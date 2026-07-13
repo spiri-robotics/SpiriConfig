@@ -8,7 +8,7 @@ Press **Up** on a stack in the web UI and SpiriConfig runs this, showing you the
 line as it goes, with a button to copy it:
 
 ```console
-$ cd /srv/compose/telemetry && docker compose -p telemetry -f compose.yaml up -d
+$ cd /srv/compose/whoami && docker compose -p whoami -f compose.yaml up -d
 ```
 
 No database, no registry, no bespoke on-disk format. If SpiriConfig vanished
@@ -17,8 +17,25 @@ the commands to manage it.
 
 ## Quickstart
 
+From a fresh checkout, with nothing to configure and nothing touched outside this
+directory:
+
 ```console
 $ uv sync
+$ ./scripts/test-data.sh                        # a compose dir + an example app store
+$ uv run spiriconfig appstore sync
+$ uv run spiriconfig appstore install whoami
+$ uv run spiriconfig docker up whoami
+$ curl localhost:8080
+Hostname: 2d5bcd6f2629
+GET / HTTP/1.1
+```
+
+`test_data/` is gitignored and disposable, and the default settings point at it --
+so trying SpiriConfig out cannot start managing the containers on your real
+machine. On a real machine, point it somewhere real:
+
+```console
 $ export SPIRICONFIG_DOCKER_COMPOSE_DIR=/srv/compose
 $ spiriconfig serve            # web UI on http://localhost:8080
 ```
@@ -26,26 +43,26 @@ $ spiriconfig serve            # web UI on http://localhost:8080
 Adding a service is making a directory. No CLI required -- that is the point:
 
 ```console
-$ mkdir -p /srv/compose/telemetry
-$ $EDITOR /srv/compose/telemetry/compose.yaml
+$ mkdir -p /srv/compose/whoami
+$ $EDITOR /srv/compose/whoami/compose.yaml
 ```
 
 From the shell:
 
 ```console
 $ spiriconfig docker list
-telemetry   running
-grafana  stopped
+whoami   running
+nextcloud  stopped
 
-$ spiriconfig docker up telemetry
-$ spiriconfig docker logs telemetry -f
+$ spiriconfig docker up whoami
+$ spiriconfig docker logs whoami -f
 ```
 
 Not sure what a command will do? Ask, without running it:
 
 ```console
-$ spiriconfig docker up telemetry --show
-cd /srv/compose/telemetry && docker compose -p telemetry -f compose.yaml up -d
+$ spiriconfig docker up whoami --show
+cd /srv/compose/whoami && docker compose -p whoami -f compose.yaml up -d
 ```
 
 Because the compose project name is the directory name, these are the same
@@ -59,7 +76,10 @@ list; the one you need is:
 
 | Variable | Default | Meaning |
 | --- | --- | --- |
-| `SPIRICONFIG_DOCKER_COMPOSE_DIR` | `/srv/compose` | One subdirectory per compose project. |
+| `SPIRICONFIG_DOCKER_COMPOSE_DIR` | `test_data/compose` | One subdirectory per compose project. Set it to `/srv/compose` on a real machine. |
+
+The defaults are relative on purpose: running out of a checkout should not start
+managing the containers on your actual box. See [configuration](docs/configuration.md).
 
 ## Plugins
 

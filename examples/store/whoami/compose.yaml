@@ -1,0 +1,11 @@
+# The smallest useful app: it answers every request with a description of that
+# request. Nothing to configure, no data to lose, so it is the one to reach for
+# when you want to see whether SpiriConfig itself is working.
+x-spiriconfig-version: "1.10.1"
+
+services:
+  whoami:
+    image: traefik/whoami:v1.10.1
+    restart: unless-stopped
+    ports:
+      - "8080:80"

@@ -14,3 +14,12 @@ docs/_build/
 
 # Test artifacts
 .pytest_cache/
+
+# Built by ./scripts/test-data.sh: a throwaway compose directory and a git app
+# store to install from. Disposable by design -- the defaults in
+# spiriconfig_docker.config and spiriconfig_appstore.config point here so that a
+# checkout never touches /srv/compose on a real machine.
+/test_data/
+
+# NiceGUI's on-disk storage for the running dev server.
+.nicegui/

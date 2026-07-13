@@ -144,7 +144,7 @@ filters what a page renders. It is tempting to reach for it as a permission syst
 The first lie is the usual one: the CLI still does everything, so a hidden button
 is not a removed capability.
 
-The second is more immediate. **The toggle is self-service.** It is in the header,
+The second is more immediate. **The toggle is self-service.** It is in the sidebar,
 it is labelled, and anyone can click it. A "regular user" who wants the Edit button
 turns advanced mode on and gets it, in the browser, without a shell. And below
 that, hiding an element is only a statement about what the page draws -- the
@@ -172,10 +172,126 @@ An application-level permission model would be a second, weaker source of truth 
 front of a capability the OS already governs, and the first time the two disagreed
 the OS would win and our UI would be the one lying.
 
-It also means the answer to "can this person restart telemetry?" is not a question
+It also means the answer to "can this person restart whoami?" is not a question
 about SpiriConfig at all. It is a question about a unix account, which the sysadmin
 already knows how to answer, with tools that already exist. Which is the whole
 point of the project.
+
+### An installed app is a symlink, and that is the whole app store
+
+An [app store](appstore.md) is a git repo with one directory per app. Installing
+one is:
+
+```console
+$ ln -s /var/lib/spiriconfig/stores/spiri-apps/whoami /srv/compose/whoami
+```
+
+That is not an implementation detail, it is the design. Everything an app store
+has to know is a question the symlink and the git repo behind it already answer:
+
+| Question | Answer |
+| --- | --- |
+| Where did this app come from? | `readlink` |
+| Have I changed it? | `git status` |
+| What did I change? | `git diff` |
+| What did the store change? | `git diff HEAD @{upstream}` |
+| Update it | `git merge` |
+| Uninstall it | `rm` a symlink -- which deletes nothing real |
+
+Note what is *not* on that list: anything of ours. There is no install manifest,
+no version database, no lockfile, no record of which commit an app came from. The
+symlink is the record, and git is the state -- and git is a tool the user already
+has, already understands, and can drive without us when we are wrong.
+
+It also means the docker plugin needed no changes at all. A symlink to a
+directory *is* a directory, so an installed app is just a stack: `spiriconfig
+docker up whoami` works on it, and so does `cd /srv/compose/whoami && docker
+compose up -d`. The app store and the thing that runs apps do not know about each
+other, which is why neither can drift out of sync with the other.
+
+#### Versions are a label, not a mechanism
+
+Nothing decides whether to update based on a version, because git can answer that
+question exactly: an app has an update if `git diff HEAD @{upstream} -- <app>/`
+says its files changed. That is what "update available" means, and it is precise
+even when the store bumps three images, rewrites a healthcheck, and touches a
+config file the maintainer forgot to bump a number for.
+
+Which is the escape from a genuinely hard problem. "What version is this bag of
+containers?" has no good answer, so we do not need one to be right. The version
+string is *cosmetic*: `x-spiriconfig-version` if a maintainer set one, and the
+date of the last commit touching the app if they did not. A store maintainer who
+never thinks about versioning still gets one that moves when the app does.
+
+#### Updates are per-store, and that is on purpose
+
+The symlinks all point into one working tree, which is at one commit, so
+"update whoami but not nextcloud" is not a state the repository can be in.
+
+This sounds like a limitation and is closer to a feature. Pulling a store only
+rewrites files on disk: nothing is restarted, nothing is pulled from a registry,
+and no running container changes until someone runs `docker compose up` on that
+stack. Per-app control still exists -- it moved to up-time, which is where the
+user was going to make that decision anyway, and where they can see what they are
+about to restart.
+
+#### An edit is a commit, so an update is a merge
+
+Editing an installed app edits a file in the store's git working tree. So when
+the store moves on, an update is a three-way merge, and the user's changes and
+the store's changes are reconciled by the thing that is best in the world at
+reconciling them.
+
+Before merging, we `git commit` whatever the user has edited. This is the step
+that makes an update non-destructive, and it is worth being explicit about why
+the alternatives are worse: `stash`, `reset`, and `checkout` all end with the
+user's work somewhere they will not think to look. Committing it puts the edit on
+the branch, so the merge has to *reconcile* with it. The worst case becomes a
+conflict they can see, rather than an edit that silently vanished -- and it is
+what makes "undo the update" safe to offer, because their work survives the abort.
+
+A conflict is left in the file with git's usual markers, and then something nice
+happens for free: **conflict markers are not valid YAML.** So `docker compose`
+refuses the file, and `Stack.write` -- which validates with `docker compose
+config` before saving -- refuses it too. A half-merged app cannot be started and
+cannot be saved over. We did not build that safety net; it fell out.
+
+The one place git will *not* save us is finishing the merge. `git commit --all`
+stages unmerged files, which git reads as "the user resolved these" -- so it will
+cheerfully commit a file still full of `<<<<<<<` markers and report a successful
+update. So `resolve` scans for markers itself and refuses while any remain. That
+guard is ours because there is no git flag that will do it.
+
+#### Things the symlink design costs
+
+Worth stating plainly, because both are real:
+
+**Relative bind mounts write into the store's checkout.** A compose file with
+`./config:/config` resolves that path against the symlink, so docker creates
+`config/` inside the git clone. This is why "have I modified this app?" means
+*tracked* files only -- otherwise every user would be told their apps were
+modified the moment they started one. Store authors should prefer named volumes.
+
+**Editing an installed app edits the store's copy of it.** Two installs of the
+same app from the same store are the same files. If you want an app that is
+yours, `adopt` it: that replaces the symlink with a real copy, and the app leaves
+the store's orbit for good.
+
+#### Two clever ideas that were rejected
+
+*Copy the app in, and record where it came from in a sidecar file.* This is the
+obvious design, and it is worse in every particular: it invents a file format,
+makes SpiriConfig the keeper of provenance, and requires reimplementing three-way
+merge against a base version we would have to store somewhere. The symlink makes
+all of that git's problem, and git already solved it.
+
+*Make `/srv/compose` itself the clone, with sparse-checkout picking the installed
+apps.* Seductive -- install becomes `git sparse-checkout add whoami` -- and
+fatally wrong. It makes the entire compose directory the property of one store,
+so the user's own hand-made projects become untracked files in somebody else's
+repository, `mkdir` stops being a supported way to add a service, and you can
+never have two stores. The user owns that tree. A symlink is a guest in it; a
+working tree is a landlord.
 
 ### One seam for "whose setting is this?"
 
@@ -209,6 +325,13 @@ a stack is running, so a second source of truth could only ever disagree with th
 first. Up and down is the whole lifecycle.
 
 **Creating or deleting project directories.** The user owns that tree. We read it.
+
+The [app store](appstore.md) does not bend this rule, it is shaped by it. An
+install creates a *symlink*, and an uninstall removes one; the app's actual files
+live in the store's checkout the whole time, and are still there afterwards. If
+installing meant `cp -r` and uninstalling meant `rm -rf`, we would be deleting
+directories full of the user's data on their behalf, and this line would have had
+to go. It did not, and the design is better for having had to obey it.
 
 **Anything clever with the docker socket.** If a thing cannot be expressed as a
 command line, it does not belong in a plugin -- because it could not be shown to

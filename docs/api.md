@@ -53,3 +53,20 @@
 .. automodule:: spiriconfig_docker.config
    :members:
 ```
+
+## The app store plugin
+
+```{eval-rst}
+.. automodule:: spiriconfig_appstore.stores
+   :members:
+```
+
+```{eval-rst}
+.. automodule:: spiriconfig_appstore.installs
+   :members:
+```
+
+```{eval-rst}
+.. automodule:: spiriconfig_appstore.config
+   :members:
+```

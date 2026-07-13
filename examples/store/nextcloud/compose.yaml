@@ -1,0 +1,35 @@
+# An app with state, to show what that looks like in a store.
+#
+# Note the named volumes. An installed app is a symlink into the store's git
+# checkout, so `./data:/var/www/html` would make docker write a Nextcloud
+# install *inside a git repository*. Named volumes keep the data where docker
+# already keeps data, and keep the checkout clean.
+services:
+  nextcloud:
+    image: nextcloud:29
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    volumes:
+      - nextcloud-data:/var/www/html
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_DB: nextcloud
+      POSTGRES_USER: nextcloud
+      POSTGRES_PASSWORD: change-me
+    depends_on:
+      - db
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    volumes:
+      - nextcloud-db:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: nextcloud
+      POSTGRES_USER: nextcloud
+      POSTGRES_PASSWORD: change-me
+
+volumes:
+  nextcloud-data:
+  nextcloud-db:

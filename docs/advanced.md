@@ -63,7 +63,7 @@ from merely looking safe.
 
 | Feature | Why |
 | --- | --- |
-| Editing a compose file | The most dangerous thing on the page. Still available from a shell: `$EDITOR "$(spiriconfig docker config telemetry)"`. |
+| Editing a compose file | The most dangerous thing on the page. Still available from a shell: `$EDITOR "$(spiriconfig docker config whoami)"`. |
 | The raw command display | The `cd … && docker compose …` line and its copy button, in every action dialog. Developers want it; for everyone else it is noise. |
 
 Note what is *not* hidden: logs. A regular user is exactly the person who needs to

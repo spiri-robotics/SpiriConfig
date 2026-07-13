@@ -1,0 +1,22 @@
+# A reverse proxy, and the reason `whoami` is interesting: bring both up and
+# whoami is reachable through traefik's router rather than its own published
+# port.
+#
+# Deliberately does NOT publish the docker socket read-write, and does not
+# enable the dashboard on a public port. A store is a place people copy from,
+# so what it shows them should be the version they can leave running.
+x-spiriconfig-version: "3.1"
+
+services:
+  traefik:
+    image: traefik:v3.1
+    restart: unless-stopped
+    command:
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.web.address=:80
+    ports:
+      - "80:80"
+    volumes:
+      # Read-only: traefik needs to watch container labels, not drive docker.
+      - /var/run/docker.sock:/var/run/docker.sock:ro

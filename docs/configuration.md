@@ -26,9 +26,32 @@ collides.
 
 | Variable | Default | Meaning |
 | --- | --- | --- |
-| `SPIRICONFIG_DOCKER_COMPOSE_DIR` | `/srv/compose` | Directory holding one subdirectory per compose project. |
+| `SPIRICONFIG_DOCKER_COMPOSE_DIR` | `test_data/compose` | Directory holding one subdirectory per compose project. |
 | `SPIRICONFIG_DOCKER_DOCKER_BIN` | `docker` | The docker executable. Set to `podman` to use podman. |
 | `SPIRICONFIG_DOCKER_COMMAND_TIMEOUT` | `300` | Seconds before a captured command is considered hung. |
+
+## App store plugin
+
+| Variable | Default | Meaning |
+| --- | --- | --- |
+| `SPIRICONFIG_APPSTORE_STORES` | `["test_data/example-store"]` | JSON list of git URLs, or local paths, of [app stores](appstore.md). |
+| `SPIRICONFIG_APPSTORE_STORE_DIR` | `test_data/stores` | Where store clones live. Not a cache: your edits to installed apps are commits in here. |
+| `SPIRICONFIG_APPSTORE_GIT_BIN` | `git` | The git executable. |
+| `SPIRICONFIG_APPSTORE_COMMAND_TIMEOUT` | `300` | Seconds before a git command is considered hung. |
+
+## Why the defaults are relative
+
+`test_data/compose`, not `/srv/compose`. Running SpiriConfig out of a checkout
+should not silently start managing the containers on the developer's actual
+machine, and a default of `/srv/compose` would do exactly that the first time
+someone typed `uv run spiriconfig docker list` to see what it did.
+
+So the defaults point somewhere harmless and local, `./scripts/test-data.sh`
+builds that tree with an example app store in it, and the whole thing is
+gitignored and disposable.
+
+**A deployment sets absolute paths.** That is what the systemd unit below is for,
+and `/srv/compose` and `/var/lib/spiriconfig/stores` are the conventional ones.
 
 ## What gets logged
 
@@ -55,7 +78,11 @@ After=docker.service
 Wants=docker.service
 
 [Service]
+# Absolute, every one. The defaults are relative for the benefit of a checkout,
+# which makes them meaningless to a service whose working directory is not one.
 Environment=SPIRICONFIG_DOCKER_COMPOSE_DIR=/srv/compose
+Environment=SPIRICONFIG_APPSTORE_STORE_DIR=/var/lib/spiriconfig/stores
+Environment=SPIRICONFIG_APPSTORE_STORES=["https://github.com/spiri/spiri-apps"]
 Environment=SPIRICONFIG_PORT=8080
 ExecStart=/usr/local/bin/spiriconfig serve
 Restart=on-failure

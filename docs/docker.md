@@ -9,9 +9,9 @@ compose file. That is the whole model.
 
 ```text
 /srv/compose/
-├── telemetry/
+├── whoami/
 │   └── compose.yaml
-├── grafana/
+├── nextcloud/
 │   ├── compose.yaml
 │   └── .env
 └── notes.txt          <- ignored: not a directory
@@ -50,20 +50,20 @@ them to print that invocation instead of running it.
 
 ```console
 $ spiriconfig docker list                 # every project, and its status
-$ spiriconfig docker up telemetry          # docker compose up -d
-$ spiriconfig docker down telemetry        # docker compose down
-$ spiriconfig docker restart telemetry     # docker compose restart
-$ spiriconfig docker pull telemetry        # docker compose pull
-$ spiriconfig docker logs telemetry -f     # docker compose logs --tail=200 --follow
-$ spiriconfig docker ps telemetry          # docker compose ps
-$ spiriconfig docker config telemetry      # print the path to the compose file
+$ spiriconfig docker up whoami          # docker compose up -d
+$ spiriconfig docker down whoami        # docker compose down
+$ spiriconfig docker restart whoami     # docker compose restart
+$ spiriconfig docker pull whoami        # docker compose pull
+$ spiriconfig docker logs whoami -f     # docker compose logs --tail=200 --follow
+$ spiriconfig docker ps whoami          # docker compose ps
+$ spiriconfig docker config whoami      # print the path to the compose file
 ```
 
 `config` prints a path rather than opening an editor, so that your own tools can
 do the part they are better at:
 
 ```console
-$ $EDITOR "$(spiriconfig docker config telemetry)"
+$ $EDITOR "$(spiriconfig docker config whoami)"
 ```
 
 ## Editing a compose file

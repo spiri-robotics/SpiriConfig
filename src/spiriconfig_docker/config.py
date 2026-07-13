@@ -16,11 +16,18 @@ class DockerSettings(BaseSettings):
         extra="ignore",
     )
 
-    compose_dir: Path = Path("/srv/compose")
+    compose_dir: Path = Path("test_data/compose")
     """Directory holding one subdirectory per compose project.
 
     ``SPIRICONFIG_DOCKER_COMPOSE_DIR``. We only ever look one level deep, and we
     never create, move, or delete project directories -- the user owns this tree.
+
+    The default is *relative*, and deliberately so: running out of a checkout
+    should not reach for ``/srv/compose`` and start managing the containers on
+    the developer's actual machine. ``./scripts/test-data.sh`` builds the tree it
+    points at. A real deployment sets this to an absolute path -- ``/srv/compose``
+    is the conventional one -- which is what the packaging and the systemd unit
+    are for.
     """
 
     docker_bin: str = "docker"
