@@ -13,8 +13,8 @@ import asyncio
 from loguru import logger
 from nicegui import ui
 
-from spiriconfig import advanced
-from spiriconfig.commands import Command, stream
+from spiriconfig import advanced, terminal
+from spiriconfig.commands import Command, stream_pty
 
 from spiriconfig_docker.config import DockerSettings, docker_settings
 from spiriconfig_docker.stacks import Stack, StackError, discover
@@ -31,7 +31,22 @@ STATUS_COLOURS = {
 
 
 async def _run_in_dialog(title: str, command: Command) -> None:
-    """Show ``command``, stream it, and leave the output on screen to read."""
+    """Show ``command``, stream it, and leave the output on screen to read.
+
+    Returns only when the *user* closes the dialog, not when the command
+    finishes. That is load-bearing, and the reason is worth writing down.
+
+    Callers do ``await _run_in_dialog(...)`` and then ``refresh()``, and refresh
+    clears the container this dialog was created inside -- which deletes the
+    dialog. So a version of this that returned as soon as the command exited
+    tore its own output off the screen a frame later. Nobody noticed for `up` or
+    `pull`, which stream for long enough to read; `logs` finishes instantly, and
+    the modal appeared and vanished.
+
+    Waiting for the dismissal fixes it at the source: the output cannot be
+    cleared away while the user is still looking at it, because we have not
+    handed control back to the code that clears things.
+    """
     with ui.dialog() as dialog, ui.card().classes("w-full max-w-4xl"):
         ui.label(title).classes("text-lg font-bold")
 
@@ -47,19 +62,33 @@ async def _run_in_dialog(title: str, command: Command) -> None:
                 on_click=lambda: ui.clipboard.write(str(command)),
             ).props("flat dense round").tooltip("Copy command")
 
-        output = ui.log(max_lines=2000).classes("w-full h-96 font-mono text-xs")
+        output = terminal.terminal()
         close = ui.button("Close", on_click=dialog.close).props("flat")
         close.disable()
 
     dialog.open()
     try:
-        async for line in stream(command, log=log):
-            output.push(line)
+        async for chunk in stream_pty(
+            command,
+            log=log,
+            rows=terminal.TERMINAL_ROWS,
+            columns=terminal.TERMINAL_COLUMNS,
+        ):
+            output.write(chunk)
     except Exception as exc:  # noqa: BLE001 - surface any failure in the dialog
         log.exception("command failed: {}", command)
-        output.push(f"[error] {exc}")
+        output.write(f"\r\n[error] {exc}\r\n")
     finally:
         close.enable()
+
+    # Block here until Close (or escape, or a click outside) dismisses it.
+    await dialog
+
+    # Then take it away. A closed dialog is still an element on the page, so
+    # without this every button press leaves one behind, and a session spent
+    # starting and stopping things accretes a pile of invisible modals holding
+    # on to their output.
+    dialog.delete()
 
 
 async def _edit_dialog(stack: Stack, on_saved) -> None:
@@ -160,8 +189,10 @@ def page(settings: DockerSettings | None = None) -> None:
     """Render the docker plugin's page."""
     config = settings or docker_settings()
 
-    ui.label("Docker Compose").classes("text-2xl font-bold")
-    ui.label(f"Projects in {config.compose_dir}").classes("text-sm text-gray-500")
+    ui.label("Apps").classes("text-2xl font-bold")
+    ui.label(f"Compose projects in {config.compose_dir}").classes(
+        "text-sm text-gray-500"
+    )
 
     container = ui.column().classes("w-full gap-2")
 
@@ -182,7 +213,23 @@ def page(settings: DockerSettings | None = None) -> None:
                 _stack_card(stack, statuses[stack.name], refresh)
 
     def refresh() -> None:
-        ui.timer(0.1, render, once=True)
+        """Re-render the stack list, shortly.
+
+        The timer is pinned to the slot `container` lives in, and that is not a
+        detail -- it is the whole bug.
+
+        A NiceGUI event handler runs with the *clicked element's* slot active. So
+        a timer created here during a button press becomes a child of `container`,
+        because the button is inside a card inside `container`. Then `render()`
+        runs, calls `container.clear()`, and deletes the very timer whose callback
+        is executing -- which cancels it, half-done, immediately after the clear
+        and before anything is put back. The page goes blank.
+
+        The first render works only by accident: `page()` calls this from the page
+        slot, outside the container, so that one timer survives.
+        """
+        with container.parent_slot:
+            ui.timer(0.1, render, once=True)
 
     with ui.row().classes("items-center gap-2"):
         ui.button("Refresh", icon="refresh", on_click=refresh).props("flat")

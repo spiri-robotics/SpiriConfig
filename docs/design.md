@@ -30,6 +30,71 @@ is invisible and unreproducible. `str(Command)` renders a copy-pasteable shell
 line -- properly quoted, `cd` included -- and there is a test that pipes it
 through a real shell to prove it is not decorative.
 
+### Output goes to a terminal, because the command expects one
+
+The UI streams command output into xterm.js, and the command runs attached to a
+**pseudo-terminal** rather than a pipe. Both halves of that are necessary, and
+the first one is the surprising one.
+
+Docker asks whether its output is going to a terminal, and *changes what it says*
+based on the answer. On a pipe it emits a flat transcript. On a tty it draws
+progress bars, redraws layer-download status in place, and colours each service
+differently. So piping the output does not give you a plain version of the same
+information — it gives you a program that concluded you were not worth talking to
+properly. `docker compose pull` is the clearest case: through a pipe it is a wall
+of "Pulling"; on a tty it is a live picture of what is happening.
+
+Since the entire project is built on *running the command a human would have run*,
+running it in a way that makes it behave differently than it would for that human
+is a bug in the premise. {func}`~spiriconfig.commands.stream_pty` gives it a
+terminal.
+
+That decision forces the second: the bytes coming back are raw, carriage returns
+and escape sequences and all, and they only mean anything to something that can
+interpret them. We do not interpret them. Writing that interpreter is writing a
+terminal emulator, and one already exists — NiceGUI ships xterm.js, so there is
+no CDN, no vendored blob, and nothing to fetch on a machine with no internet.
+
+The bytes are also never decoded on our side. A multi-byte character split across
+a read boundary would be mangled; the browser reassembles the stream.
+
+### The output dialog waits for the human, not the command
+
+{func}`~spiriconfig.commands.stream_pty` finishing is not the end of the
+interaction — the person still has to *read* the thing. So the dialog returns
+when it is dismissed, not when the command exits.
+
+This is not fussiness, it is a bug we shipped. Every action does
+`await _run_in_dialog(...)` and then `refresh()`, and refresh clears the
+container the dialog was created inside — deleting it. `up` and `pull` stream for
+long enough that nobody noticed. `logs` returns instantly, so the modal appeared
+and vanished before it could be read, and after a refresh there was nothing there
+at all.
+
+The fix is to not hand control back to the code that clears things until the user
+is done looking. And then to `delete()` the dialog, because a closed dialog is
+still an element on the page, and a session spent starting and stopping things
+would otherwise accrete a pile of invisible modals still holding their output.
+
+### Refresh must not schedule itself inside the thing it clears
+
+The other half of the same bug, and the one that actually blanked the page.
+
+Every action refreshes the list afterwards, and `refresh()` schedules `render()`
+on a `ui.timer`. A NiceGUI event handler runs with the *clicked element's* slot
+active -- and the button that was clicked lives in a card, inside the container.
+So the timer became a child of the container. `render()`'s first act is to clear
+that container, which deleted the timer whose callback was running, cancelling it
+half-done: cleared, and never repopulated. Close a dialog, and the page behind it
+was empty.
+
+The first render works only by accident, because `page()` calls `refresh()` from
+the page slot, outside the container.
+
+The timer is now pinned to `container.parent_slot`. Any code that reaches for
+`ui.timer` from inside a handler should ask the same question first: which slot
+is this actually landing in, and is something about to delete it?
+
 ### Building a command is separate from running it
 
 Every function that acts on a stack *returns* a `Command`; it does not execute

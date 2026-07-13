@@ -28,6 +28,13 @@
    :members:
 ```
 
+## Terminal
+
+```{eval-rst}
+.. automodule:: spiriconfig.terminal
+   :members:
+```
+
 ## Configuration
 
 ```{eval-rst}

@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-from spiriconfig.commands import Command, CommandError, run, stream
+from spiriconfig.commands import Command, CommandError, run, stream, stream_pty
 
 
 class TestCommandRendering:
@@ -110,3 +110,61 @@ class TestStream:
     async def test_a_successful_command_adds_no_marker_line(self) -> None:
         lines = [line async for line in stream(Command(argv=["echo", "done"]))]
         assert lines == ["done"]
+
+
+class TestStreamPty:
+    """Streaming through a pseudo-terminal.
+
+    The point of these is not "does output arrive" -- `stream` already did that.
+    It is that the child program *believes it is talking to a terminal*, because
+    docker changes what it says based on the answer, and everything nice about
+    the output (colour, progress bars redrawn in place) is downstream of it.
+    """
+
+    async def test_the_child_thinks_it_has_a_terminal(self) -> None:
+        command = Command(
+            argv=["sh", "-c", "test -t 1 && echo yes-a-tty || echo no-just-a-pipe"]
+        )
+        output = b"".join([chunk async for chunk in stream_pty(command)])
+        assert b"yes-a-tty" in output
+
+    async def test_control_bytes_survive_intact(self) -> None:
+        """Carriage returns and escape sequences are the output, not noise.
+
+        `stream` would have rstripped and line-split these into nonsense. They go
+        to xterm.js untouched, because it is the thing that knows what they mean.
+        """
+        command = Command(
+            argv=["sh", "-c", r"printf 'aaa\rbbb\n\033[32mgreen\033[0m\n'"]
+        )
+        output = b"".join([chunk async for chunk in stream_pty(command)])
+
+        assert b"\r" in output, "the carriage return was eaten"
+        assert b"\x1b[32m" in output, "the colour escape was eaten"
+
+    async def test_a_pty_translates_newlines_for_the_terminal(self) -> None:
+        r"""A bare \n moves down a line without returning to the left margin.
+
+        The pty's line discipline turns it into \r\n, which is why we do not have
+        to, and why xterm is configured with convertEol off.
+        """
+        command = Command(argv=["printf", "one\ntwo\n"])
+        output = b"".join([chunk async for chunk in stream_pty(command)])
+        assert output == b"one\r\ntwo\r\n"
+
+    async def test_a_failure_is_announced_in_the_stream(self) -> None:
+        """Callers only render bytes, so a failure has to arrive as bytes."""
+        command = Command(argv=["sh", "-c", "exit 3"])
+        output = b"".join([chunk async for chunk in stream_pty(command)])
+        assert b"[command exited with code 3]" in output
+
+    async def test_a_missing_executable_raises(self) -> None:
+        command = Command(argv=["definitely-not-a-real-binary-9c1f"])
+        with pytest.raises(CommandError, match="executable not found"):
+            [chunk async for chunk in stream_pty(command)]
+
+    async def test_it_runs_in_the_commands_directory(self, tmp_path: Path) -> None:
+        (tmp_path / "marker.txt").write_text("here")
+        command = Command(argv=["ls"], cwd=tmp_path)
+        output = b"".join([chunk async for chunk in stream_pty(command)])
+        assert b"marker.txt" in output

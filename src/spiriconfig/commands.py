@@ -130,6 +130,119 @@ def run(
     return result
 
 
+def _set_winsize(fd: int, rows: int, columns: int) -> None:
+    """Tell the pty how big it is, so programs wrap and draw to the right width."""
+    import fcntl
+    import struct
+    import termios
+
+    fcntl.ioctl(fd, termios.TIOCSWINSZ, struct.pack("HHHH", rows, columns, 0, 0))
+
+
+async def stream_pty(
+    command: Command,
+    *,
+    log: Logger = logger,
+    rows: int = 30,
+    columns: int = 120,
+) -> AsyncIterator[bytes]:
+    """Run ``command`` attached to a pseudo-terminal, yielding raw output bytes.
+
+    The difference between this and :func:`stream` is not cosmetic, and it is not
+    really about colour either.
+
+    Docker asks whether its output is going to a terminal, and changes what it
+    *says* based on the answer. Through a pipe it gives up and emits a flat
+    transcript; on a tty it draws progress bars, redraws layer download status in
+    place, and uses colour to separate services. So piping the output does not
+    give us a plain version of the same information -- it gives us a program that
+    decided we were not worth talking to properly. `docker compose pull` is the
+    obvious victim: on a pipe it is a wall of "Pulling", on a tty it is a live
+    picture of what is happening.
+
+    So we give it a terminal. The bytes that come back are raw, carriage returns
+    and escape sequences and all, and they are only meaningful to something that
+    can interpret them -- which is why they go to xterm.js in the browser rather
+    than to :class:`ui.log`. Interpreting them ourselves would mean writing a
+    terminal emulator, which is a thing that already exists.
+
+    Yields ``bytes``, deliberately: decoding here would mean splitting on
+    character boundaries we do not control, and a multi-byte character straddling
+    a read boundary would be mangled. The browser reassembles the stream.
+    """
+    import os
+    import pty
+
+    log.info("$ {}", command)
+
+    master, slave = pty.openpty()
+    _set_winsize(slave, rows, columns)
+
+    env = {
+        **os.environ,
+        # Without this, docker sees TERM unset and falls back to no-colour output
+        # even though it has a tty.
+        "TERM": "xterm-256color",
+        "COLUMNS": str(columns),
+        "LINES": str(rows),
+        **command.env,
+    }
+
+    try:
+        proc = await asyncio.create_subprocess_exec(
+            *command.argv,
+            cwd=command.cwd,
+            env=env,
+            stdin=slave,
+            stdout=slave,
+            stderr=slave,
+        )
+    except FileNotFoundError as exc:
+        os.close(master)
+        os.close(slave)
+        raise CommandError(
+            Result(command, 127, "", f"executable not found: {command.argv[0]}")
+        ) from exc
+
+    # The child holds the only copy that matters now. Ours has to go, or we will
+    # never see EOF on the master: the pty stays open as long as any process has
+    # the slave, and that would include us, forever.
+    os.close(slave)
+
+    loop = asyncio.get_running_loop()
+    chunks: asyncio.Queue[bytes | None] = asyncio.Queue()
+
+    def _readable() -> None:
+        try:
+            data = os.read(master, 65536)
+        except OSError:
+            # EIO on Linux is how a pty reports "the other end has gone away".
+            # It is the normal end of the stream, not a failure.
+            data = b""
+        if data:
+            chunks.put_nowait(data)
+        else:
+            loop.remove_reader(master)
+            chunks.put_nowait(None)
+
+    loop.add_reader(master, _readable)
+    try:
+        while (chunk := await chunks.get()) is not None:
+            yield chunk
+    finally:
+        loop.remove_reader(master)
+        os.close(master)
+
+    returncode = await proc.wait()
+    if returncode != 0:
+        log.warning("-> exit {}", returncode)
+        # \r\n, not \n: this goes to a terminal, where a bare newline moves down
+        # a line without returning to the left margin.
+        yield f"\r\n[command exited with code {returncode}]\r\n".encode()
+    else:
+        log.debug("-> exit 0")
+
+
 async def stream(command: Command, *, log: Logger = logger) -> AsyncIterator[str]:
     """Run ``command``, yielding output lines as they arrive.
 
