@@ -1,8 +1,12 @@
 """The web UI shell.
 
-The shell owns the layout, the nav, and the index page. It knows nothing about
-docker or any other plugin: it asks each discovered plugin to render itself at
-``/<name>`` and gets out of the way.
+The shell owns the sidebar, the header, and the index page. It knows nothing
+about docker or any other plugin: it asks each discovered plugin to render itself
+at ``/<name>`` and gets out of the way.
+
+The sidebar is the shell's only claim on the screen. Everything to the right of
+it is the plugin's, in full: the shell puts no heading, no breadcrumb, and no
+chrome of its own into the main area.
 """
 
 from __future__ import annotations
@@ -17,29 +21,62 @@ from spiriconfig.config import Settings
 from spiriconfig.plugins import Plugin, discover
 
 
-def _layout(plugins: list[Plugin], current: str | None = None) -> None:
-    """The header and nav, shared by every page."""
-    with ui.header().classes("items-center justify-between"):
-        with ui.link(target="/").classes("no-underline text-white"):
-            ui.label("SpiriConfig").classes("text-xl font-bold")
-        with ui.row().classes("items-center gap-2"):
-            for plugin in plugins:
-                if not plugin.has_page:
-                    continue
-                button = ui.button(
-                    plugin.title,
-                    on_click=lambda p=plugin: ui.navigate.to(f"/{p.name}"),
-                ).props("flat color=white")
-                if plugin.name == current:
-                    button.props("outline")
+def _nav_item(plugin: Plugin, current: str | None) -> None:
+    """One plugin's entry in the sidebar."""
+    item = ui.item(on_click=lambda: ui.navigate.to(f"/{plugin.name}"))
+    item.props("clickable v-ripple")
+    if plugin.name == current:
+        item.props("active active-class=text-primary")
+    with item:
+        with ui.item_section().props("avatar"):
+            ui.icon(plugin.icon)
+        with ui.item_section():
+            ui.item_label(plugin.title)
 
+
+def _sidebar(plugins: list[Plugin], current: str | None) -> ui.left_drawer:
+    """The nav, and the advanced-mode toggle beneath it.
+
+    The toggle sits at the bottom, away from the plugins: it is a property of the
+    whole UI rather than of whatever you happen to be looking at.
+    """
+    drawer = ui.left_drawer(value=True, bordered=True).classes("justify-between p-0")
+    drawer.mark("sidebar")
+    with drawer:
+        with ui.list().props("padding").classes("w-full"):
+            for plugin in plugins:
+                if plugin.has_page:
+                    _nav_item(plugin, current)
+
+        with ui.column().classes("w-full gap-0"):
+            ui.separator()
             # Never inside advanced.only(): a toggle you can only see once you
             # have turned it on is a trap with no way back.
-            advanced.toggle().props("color=white keep-color")
+            advanced.toggle().classes("p-4")
+    return drawer
+
+
+def _layout(plugins: list[Plugin], current: str | None = None) -> None:
+    """The header and sidebar, shared by every page."""
+    drawer = _sidebar(plugins, current)
+
+    with ui.header().classes("items-center gap-2"):
+        # The sidebar collapses: on a small screen it is most of the window, and
+        # on any screen a plugin is sometimes better off with the whole width.
+        ui.button(icon="menu", on_click=drawer.toggle).props(
+            "flat round dense color=white"
+        ).mark("sidebar-toggle").tooltip("Show or hide the sidebar")
+        with ui.link(target="/").classes("no-underline text-white"):
+            ui.label("SpiriConfig").classes("text-xl font-bold")
 
 
 def _index(plugins: list[Plugin]) -> None:
-    """The landing page: one card per plugin."""
+    """The landing page: one card per plugin.
+
+    Only reached by clicking the title, since the sidebar takes you straight to a
+    plugin. It is the place that admits to a plugin the sidebar cannot show you:
+    a CLI-only one, which has no page to link to.
+    """
     ui.label("Plugins").classes("text-2xl font-bold")
 
     if not plugins:
@@ -51,7 +88,9 @@ def _index(plugins: list[Plugin]) -> None:
     with ui.column().classes("w-full gap-2"):
         for plugin in plugins:
             with ui.card().classes("w-full"):
-                ui.label(plugin.title).classes("text-lg font-bold")
+                with ui.row().classes("items-center gap-2"):
+                    ui.icon(plugin.icon).classes("text-2xl text-gray-600")
+                    ui.label(plugin.title).classes("text-lg font-bold")
                 if plugin.description:
                     ui.label(plugin.description).classes("text-sm text-gray-500")
                 if plugin.has_page:

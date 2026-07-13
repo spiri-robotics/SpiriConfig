@@ -5,7 +5,7 @@ without thinking about it, and someone who wants the exact `docker compose` line
 so they can go and do something cleverer with it. Advanced mode is the switch
 between those two views.
 
-It is a toggle in the header. Off by default; the choice sticks.
+It is a toggle at the bottom of the sidebar. Off by default; the choice sticks.
 
 ## What it is not
 
@@ -13,7 +13,7 @@ It is a toggle in the header. Off by default; the choice sticks.
 **Advanced mode is not a permission system. It is not a security boundary. It
 must never be used as either.**
 
-**The toggle is self-service.** It sits in the header of every page, and anybody
+**The toggle is self-service.** It sits in the sidebar of every page, and anybody
 looking at the web UI can turn it on. One click, and every advanced feature is
 right there. Nothing is withheld from anyone.
 

@@ -43,6 +43,9 @@ class Plugin(abc.ABC):
     description: str = ""
     """One-line summary, shown in the CLI help and on the web UI's index."""
 
+    icon: str = "extension"
+    """Material icon name, shown beside the title in the web UI's sidebar."""
+
     def cli(self) -> typer.Typer | None:
         """Return a Typer app to mount at ``spiriconfig <name>``, or None."""
         return None

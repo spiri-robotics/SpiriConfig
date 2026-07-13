@@ -78,6 +78,34 @@ class TestRoutes:
         await user.should_see("No plugins are installed")
 
 
+class TestTheSidebar:
+    async def test_it_links_to_every_plugin_with_a_page(self, user: User) -> None:
+        """The nav is the sidebar now, so it is there on a plugin's own page too."""
+        web.build([Pageful(), CliOnly()])
+        await user.open("/pageful")
+        await user.should_see("Has A Page")
+
+    async def test_the_advanced_toggle_lives_in_it(self, user: User) -> None:
+        web.build([Pageful()])
+        await user.open("/pageful")
+        await user.should_see("Advanced")
+
+    async def test_it_can_be_collapsed_and_brought_back(self, user: User) -> None:
+        """Hiding the sidebar must not be a one-way door: the button that hides it
+        lives in the header, which stays put."""
+        web.build([Pageful()])
+        await user.open("/pageful")
+
+        drawer = user.find(marker="sidebar").elements.pop()
+        assert drawer.value is True
+
+        user.find(marker="sidebar-toggle").click()
+        assert drawer.value is False
+
+        user.find(marker="sidebar-toggle").click()
+        assert drawer.value is True
+
+
 class TestPluginFailureIsContained:
     async def test_a_page_that_raises_shows_an_error_instead_of_dying(
         self, user: User
@@ -101,4 +129,4 @@ class TestTheRealPluginSet:
         """No arguments: discover the real entry points, and serve them."""
         web.build()
         await user.open("/docker")
-        await user.should_see("Docker Compose")
+        await user.should_see("Apps")

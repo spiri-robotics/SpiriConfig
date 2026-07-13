@@ -17,9 +17,14 @@ from spiriconfig_docker.cli import app as cli_app
 class DockerPlugin(Plugin):
     """Manage the docker compose projects in a configured directory."""
 
+    # `name` is the CLI subcommand and the URL, and stays "docker": that is what
+    # the thing under it actually is. `title` is what a user is shown, and they
+    # do not think of these as compose projects -- they think of them as the apps
+    # running on the box. Plural: the page lists all of them.
     name = "docker"
-    title = "Docker Compose"
+    title = "Apps"
     description = "Start, stop, and edit docker compose projects."
+    icon = "apps"
 
     def cli(self) -> typer.Typer:
         return cli_app

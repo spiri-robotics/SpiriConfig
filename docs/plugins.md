@@ -34,6 +34,7 @@ class TailscalePlugin(Plugin):
     name = "tailscale"
     title = "Tailscale"
     description = "Show and manage the tailscale connection."
+    icon = "vpn_lock"
 
     def cli(self) -> typer.Typer:
         return cli_app
@@ -67,17 +68,20 @@ what removes it. There is no plugin registry to edit.
 ## The interface
 
 Subclass {class}`~spiriconfig.plugins.Plugin` and set `name`, `title`, and
-`description`. Then provide either or both of:
+`description`. Optionally set `icon` to a [Material icon](https://fonts.google.com/icons)
+name, which is what the sidebar shows beside your title; it defaults to a generic
+plug. Then provide either or both of:
 
 `cli()`
 : A `typer.Typer` app, mounted at `spiriconfig <name> ...`.
 
 `page()`
-: Called inside a NiceGUI page route at `/<name>`. Use `ui.*` freely.
+: Called inside a NiceGUI page route at `/<name>`. The shell gives you the whole
+  main area -- everything right of the sidebar is yours, heading included.
 
-Both are optional. A plugin with only a `cli()` is fine and gets no nav entry. A
-plugin with only a `page()` is *technically* fine and is almost always a mistake
--- see below.
+Both are optional. A plugin with only a `cli()` is fine and gets no sidebar entry
+(it still appears on the index page). A plugin with only a `page()` is
+*technically* fine and is almost always a mistake -- see below.
 
 ## The rules
 
