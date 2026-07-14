@@ -46,6 +46,20 @@ class Plugin(abc.ABC):
     icon: str = "extension"
     """Material icon name, shown beside the title in the web UI's sidebar."""
 
+    advanced: bool = False
+    """Whether this plugin is only *shown* in advanced mode.
+
+    For a plugin that is a developer's tool rather than an operator's -- the
+    terminal is the obvious one. It keeps the sidebar about the things a normal
+    user came here to do, without the plugin having to wrap its own page in
+    :func:`spiriconfig.advanced.only` and hope it remembered every entry point.
+
+    Shown, and nothing more. The page is still routed and the CLI still works with
+    advanced mode off, exactly as :mod:`spiriconfig.advanced` says: this is a
+    filter on the UI, not a permission, and a plugin that sets this flag has not
+    been secured by it. If a plugin must not be *reachable*, do not install it.
+    """
+
     def cli(self) -> typer.Typer | None:
         """Return a Typer app to mount at ``spiriconfig <name>``, or None."""
         return None

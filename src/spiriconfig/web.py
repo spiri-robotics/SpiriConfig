@@ -22,7 +22,12 @@ from spiriconfig.plugins import Plugin, discover
 
 
 def _nav_item(plugin: Plugin, current: str | None) -> None:
-    """One plugin's entry in the sidebar."""
+    """One plugin's entry in the sidebar.
+
+    A plugin that declares itself advanced is marked rather than skipped, so it
+    appears and disappears with the toggle like everything else the toggle owns --
+    and wears the purple while it is there, saying which switch put it there.
+    """
     item = ui.item(on_click=lambda: ui.navigate.to(f"/{plugin.name}"))
     item.props("clickable v-ripple")
     if plugin.name == current:
@@ -32,6 +37,8 @@ def _nav_item(plugin: Plugin, current: str | None) -> None:
             ui.icon(plugin.icon)
         with ui.item_section():
             ui.item_label(plugin.title)
+    if plugin.advanced:
+        advanced.mark(item)
 
 
 def _sidebar(plugins: list[Plugin], current: str | None) -> ui.left_drawer:
@@ -92,7 +99,8 @@ def _index(plugins: list[Plugin]) -> None:
 
     with ui.column().classes("w-full gap-2"):
         for plugin in plugins:
-            with ui.card().classes("w-full"):
+            card = ui.card().classes("w-full")
+            with card:
                 with ui.row().classes("items-center gap-2"):
                     ui.icon(plugin.icon).classes("text-2xl text-gray-600")
                     ui.label(plugin.title).classes("text-lg font-bold")
@@ -105,6 +113,11 @@ def _index(plugins: list[Plugin]) -> None:
                     ).props("flat")
                 else:
                     ui.label("CLI only").classes("text-xs text-gray-400")
+            # The index has to agree with the sidebar. An advanced plugin that was
+            # hidden from the nav and then listed here anyway would just be a
+            # confusing second door into the same room.
+            if plugin.advanced:
+                advanced.mark(card)
 
 
 def _register(plugin: Plugin, found: list[Plugin]) -> None:
