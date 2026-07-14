@@ -16,7 +16,10 @@ from loguru import logger
 
 from spiriconfig.commands import Command, run, stream
 
+from spiriconfig_docker import settings as app_settings
 from spiriconfig_docker.config import docker_settings
+from spiriconfig_docker.env import read as read_env
+from spiriconfig_docker.settings import SettingsError, StackSettings
 from spiriconfig_docker.stacks import Stack, StackError, discover, get
 
 log = logger.bind(plugin="docker")
@@ -134,3 +137,121 @@ def config(stack: StackArg) -> None:
     own tools already do better than we would.
     """
     typer.echo(str(_stack(stack).compose_file))
+
+
+@app.command()
+def env(stack: StackArg) -> None:
+    """Print the path to a compose project's ``.env`` file.
+
+    The companion to ``config``, and the same idea: the settings page edits this
+    file, so this is how you get at what it edited. ``cat "$(spiriconfig docker env
+    grafana)"`` is the whole of "what did the UI just do to my machine".
+    """
+    typer.echo(str(_settings(stack).env_file))
+
+
+def _settings(name: str) -> StackSettings:
+    """Look up a stack's declared settings, turning a bad schema into a CLI error."""
+    try:
+        return app_settings.for_stack(_stack(name))
+    except SettingsError as exc:
+        typer.secho(str(exc), fg=typer.colors.RED, err=True)
+        raise typer.Exit(1) from exc
+
+
+#: Stand-in for a secret in ``settings`` output. See the ``--show-secrets`` flag.
+MASK = "********"
+
+
+@app.command()
+def settings(
+    stack: StackArg,
+    assignments: Annotated[
+        list[str] | None,
+        typer.Argument(
+            metavar="[KEY=VALUE]...",
+            help="Settings to change. With none, the current ones are listed.",
+        ),
+    ] = None,
+    apply: Annotated[
+        bool,
+        typer.Option("--apply", help="Run `up -d` afterwards, so the change takes effect."),
+    ] = False,
+    show_secrets: Annotated[
+        bool,
+        typer.Option("--show-secrets", help="Print password fields instead of masking them."),
+    ] = False,
+) -> None:
+    """Show or change the settings an app declares in ``x-spiri-settings``.
+
+    Writes the same ``.env`` the web UI's settings page writes, with the same
+    validation in front of it -- the CLI is not a back door around the form's
+    rules, it is the same door.
+    """
+    stack_settings = _settings(stack)
+
+    if not stack_settings.fields:
+        typer.echo(
+            f"{stack} declares no settings. An app opts in by listing them under "
+            f"`{app_settings.SETTINGS_KEY}` in its compose file."
+        )
+        return
+
+    if not assignments:
+        _list_settings(stack_settings, show_secrets=show_secrets)
+        return
+
+    values = dict(stack_settings.values())
+    for assignment in assignments:
+        key, separator, value = assignment.partition("=")
+        if not separator:
+            typer.secho(
+                f"{assignment!r} is not a KEY=VALUE. Nothing was changed.",
+                fg=typer.colors.RED,
+                err=True,
+            )
+            raise typer.Exit(1)
+        try:
+            app_settings.get(stack_settings, key)
+        except SettingsError as exc:
+            typer.secho(f"{exc}. Nothing was changed.", fg=typer.colors.RED, err=True)
+            raise typer.Exit(1) from exc
+        values[key] = value
+
+    # Every assignment is checked before any of them is written, so a typo in the
+    # third one does not leave the first two applied and the app half-configured.
+    try:
+        stack_settings.save(values)
+    except (SettingsError, OSError) as exc:
+        typer.secho(str(exc), fg=typer.colors.RED, err=True)
+        raise typer.Exit(1) from exc
+
+    typer.echo(f"Wrote {stack_settings.env_file}")
+
+    if apply:
+        _execute_streaming(stack_settings.stack.up(), show=False)
+    else:
+        typer.echo(
+            f"Run `spiriconfig docker up {stack}` to restart it with the new settings."
+        )
+
+
+def _list_settings(stack_settings: StackSettings, *, show_secrets: bool) -> None:
+    """Print each declared setting, its value, and where that value came from.
+
+    The provenance column is the useful one: "this is the app's default" and "this
+    is what you set last week" look identical in a value column, and only one of
+    them changes when the app is updated.
+    """
+    current = stack_settings.values()
+    in_file = set(read_env(stack_settings.env_file))
+    width = max(len(f.env) for f in stack_settings.fields)
+
+    for field in stack_settings.fields:
+        value = current[field.env]
+        if field.widget == "password" and value and not show_secrets:
+            value = MASK
+        origin = "" if field.env in in_file else "  (default)"
+        typer.echo(f"{field.env:<{width}}  {value or '(unset)'}{origin}")
+
+    typer.echo(f"\n{stack_settings.env_file}")

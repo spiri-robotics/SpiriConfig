@@ -16,7 +16,10 @@ from nicegui import ui
 from spiriconfig import advanced, terminal, theme
 from spiriconfig.commands import Command, stream_pty
 
+from spiriconfig_docker import settings as app_settings
+from spiriconfig_docker import widgets
 from spiriconfig_docker.config import DockerSettings, docker_settings
+from spiriconfig_docker.settings import SettingsError
 from spiriconfig_docker.stacks import Stack, StackError, discover
 
 log = logger.bind(plugin="docker")
@@ -130,7 +133,92 @@ async def _edit_dialog(stack: Stack, on_saved) -> None:
     dialog.open()
 
 
-def _stack_card(stack: Stack, status: str, refresh) -> None:
+async def _settings_dialog(stack: Stack) -> str | None:
+    """Edit a stack's declared settings. Returns what the user chose to do.
+
+    ``"applied"`` if they asked for the stack to be brought up with the new
+    settings, ``"saved"`` if they only saved, and ``None`` if they dismissed it
+    without saving.
+
+    Returning the choice rather than acting on it is what keeps the "apply" path
+    out of a nested dialog. The command has to be streamed into an output dialog,
+    and building that one inside *this* one -- which is mid-teardown by then --
+    is a good way to reinvent the disappearing-modal bug. The caller runs it in
+    the card's slot instead, exactly as every other action on the card does.
+    """
+    try:
+        config = await asyncio.to_thread(app_settings.for_stack, stack)
+        current = await asyncio.to_thread(config.values)
+    except (SettingsError, OSError) as exc:
+        ui.notify(str(exc), type="negative", multi_line=True, timeout=0)
+        return None
+
+    with ui.dialog() as dialog, ui.card().classes("w-full max-w-2xl"):
+        ui.label(f"{stack.name} — settings").classes("text-lg font-bold")
+
+        with ui.column().classes("w-full gap-4"):
+            bound = widgets.form(config.fields, current)
+
+        # Advanced only: the file, and the bytes we are about to put in it. The
+        # settings page is a nicer way to edit a .env, and a developer should be
+        # able to see through it to the file at any point -- including before the
+        # write, which is the moment the preview is actually worth anything.
+        with advanced.only(), ui.expansion(
+            f"{config.env_file}", icon="description"
+        ).classes(f"w-full {theme.COMMAND_CLASS}") as expansion:
+            preview = ui.label().classes(
+                "font-mono text-xs whitespace-pre-wrap break-all"
+            )
+
+            def show_preview() -> None:
+                """Render the .env as it would be written, with today's answers in it.
+
+                Recomputed when the panel is opened rather than bound to the
+                widgets: a settings form is a handful of boxes, and re-rendering
+                the whole file on every keystroke of a password field buys nothing
+                anyone can see.
+                """
+                if not expansion.value:
+                    return
+                try:
+                    preview.set_text(config.preview(widgets.values(bound)))
+                except SettingsError as exc:
+                    preview.set_text(f"# cannot preview: {exc}")
+
+            expansion.on_value_change(show_preview)
+
+        async def save(apply: bool) -> None:
+            # Validation and the write both live in StackSettings.save, which puts
+            # the old .env back if docker compose will not read the new one -- so a
+            # bad save cannot leave a stack that will not start.
+            try:
+                await asyncio.to_thread(config.save, widgets.values(bound))
+            except (SettingsError, OSError) as exc:
+                ui.notify(str(exc), type="negative", multi_line=True, timeout=0)
+                return
+            ui.notify(f"Saved {config.env_file}", type="positive")
+            dialog.submit("applied" if apply else "saved")
+
+        with ui.row().classes("w-full justify-end items-center"):
+            ui.button("Cancel", on_click=dialog.close).props("flat")
+            ui.button("Save", on_click=lambda: save(apply=False)).props("flat")
+            # The one that does what the user actually came to do. A saved .env
+            # changes nothing until compose reads it again, so a settings page
+            # without this button is one that appears not to work: you change the
+            # port, you save, and the app is still on the old one.
+            ui.button(
+                "Save & apply", icon="play_arrow", on_click=lambda: save(apply=True)
+            ).props("color=primary").tooltip(
+                "Save, then run docker compose up -d to restart with the new settings"
+            )
+
+    dialog.open()
+    result = await dialog
+    dialog.delete()
+    return result
+
+
+def _stack_card(stack: Stack, status: str, has_settings: bool, refresh) -> None:
     """One stack: its status, and the things you can do to it."""
     with ui.card().classes("w-full"):
         with ui.row().classes("w-full items-center justify-between"):
@@ -143,6 +231,18 @@ def _stack_card(stack: Stack, status: str, refresh) -> None:
             await _run_in_dialog(f"{stack.name} — {title}", command)
             refresh()
 
+        async def configure() -> None:
+            """Open the settings form, and do whatever the user asked for next.
+
+            The `up` runs out here rather than inside the dialog, in the card's own
+            slot -- the same slot every other command on this card is streamed into.
+            """
+            result = await _settings_dialog(stack)
+            if result == "applied":
+                await _run_in_dialog(f"{stack.name} — up", stack.up())
+            if result is not None:
+                refresh()
+
         with ui.row().classes("gap-2"):
             ui.button("Up", icon="play_arrow", on_click=lambda: act(stack.up(), "up"))
             ui.button("Down", icon="stop", on_click=lambda: act(stack.down(), "down"))
@@ -150,6 +250,16 @@ def _stack_card(stack: Stack, status: str, refresh) -> None:
                 "Restart", icon="restart_alt",
                 on_click=lambda: act(stack.restart(), "restart"),
             ).props("flat")
+
+            # Not advanced-only, and that is the point of the feature: an app
+            # author decided which knobs are safe to turn, so turning them is an
+            # ordinary thing for an ordinary user to do. Only shown for an app that
+            # declares some -- a Settings button leading to an empty form would be
+            # worse than no button at all.
+            if has_settings:
+                ui.button(
+                    "Settings", icon="tune", on_click=configure
+                ).props("flat")
             ui.button(
                 "Pull", icon="download",
                 on_click=lambda: act(stack.pull(), "pull"),
@@ -205,6 +315,14 @@ def page(settings: DockerSettings | None = None) -> None:
         container.clear()
         stacks = await asyncio.to_thread(discover, config)
         statuses = await _statuses(stacks)
+
+        # Which stacks have a settings form, worked out in one hop off the event
+        # loop. It is a small YAML parse per stack, but it is a disk read per
+        # stack, and the list is drawn on every refresh.
+        settings_flags = await asyncio.to_thread(
+            lambda: {s.name: app_settings.has_settings(s) for s in stacks}
+        )
+
         with container:
             if not stacks:
                 with ui.card().classes("w-full"):
@@ -215,7 +333,12 @@ def page(settings: DockerSettings | None = None) -> None:
                     ).classes("text-sm text-gray-500")
                 return
             for stack in stacks:
-                _stack_card(stack, statuses[stack.name], refresh)
+                _stack_card(
+                    stack,
+                    statuses[stack.name],
+                    settings_flags[stack.name],
+                    refresh,
+                )
 
     def refresh() -> None:
         """Re-render the stack list, shortly.

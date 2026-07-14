@@ -1,0 +1,63 @@
+# Dashboards for the telemetry the fleet sends home -- and the app that exists to
+# show what `x-spiri-settings` is for.
+#
+# Everything below the settings block is an ordinary compose file. `x-` keys are
+# extension fields, which compose ignores by spec, so this runs unchanged under a
+# bare `docker compose up -d` on a machine that has never heard of SpiriConfig.
+# The settings form is an *addition* to a working app, never a requirement of one.
+x-spiriconfig-version: "11.1.0"
+
+# Each field names a variable in this app's .env, and the NiceGUI widget that
+# edits it. SpiriConfig's settings page is generated from this list; nothing else
+# has to be written to get one.
+x-spiri-settings:
+  - env: GRAFANA_PORT
+    widget: number
+    label: HTTP port
+    help: The port the dashboards are served on.
+    default: "3000"
+    min: 1
+    max: 65535
+
+  - env: GRAFANA_ADMIN_PASSWORD
+    widget: password
+    label: Admin password
+    help: Password for the `admin` user. Change it before this leaves the bench.
+    default: admin
+    required: true
+
+  - env: GRAFANA_LOG_LEVEL
+    widget: select
+    label: Log level
+    help: How much grafana writes to `docker compose logs`.
+    options: [debug, info, warn, error]
+    default: info
+
+  - env: GRAFANA_ANONYMOUS
+    widget: switch
+    label: Allow anonymous viewing
+    help: Let anyone who can reach the port read the dashboards without logging in.
+    default: "false"
+
+services:
+  grafana:
+    image: grafana/grafana:11.1.0
+    restart: unless-stopped
+    ports:
+      # The `:-3000` is not redundant with the `default:` above, and the difference
+      # is the whole reason both exist. `default:` is what the *form* offers a
+      # human; this is what the *app* does when nobody has filled the form in. An
+      # app that only had the first would refuse to start until someone had visited
+      # a web page, which is a rotten thing to ask of a compose file.
+      - "${GRAFANA_PORT:-3000}:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: "${GRAFANA_ADMIN_PASSWORD:-admin}"
+      GF_LOG_LEVEL: "${GRAFANA_LOG_LEVEL:-info}"
+      GF_AUTH_ANONYMOUS_ENABLED: "${GRAFANA_ANONYMOUS:-false}"
+    volumes:
+      # Named, not a bind mount: a relative bind mount would resolve against the
+      # symlink and write into the store's git checkout. See docs/design.md.
+      - grafana-data:/var/lib/grafana
+
+volumes:
+  grafana-data:

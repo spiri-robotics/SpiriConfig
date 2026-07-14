@@ -21,7 +21,11 @@ from nicegui.testing import User
 
 from spiriconfig import theme, web
 from spiriconfig.plugins import Plugin
+from spiriconfig_docker import env
 from spiriconfig_docker.config import DockerSettings
+from spiriconfig_docker.stacks import Stack
+
+from tests.conftest import docker_required
 
 
 class _DockerPage(Plugin):
@@ -165,3 +169,127 @@ class TestTheEditorFollowsTheOperatingSystem:
         editor = await self._open_the_editor(user, settings)
         assert editor.props["theme"] == theme.CODEMIRROR_LIGHT
 
+
+class TestTheSettingsForm:
+    """The form generated from an app's `x-spiri-settings`.
+
+    `configurable` is a stack that declares one; `hello` is the ordinary kind that
+    declares nothing. Both are on the page, which is the interesting part -- an app
+    with no settings must not grow a button that opens an empty form.
+    """
+
+    async def _open(self, user: User, settings: DockerSettings) -> None:
+        web.build([_DockerPage(settings)])
+        await user.open("/docker")
+        await user.should_see("configurable")
+        user.find("Settings").click()
+        await user.should_see("configurable — settings")
+
+    async def test_only_an_app_that_declares_settings_gets_the_button(
+        self, user: User, settings: DockerSettings, configurable: Stack
+    ) -> None:
+        web.build([_DockerPage(settings)])
+        await user.open("/docker")
+        await user.should_see("hello")
+        await user.should_see("configurable")
+
+        # One Settings button on the page, and it is not `hello`'s.
+        assert len(user.find("Settings").elements) == 1
+
+    async def test_the_form_shows_a_widget_for_every_declared_field(
+        self, user: User, settings: DockerSettings, configurable: Stack
+    ) -> None:
+        await self._open(user, settings)
+
+        await user.should_see("Greeting")
+        await user.should_see("Port")
+        await user.should_see("Log level")
+        await user.should_see("Allow anonymous access")
+        await user.should_see("Admin password")
+
+        # And the help text the app wrote, which is the entire reason `help:` exists.
+        await user.should_see("What the app says when it starts.")
+
+    async def test_the_form_is_filled_in_from_the_env_file(
+        self, user: User, settings: DockerSettings, configurable: Stack
+    ) -> None:
+        (configurable.path / ".env").write_text("GREETING=from-the-file\n")
+
+        await self._open(user, settings)
+
+        greeting = user.find(marker="setting-GREETING").elements.pop()
+        assert greeting.value == "from-the-file"
+
+    async def test_a_field_the_env_file_does_not_set_shows_its_default(
+        self, user: User, settings: DockerSettings, configurable: Stack
+    ) -> None:
+        """The state of an app nobody has configured yet, which is every app the
+        moment it is installed."""
+        await self._open(user, settings)
+
+        assert user.find(marker="setting-GREETING").elements.pop().value == "hello"
+        # A number widget, so this one has been through float() and back.
+        assert user.find(marker="setting-PORT").elements.pop().value == 8080
+
+    async def test_the_raw_env_file_is_an_advanced_thing_to_want(
+        self, user: User, settings: DockerSettings, configurable: Stack
+    ) -> None:
+        """Turning knobs an app declared is an ordinary act. Reading the file they
+        land in is a developer's question, so it is behind the switch -- but it is
+        *there*, because a developer should be able to see through the form to the
+        file at any point."""
+        await self._open(user, settings)
+        await user.should_not_see(str(configurable.path / ".env"))
+
+        user.find("Advanced").click()
+        await user.should_see(str(configurable.path / ".env"))
+
+    @docker_required
+    async def test_saving_writes_the_env_file(
+        self, user: User, settings: DockerSettings, configurable: Stack
+    ) -> None:
+        """The whole feature, end to end: open the form, change a value, save, and
+        find it in a file that `docker compose` will read."""
+        await self._open(user, settings)
+
+        user.find(marker="setting-GREETING").clear().type("good morning")
+        user.find("Save").click()
+        await user.should_see("Saved")
+
+        written = env.read(configurable.path / ".env")
+        assert written["GREETING"] == "good morning"
+
+    @docker_required
+    async def test_saving_a_password_with_a_dollar_in_it_does_not_mangle_it(
+        self, user: User, settings: DockerSettings, configurable: Stack
+    ) -> None:
+        """The bug the encoder exists to prevent, driven from the actual form: a
+        password written bare has its `$secret` expanded away by compose, and the
+        user is left with a password of `p` and no idea why they cannot log in."""
+        await self._open(user, settings)
+
+        user.find(marker="setting-SECRET").clear().type("p$ecret w0rd#!")
+        user.find("Save").click()
+        await user.should_see("Saved")
+
+        assert env.read(configurable.path / ".env")["SECRET"] == "p$ecret w0rd#!"
+
+    @docker_required
+    async def test_a_rejected_save_says_so_and_changes_nothing(
+        self, user: User, settings: DockerSettings, configurable: Stack
+    ) -> None:
+        """`PORT` lands in a `ports:` mapping, so a value that is not a port makes
+        compose refuse the project. The user must be told, and their previous,
+        working .env must still be there."""
+        (configurable.path / ".env").write_text("PORT=9000\n")
+
+        await self._open(user, settings)
+
+        # Through the number widget's own text box, which is how a person would do
+        # it -- ui.number does not stop you typing letters, it just yields None.
+        user.find(marker="setting-PORT").clear().type("-1")
+        user.find("Save").click()
+        # Generously: the refusal comes back from a real `docker compose config`.
+        await user.should_see("rejected", retries=10)
+
+        assert (configurable.path / ".env").read_text() == "PORT=9000\n"
