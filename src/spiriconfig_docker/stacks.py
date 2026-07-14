@@ -15,6 +15,7 @@ without a docker daemon anywhere in sight.
 from __future__ import annotations
 
 import json
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -40,6 +41,27 @@ COMPOSE_FILENAMES = (
 #: flavour of "in progress" than a corpse. Guessing wrong in that direction shows
 #: a transient "partial" instead of falsely reporting a running stack as stopped.
 DEAD_STATES = frozenset({"exited", "dead", "removing"})
+
+#: What :meth:`Stack.exec` runs when nobody says otherwise. See the method for why
+#: it is ``sh`` and not ``bash``.
+DEFAULT_EXEC_COMMAND = "/bin/sh"
+
+#: Wraps a supervised ``exec`` so that :meth:`Stack.hangup` has something to aim at.
+#: ``$0`` is the pidfile and ``$@`` the real command -- passed as arguments rather
+#: than pasted into the script, so that a command with a space or a quote in it
+#: cannot rewrite the shell line it travels in.
+#:
+#: The write is allowed to fail. A read-only container has nowhere to put a pidfile,
+#: and the right answer there is a terminal that works and does not get reaped, not
+#: a button that refuses to open. Hence ``2>/dev/null`` and no ``&&``: whatever
+#: happens to the redirect, the ``exec`` still runs.
+_RECORD_PID = 'echo $$ > "$0" 2>/dev/null; exec "$@"'
+
+#: The other half: hang up on whatever that recorded, and tidy the file away.
+#: Every failure here is ignored on purpose -- an exec that already exited leaves a
+#: pid that is gone, and "kill: no such process" is the sound of there being nothing
+#: to clean up. Success and "already clean" should look the same to the caller.
+_HANGUP = 'kill -HUP "$(cat "$0" 2>/dev/null)" 2>/dev/null; rm -f "$0"'
 
 log = logger.bind(plugin="docker")
 
@@ -112,6 +134,107 @@ class Stack:
         """List the stack's containers, as JSON."""
         return self._compose("ps", "--all", "--format", "json")
 
+    def exec(
+        self, service: str, command: Sequence[str] = (), *, pidfile: str | None = None
+    ) -> Command:
+        """Run a command inside a service's *running* container.
+
+        The command defaults to :data:`DEFAULT_EXEC_COMMAND`, which is a shell,
+        because "give me a prompt in there" is what people overwhelmingly want. It
+        is only a default: this is ``docker compose exec``, so anything the image
+        can run is fair game, and the UI hands the user a box to say so.
+
+        ``/bin/sh`` rather than ``bash``: sh is the one a container is actually
+        likely to have. Alpine -- which half the images on a device are built from
+        -- ships busybox and no bash at all, and a button that dies with "executable
+        file not found" on half the apps is worse than a plainer shell that works on
+        all of them. Somebody who wants bash types bash.
+
+        No TTY flag, because there is none to pass: unlike ``docker exec``, which
+        wants ``-it``, ``docker compose exec`` allocates a TTY *by default* and the
+        only related flag it has is ``-T``, to turn one off. The shell on the far
+        side gets a terminal without our asking for one.
+
+        ``pidfile`` is what the web terminal passes, and it is the whole of our
+        answer to :meth:`hangup` -- see there for why it has to exist at all. The
+        command line stops being the one a person would type when it is set, which
+        is precisely why it is *optional*: the CLI and the line shown on the page
+        are built without it, and only the session that has a browser tab to lose
+        is wrapped.
+        """
+        argv = list(command) or [DEFAULT_EXEC_COMMAND]
+        if pidfile is None:
+            return self._compose("exec", service, *argv)
+        return self._compose("exec", service, "sh", "-c", _RECORD_PID, pidfile, *argv)
+
+    def hangup(self, service: str, pidfile: str) -> Command:
+        """Kill what a ``pidfile``'d :meth:`exec` left running in the container.
+
+        This exists because **docker will not do it for us**. That is a strong claim
+        about somebody else's software, so it is worth writing down what was actually
+        measured, because every plausible easier answer is wrong:
+
+        - It is not a missing ``-it``. Unlike ``docker exec``, ``docker compose exec``
+          allocates a TTY *by default*; the only flag it has is ``-T``, to turn one
+          off. Passing ``-it`` to a plain ``docker exec`` leaks identically.
+        - It is not a pty we forgot to close. With the client verifiably reaped and
+          nothing on the host holding the slave device open, the process inside the
+          container carries on regardless.
+        - It is not a signal we failed to send. SIGHUP kills the client and leaks;
+          SIGKILL leaks; SIGTERM and SIGINT do not even *kill the client*, which
+          sits in raw mode forwarding them as bytes. There is no polite signal that
+          makes it clean up, because there is nothing listening for one.
+
+        The reason is that an exec'd process is not the client's child. It is
+        parented inside the container, and the daemon does not tear an exec down when
+        the hijacked API stream drops -- so the shell gets no EOF, no SIGHUP, and no
+        timeout. It simply carries on, forever, until the container stops. The docker
+        API can start an exec and inspect an exec, and offers no way whatsoever to
+        kill one; hence a pidfile, which is the shape everybody who has hit this ends
+        up at. Twelve years and counting:
+
+        - https://github.com/moby/moby/issues/9098  (open since 2014: killing the
+          ``docker exec`` client does not terminate the spawned process)
+        - https://github.com/moby/moby/issues/29700 (the orphan, reparented to
+          PPID 0, when the client disconnects)
+        - https://github.com/moby/moby/issues/35703 (the request for a
+          ``docker exec kill`` that would make this method unnecessary)
+
+        Nobody meets this at a real terminal, because at a real terminal you type
+        ``exit`` -- and a shell that exits is clean. A browser tab has no ``exit``;
+        closing it *is* the hangup. So the rare accident becomes the ordinary path,
+        and we have to do by hand what the tty would have done for us.
+
+        Killing the shell is enough to kill what it was running. It is a session
+        leader with a controlling terminal, so the kernel SIGHUPs the foreground
+        process group when it dies -- the runaway ``ping`` goes with it, exactly as
+        when a real terminal window closes.
+
+        ``-T`` because this one has no terminal and wants none: it is a command we
+        run *at* the container, not a session anybody is sitting in.
+        """
+        return self._compose("exec", "-T", service, "sh", "-c", _HANGUP, pidfile)
+
+    def attach(self, service: str) -> Command:
+        """Attach to a running container's main process, stdin included.
+
+        The difference from :meth:`exec` is worth being clear about, because the
+        buttons sit next to each other and only one of them is safe to be careless
+        with. ``exec`` starts a *new* process alongside the app; you can exit it and
+        nothing has happened to the container. ``attach`` connects you to the
+        process the container already *is* -- pid 1, the app itself. It is how you
+        talk to a REPL an app is serving on its stdin, and how you see output that
+        goes nowhere near the logs.
+
+        Deliberately plain: no ``--sig-proxy``, no ``--detach-keys``. Whatever
+        ``docker compose attach`` does with a signal is docker's business and its
+        documented behaviour, and a person who typed this line into a shell would
+        get exactly what this button gives them. Bolting on flags the user did not
+        ask for, however well meant, is the point at which the UI stops being a face
+        over the command line and starts being a different program.
+        """
+        return self._compose("attach", service)
+
     def validate(self) -> Command:
         """Ask docker compose to parse the file and say nothing if it is valid."""
         return self._compose("config", "--quiet")
@@ -158,6 +281,28 @@ class Stack:
         if all(state in DEAD_STATES for state in states):
             return "stopped"
         return "partial"
+
+    def running_services(self) -> list[str]:
+        """The services with a container up right now, sorted, for exec and attach.
+
+        Running, and not merely declared in the compose file, because both of the
+        things this feeds are things you can only do to a *process*. Offering a
+        person the name of a service that is not up would be offering them a button
+        whose only possible outcome is docker telling them so.
+
+        Which also means this is a snapshot and not a promise: a container can exit
+        between the menu being drawn and the user picking from it. The failure is
+        then docker's to report, which it does perfectly well -- there is no race
+        worth closing here, only one worth not pretending we have closed.
+        """
+        return sorted(
+            {
+                service
+                for container in self.containers()
+                if container.get("State") == "running"
+                and (service := container.get("Service"))
+            }
+        )
 
     # -- the compose file itself ----------------------------------------------
 
@@ -286,6 +431,7 @@ def get(settings: DockerSettings, name: str) -> Stack:
 
 __all__ = [
     "COMPOSE_FILENAMES",
+    "DEFAULT_EXEC_COMMAND",
     "Stack",
     "StackError",
     "discover",

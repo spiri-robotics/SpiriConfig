@@ -57,6 +57,8 @@ $ spiriconfig docker pull whoami        # docker compose pull
 $ spiriconfig docker logs whoami -f     # docker compose logs --tail=200 --follow
 $ spiriconfig docker ps whoami          # docker compose ps
 $ spiriconfig docker config whoami      # print the path to the compose file
+$ spiriconfig docker exec whoami whoami   # docker compose exec whoami /bin/sh
+$ spiriconfig docker attach whoami whoami # docker compose attach whoami
 ```
 
 `config` prints a path rather than opening an editor, so that your own tools can
@@ -65,6 +67,73 @@ do the part they are better at:
 ```console
 $ $EDITOR "$(spiriconfig docker config whoami)"
 ```
+
+## Getting inside a container
+
+Two buttons, both [advanced](advanced.md)-only, both opening a real terminal in
+the browser. They are not the same thing, and the difference is worth knowing
+before you press one.
+
+**Exec** starts a *new* process next to the app — a shell, by default. You can
+exit it and nothing has happened to the container. It defaults to `/bin/sh`
+rather than `bash` because `sh` is the shell a container actually has: Alpine
+images ship busybox and no bash at all. The command is a text box, not a shell
+button, because `docker compose exec` runs anything the image has:
+
+```console
+$ spiriconfig docker exec grafana grafana                  # a shell
+$ spiriconfig docker exec grafana grafana -- ls -la /etc   # or anything else
+```
+
+Put `--` before a command with options of its own, or they will be read as ours.
+
+**Attach** connects you to the process the container already *is* — pid 1, the
+app itself. It is how you reach a REPL an app serves on its stdin, and how you
+see output that never goes near the logs. Your keystrokes go to the app, so what
+Ctrl-C does is between you and that process. We pass no `--sig-proxy` and no
+`--detach-keys`: it is the plain command, and it behaves exactly as it does when
+you type it.
+
+Both only offer services that are **running**, since both need a live process.
+
+(the-orphan)=
+
+### The orphan, and what we do about it
+
+:::{note}
+**`docker compose exec` does not clean up after itself, and it never has.**
+
+When the client that started an exec goes away, the process it started inside the
+container keeps running. Forever — there is no timeout, and nothing reaps it
+short of the container stopping. The exec'd process is not the client's child; it
+belongs to the container, and the daemon does not tear an exec down when the API
+connection drops. The docker API can *start* an exec and *inspect* an exec, and
+offers no way at all to *kill* one.
+
+This is [moby/moby#9098][9098], open since **2014**, along with [#29700][29700]
+(the orphan, reparented to PPID 0) and [#35703][35703] (the request for a
+`docker exec kill` that would make all of this unnecessary).
+
+Nobody meets it at a terminal, because at a terminal you type `exit`, and a shell
+that exits is clean. **A browser tab has no `exit`** — closing it *is* the
+hangup. So the rare accident becomes the ordinary path, and without help every
+visit to the Exec button would leave a shell running inside your container.
+
+So the web session runs the exec wrapped in a tiny supervisor that records its pid
+inside the container, and kills it when you close the dialog or the tab. The
+command line the page *shows* you is the plain one — the one the CLI runs, and the
+one worth copying — because that line should be about your container, not about
+our workaround.
+
+It is worth knowing that the CLI does **not** do this. `spiriconfig docker exec`
+is exactly `docker compose exec`, orphan and all: if you kill your terminal
+instead of typing `exit`, you will leave a shell behind, precisely as you would
+running docker by hand.
+:::
+
+[9098]: https://github.com/moby/moby/issues/9098
+[29700]: https://github.com/moby/moby/issues/29700
+[35703]: https://github.com/moby/moby/issues/35703
 
 ## Editing a compose file
 

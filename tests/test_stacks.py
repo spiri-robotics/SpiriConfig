@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+import asyncio
+import subprocess
+import time
+from collections.abc import Callable
 from pathlib import Path
 
 import pytest
 
-from spiriconfig.commands import run
+from spiriconfig.commands import PtySession, run
 from spiriconfig_docker.config import DockerSettings
 from spiriconfig_docker.stacks import (
     Stack,
@@ -139,6 +143,99 @@ class TestCommands:
         assert list(get(settings, "hello").up().argv)[0] == "/usr/bin/podman"
 
 
+class TestExecAndAttach:
+    def test_exec_runs_a_shell_by_default(self, settings: DockerSettings) -> None:
+        argv = list(get(settings, "hello").exec("web").argv)
+        assert argv[-3:] == ["exec", "web", "/bin/sh"]
+
+    def test_exec_runs_whatever_it_is_given(self, settings: DockerSettings) -> None:
+        """It is `docker compose exec`, not a shell button: anything the image has."""
+        argv = list(get(settings, "hello").exec("web", ["ls", "-la", "/etc"]).argv)
+        assert argv[-5:] == ["exec", "web", "ls", "-la", "/etc"]
+
+    def test_exec_asks_for_no_tty_because_it_already_has_one(
+        self, settings: DockerSettings
+    ) -> None:
+        """The `-it` trap. `docker exec` needs it; `docker compose exec` allocates a
+        TTY by default and has no such flag -- its only related flag is `-T`, which
+        turns the TTY *off*. Passing `-it` here would just be an error."""
+        argv = list(get(settings, "hello").exec("web").argv)
+        assert "-it" not in argv
+        assert "-T" not in argv
+
+    def test_attach_attaches(self, settings: DockerSettings) -> None:
+        argv = list(get(settings, "hello").attach("web").argv)
+        assert argv[-2:] == ["attach", "web"]
+
+    def test_attach_is_left_exactly_as_docker_ships_it(
+        self, settings: DockerSettings
+    ) -> None:
+        """No --sig-proxy, no --detach-keys. What attach does with a signal is
+        documented behaviour of a real command, and bolting on flags the user never
+        asked for is where a face over the command line becomes a different program.
+        """
+        argv = list(get(settings, "hello").attach("web").argv)
+        assert not [a for a in argv if a.startswith("--sig-proxy")]
+        assert not [a for a in argv if a.startswith("--detach-keys")]
+
+
+class TestTheExecBabysitter:
+    """`exec` grows a pidfile only when somebody has a browser tab to lose.
+
+    The split is the point: the supervised form is what the *web session* runs, and
+    the plain form is what we show, what the CLI runs, and what a person would type.
+    See `Stack.hangup` for the evidence that the babysitter has to exist at all.
+    """
+
+    def test_the_plain_form_is_the_one_a_person_would_type(
+        self, settings: DockerSettings
+    ) -> None:
+        command = get(settings, "hello").exec("web")
+        assert str(command).endswith("exec web /bin/sh")
+        assert "spiriconfig" not in str(command)
+
+    def test_the_supervised_form_records_its_pid_and_then_execs_the_real_thing(
+        self, settings: DockerSettings
+    ) -> None:
+        argv = list(get(settings, "hello").exec("web", pidfile="/tmp/pf").argv)
+
+        assert argv[-7:-3] == ["exec", "web", "sh", "-c"]
+        # The pidfile is $0 and the command is "$@", passed as *arguments* -- so a
+        # command with a quote or a space in it cannot rewrite the script it rides in.
+        assert argv[-2:] == ["/tmp/pf", "/bin/sh"]
+        assert 'exec "$@"' in argv[-3]
+
+    def test_the_supervised_form_still_runs_a_custom_command(
+        self, settings: DockerSettings
+    ) -> None:
+        argv = list(
+            get(settings, "hello").exec("web", ["ls", "-la"], pidfile="/tmp/pf").argv
+        )
+        assert argv[-3:] == ["/tmp/pf", "ls", "-la"]
+
+    def test_a_container_that_cannot_be_written_to_still_gets_a_terminal(
+        self, settings: DockerSettings
+    ) -> None:
+        """A read-only image has nowhere to put a pidfile, and the right answer there
+        is a shell that works and does not get reaped -- not a button that refuses to
+        open. So the write is allowed to fail and the `exec` runs regardless."""
+        script = list(get(settings, "hello").exec("web", pidfile="/tmp/pf").argv)[-3]
+        assert "2>/dev/null" in script
+        assert "&&" not in script  # a failed write must not swallow the exec
+
+    def test_hangup_kills_what_the_pidfile_names(self, settings: DockerSettings) -> None:
+        argv = list(get(settings, "hello").hangup("web", "/tmp/pf").argv)
+        assert argv[-7:-3] == ["exec", "-T", "web", "sh"]
+        assert argv[-1] == "/tmp/pf"
+        assert "kill -HUP" in argv[-2]
+
+    def test_hangup_wants_no_terminal_of_its_own(
+        self, settings: DockerSettings
+    ) -> None:
+        """It is a command we run *at* the container, not a session anyone sits in."""
+        assert "-T" in list(get(settings, "hello").hangup("web", "/tmp/pf").argv)
+
+
 class TestParsePs:
     """Compose emits either a JSON array or one object per line, by version."""
 
@@ -227,6 +324,143 @@ class TestStatus:
 
         run(unique_stack.down()).check()
         assert unique_stack.status() == "down"
+
+
+class TestRunningServices:
+    """What exec and attach can be pointed at: services with a live process."""
+
+    @docker_required
+    def test_only_lists_services_that_are_actually_up(
+        self, unique_stack: Stack
+    ) -> None:
+        """Running, not merely declared. Offering a service that is down would be
+        offering a button whose only outcome is docker saying so."""
+        assert unique_stack.running_services() == []
+
+        run(unique_stack.up()).check()
+        assert unique_stack.running_services() == ["hello"]
+
+        run(unique_stack.down()).check()
+        assert unique_stack.running_services() == []
+
+
+def _processes(stack: Stack, needle: str) -> int:
+    """How many processes in the stack's container match ``needle``.
+
+    Asked from outside with `compose top`, rather than by exec'ing a `ps` in: an
+    exec that goes hunting for leaked execs is a good way to find itself.
+    """
+    result = run(stack._compose("top", "hello"))
+    return sum(needle in line for line in result.stdout.splitlines())
+
+
+async def _eventually(condition: Callable[[], bool], timeout: float = 15.0) -> None:
+    """Wait for something to become true, or fail the test.
+
+    Generously, because every poll here is a `docker compose top` -- a round trip to
+    the daemon, on a machine that is also running a test suite. The alternative, a
+    plausible-looking fixed sleep, passes on an idle laptop and fails at random in a
+    full run, which is the worst of both worlds.
+    """
+    deadline = asyncio.get_running_loop().time() + timeout
+    while asyncio.get_running_loop().time() < deadline:
+        if condition():
+            return
+        await asyncio.sleep(0.2)
+    pytest.fail(f"never became true within {timeout}s")
+
+
+class TestAnExecDoesNotOutliveTheBrowserTab:
+    """The rule the terminal page already keeps, now across the container boundary.
+
+    `docker compose exec` orphans its process when the client goes away, and it has
+    done since 2014 -- moby/moby#9098, still open. A closed browser tab *is* the
+    client going away, so without `Stack.hangup` every visit to the Exec button
+    would leave a shell running inside the user's container, for as long as that
+    container lives. Nobody hits this at a real terminal because at a real terminal
+    you type `exit`; a browser tab has no `exit`.
+    """
+
+    SLEEP = "31417"  # a duration nothing else on the machine will be sleeping for
+
+    @docker_required
+    async def test_hanging_up_kills_the_shell_and_what_it_was_running(
+        self, unique_stack: Stack
+    ) -> None:
+        """The whole feature: the shell dies, *and* the runaway command dies with it.
+
+        Through a real :class:`PtySession`, because the second half depends on there
+        being a terminal. We only ever kill the shell -- but the shell is a session
+        leader with a controlling tty, so the kernel SIGHUPs its foreground process
+        group on the way out, and the `sleep` the user walked away from goes with it.
+        Take the pty away and that mechanism is gone, and the test would be proving
+        something the application does not do.
+        """
+        run(unique_stack.up()).check()
+        pidfile = "/tmp/.spiriconfig-test-pf"
+
+        session = PtySession(unique_stack.exec("hello", pidfile=pidfile))
+        await session.start()
+        try:
+            # The runaway command, left in the foreground exactly as a user leaves it.
+            session.write(f"sleep {self.SLEEP}\n")
+            await _eventually(lambda: _processes(unique_stack, self.SLEEP) >= 1)
+        finally:
+            session.close()  # the closed browser tab
+            await session.wait()
+
+        # Which, on its own, leaves the sleep running: that is moby#9098, and the
+        # canary below asserts it. This is the line that cleans up after docker.
+        run(unique_stack.hangup("hello", pidfile)).check()
+
+        await _eventually(lambda: _processes(unique_stack, self.SLEEP) == 0)
+
+    @docker_required
+    def test_hanging_up_twice_is_not_an_error(self, unique_stack: Stack) -> None:
+        """Both endings can happen -- close the dialog, then close the tab -- and a
+        pid that is already gone must look the same as a job well done."""
+        run(unique_stack.up()).check()
+        result = run(unique_stack.hangup("hello", "/tmp/.spiriconfig-nothing-here"))
+        assert result.ok
+
+    @docker_required
+    def test_docker_still_has_not_fixed_this(self, unique_stack: Stack) -> None:
+        """A canary, not a complaint. If this test ever *fails*, docker has fixed
+        moby/moby#9098 -- and `Stack.hangup`, the pidfile, and the whole babysitter
+        can be deleted. It is here so that the day that happens, we find out.
+
+        It asserts the bug: an unsupervised exec, whose client we kill, leaves its
+        process running inside the container.
+        """
+        run(unique_stack.up()).check()
+
+        proc = subprocess.Popen(  # noqa: S603
+            [*unique_stack.exec("hello", ["sleep", self.SLEEP]).argv],
+            cwd=unique_stack.path,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        try:
+            for _ in range(100):
+                if _processes(unique_stack, self.SLEEP):
+                    break
+                time.sleep(0.1)
+            else:
+                pytest.fail("the sleep never started; the canary is not testing anything")
+
+            # Kill the client, and give it every chance to clean up on its way out.
+            proc.terminate()
+            proc.wait(timeout=10)
+            time.sleep(2)
+
+            assert _processes(unique_stack, self.SLEEP) >= 1, (
+                "docker appears to have fixed moby/moby#9098 -- an exec'd process no "
+                "longer outlives its client. Stack.hangup and the pidfile that feeds "
+                "it can now be deleted."
+            )
+        finally:
+            proc.kill()
 
 
 class TestWrite:

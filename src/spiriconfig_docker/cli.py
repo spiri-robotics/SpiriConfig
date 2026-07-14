@@ -9,6 +9,7 @@ have run without us, so they are never dependent on this tool.
 from __future__ import annotations
 
 import asyncio
+import os
 from typing import Annotated
 
 import typer
@@ -20,7 +21,13 @@ from spiriconfig_docker import settings as app_settings
 from spiriconfig_docker.config import docker_settings
 from spiriconfig_docker.env import read as read_env
 from spiriconfig_docker.settings import SettingsError, StackSettings
-from spiriconfig_docker.stacks import Stack, StackError, discover, get
+from spiriconfig_docker.stacks import (
+    DEFAULT_EXEC_COMMAND,
+    Stack,
+    StackError,
+    discover,
+    get,
+)
 
 log = logger.bind(plugin="docker")
 
@@ -126,6 +133,57 @@ def logs(
 def ps(stack: StackArg, show: ShowOption = False) -> None:
     """Show a compose project's containers."""
     _execute(_stack(stack).ps(), show=show)
+
+
+def _execute_interactively(command: Command, *, show: bool) -> None:
+    """Hand our terminal to the command, and get out of the way.
+
+    ``exec`` rather than spawning a child and waiting on it, exactly as
+    ``spiriconfig terminal shell`` does: this is a program that wants to *be* the
+    thing you are typing at, with your job control, your signals and your window
+    size. Every layer we leave between it and the terminal is a layer that can get
+    one of those wrong.
+    """
+    if show:
+        typer.echo(str(command))
+        return
+    os.chdir(command.cwd or "/")
+    os.execvp(command.argv[0], list(command.argv))  # noqa: S606 - argv is ours
+
+
+ServiceArg = Annotated[str, typer.Argument(help="Service within the project.")]
+
+
+@app.command("exec")
+def exec_(
+    stack: StackArg,
+    service: ServiceArg,
+    command: Annotated[
+        list[str] | None,
+        typer.Argument(
+            metavar="[COMMAND]...",
+            help=f"What to run. Defaults to {DEFAULT_EXEC_COMMAND}.",
+        ),
+    ] = None,
+    show: ShowOption = False,
+) -> None:
+    """Run a command in a service's container -- a shell, unless you say otherwise.
+
+    Put ``--`` before a command that has options of its own, or typer will read
+    them as ours: ``spiriconfig docker exec grafana grafana -- ls -la /etc``.
+    """
+    _execute_interactively(_stack(stack).exec(service, command or []), show=show)
+
+
+@app.command()
+def attach(stack: StackArg, service: ServiceArg, show: ShowOption = False) -> None:
+    """Attach to a service's main process, stdin and all.
+
+    Not the same as ``exec``, and the difference bites: ``exec`` starts a new
+    process next to the app, while this connects you to the app itself. What your
+    keystrokes and your Ctrl-C do to it is between you and that process.
+    """
+    _execute_interactively(_stack(stack).attach(service), show=show)
 
 
 @app.command()

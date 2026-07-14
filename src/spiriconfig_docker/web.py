@@ -9,18 +9,25 @@ rather than a replacement for it.
 from __future__ import annotations
 
 import asyncio
+import shlex
+import uuid
 
 from loguru import logger
-from nicegui import ui
+from nicegui import context, ui
 
 from spiriconfig import advanced, terminal, theme
-from spiriconfig.commands import Command, stream_pty
+from spiriconfig.commands import Command, PtySession, run, stream_pty
 
 from spiriconfig_docker import settings as app_settings
 from spiriconfig_docker import widgets
 from spiriconfig_docker.config import DockerSettings, docker_settings
 from spiriconfig_docker.settings import SettingsError
-from spiriconfig_docker.stacks import Stack, StackError, discover
+from spiriconfig_docker.stacks import (
+    DEFAULT_EXEC_COMMAND,
+    Stack,
+    StackError,
+    discover,
+)
 
 log = logger.bind(plugin="docker")
 
@@ -63,14 +70,8 @@ async def _run_in_dialog(title: str, command: Command) -> None:
         # Advanced only: the exact command line, to copy and run yourself. The
         # output below is shown to everyone -- a regular user still needs to see
         # what went wrong, they just do not need the invocation that caused it.
-        with advanced.only(), ui.row().classes(
-            f"w-full items-center gap-2 {theme.COMMAND_CLASS} p-2"
-        ):
-            ui.label(str(command)).classes("font-mono text-xs grow break-all")
-            ui.button(
-                icon="content_copy",
-                on_click=lambda: ui.clipboard.write(str(command)),
-            ).props("flat dense round").tooltip("Copy command")
+        with advanced.only():
+            _copyable(command)
 
         output = terminal.terminal()
         close = ui.button("Close", on_click=dialog.close).props("flat")
@@ -99,6 +100,202 @@ async def _run_in_dialog(title: str, command: Command) -> None:
     # starting and stopping things accretes a pile of invisible modals holding
     # on to their output.
     dialog.delete()
+
+
+def _copyable(command: Command) -> None:
+    """The exact command line, with a button to take it away with you."""
+    with ui.row().classes(f"w-full items-center gap-2 {theme.COMMAND_CLASS} p-2"):
+        ui.label(str(command)).classes("font-mono text-xs grow break-all")
+        ui.button(
+            icon="content_copy",
+            on_click=lambda: ui.clipboard.write(str(command)),
+        ).props("flat dense round").tooltip("Copy command")
+
+
+async def _terminal_dialog(
+    title: str,
+    command: Command,
+    *,
+    what: str,
+    shown: Command | None = None,
+    reap: Command | None = None,
+) -> None:
+    """Run ``command`` on a pty, in a dialog you can type into.
+
+    The sibling of :func:`_run_in_dialog`, and the distinction is the one drawn in
+    :mod:`spiriconfig.terminal`: that one shows a *transcript* of a command somebody
+    already decided on, this one hands you the keyboard. `up` and `pull` are things
+    we run for you; `exec` and `attach` are things you run.
+
+    ``shown`` is the command line we *print*, when that is not the one we run. Only
+    `exec` needs it, and the split is not a fib -- it is the opposite. The line on
+    screen is the line that gets you this shell, and the one the CLI runs, and the
+    one worth copying; what we actually spawn is that same command wearing a
+    babysitter (see :meth:`Stack.hangup`) which exists solely so the browser tab can
+    hang up on it. Printing the babysitter would be showing the user a command line
+    that is *about our implementation* rather than about their container.
+
+    ``reap`` is that babysitter's other half, and it runs down both paths out of
+    here -- the Close button, and the browser vanishing -- because those are two
+    different ways for a session to end and only one of them tells us so.
+    """
+    session = PtySession(
+        command,
+        log=log,
+        rows=terminal.TERMINAL_ROWS,
+        columns=terminal.TERMINAL_COLUMNS,
+    )
+    client = context.client
+    reaped = False
+
+    async def hangup() -> None:
+        """End the session, and kill what it left inside the container.
+
+        Idempotent, because both endings can happen -- a user who closes the dialog
+        and *then* the tab would otherwise reap twice. The kill is harmless the
+        second time (the pid is already gone) but the log line is a lie, and a lie
+        in a log is worth more than the two lines it costs to prevent.
+        """
+        nonlocal reaped
+        session.close()
+        if reap is None or reaped:
+            return
+        reaped = True
+        await asyncio.to_thread(run, reap, log=log)
+
+    with ui.dialog() as dialog, ui.card().classes("w-full max-w-4xl"):
+        ui.label(title).classes("text-lg font-bold")
+
+        # Not behind `advanced.only()`, unlike everywhere else this block appears.
+        # Getting here at all meant turning advanced mode on -- the buttons that
+        # open this dialog are advanced-only -- so hiding it would only serve to
+        # make it vanish if someone flipped the switch off mid-session, which is
+        # a strange thing to arrange on purpose.
+        _copyable(shown or command)
+
+        view = terminal.interactive(
+            on_data=lambda event: session.write(event.data),
+            on_resize=lambda event: session.resize(event.rows, event.cols),
+        ).classes("h-[60vh]")
+
+        ui.button("Close", on_click=dialog.close).props("flat")
+
+    dialog.open()
+
+    # The closed tab. `pump` already hangs up the *session* on disconnect, but the
+    # shell inside the container is not ours to hang up on -- it outlives the client
+    # that started it, and nothing but this will kill it. Registered before the
+    # session starts, unlike pump's, because the thing it cleans up is not the
+    # process we spawned: it is the one docker spawned on our behalf, which exists
+    # from the moment the exec lands and would survive us failing halfway through.
+    client.on_disconnect(hangup)
+
+    # Started as a task, not awaited: this runs for as long as the user keeps the
+    # session open, and we have a dialog to sit and wait on in the meantime.
+    running = asyncio.create_task(
+        terminal.pump(session, view, client, what=what, log=log)
+    )
+
+    await dialog
+
+    # The user is done. Hang up -- which ends `pump`'s loop over the output, so the
+    # task finishes on its own and the process gets reaped rather than being left
+    # for the garbage collector to notice.
+    await hangup()
+    await running
+    dialog.delete()
+
+
+async def _pick_service(title: str, services: list[str]) -> str | None:
+    """Ask which container, when there is more than one it could be."""
+    with ui.dialog() as dialog, ui.card().classes("w-full max-w-md"):
+        ui.label(title).classes("text-lg font-bold")
+        service = ui.select(
+            services, value=services[0], label="Service"
+        ).classes("w-full").props("outlined")
+
+        with ui.row().classes("w-full justify-end"):
+            ui.button("Cancel", on_click=dialog.close).props("flat")
+            ui.button(
+                "Open", on_click=lambda: dialog.submit(service.value)
+            ).props("color=primary").mark("pick-open")
+
+    dialog.open()
+    chosen = await dialog
+    dialog.delete()
+    return chosen
+
+
+async def _exec_dialog(
+    stack: Stack, services: list[str]
+) -> tuple[str, list[str]] | None:
+    """Ask what to run and where. Returns the service and the argv, or None.
+
+    The parts rather than a finished :class:`Command`, because the caller builds two
+    of them out of this -- the one it runs, which is supervised, and the one it shows,
+    which is the one you would type. See :meth:`Stack.hangup`.
+
+    The command is a text box rather than a shell button, because the box is the
+    honest widget: this is ``docker compose exec``, which runs *anything* the image
+    has, and a button labelled "Shell" would be a smaller tool wearing a costume.
+    It is filled in with a shell, which is what almost everyone wants almost always.
+
+    The line is shown as it is typed. That is the whole idea of the project rendered
+    in one widget -- you can watch the thing you are about to run assemble itself,
+    and copy it, and run it yourself instead.
+    """
+    with ui.dialog() as dialog, ui.card().classes("w-full max-w-2xl"):
+        ui.label(f"{stack.name} — exec").classes("text-lg font-bold")
+
+        service = ui.select(
+            services, value=services[0], label="Service"
+        ).classes("w-full").props("outlined")
+        command = ui.input(
+            "Command", value=DEFAULT_EXEC_COMMAND
+        ).classes("w-full").props("outlined")
+
+        with ui.row().classes(f"w-full items-center gap-2 {theme.COMMAND_CLASS} p-2"):
+            preview = ui.label().classes("font-mono text-xs grow break-all")
+
+        def argv() -> list[str] | None:
+            """What was typed, as a command, or None if it is not one yet.
+
+            ``shlex``, so that `sh -c 'echo hi'` means what it means in a shell --
+            three arguments, not five. It is also the only thing here that can be
+            *wrong*: an unbalanced quote is the one input this form can be given
+            that has no command in it at all.
+            """
+            try:
+                words = shlex.split(command.value)
+            except ValueError:
+                return None
+            return words or None
+
+        def show() -> None:
+            words = argv()
+            preview.set_text(str(stack.exec(service.value, words)) if words else "…")
+            go.set_enabled(words is not None)
+
+        def submit() -> None:
+            if (words := argv()) is not None:
+                dialog.submit((service.value, words))
+
+        with ui.row().classes("w-full justify-end"):
+            ui.button("Cancel", on_click=dialog.close).props("flat")
+            go = (
+                ui.button("Run", icon="play_arrow", on_click=submit)
+                .props("color=primary")
+                .mark("exec-run")
+            )
+
+        service.on_value_change(show)
+        command.on_value_change(show)
+        show()
+
+    dialog.open()
+    chosen = await dialog
+    dialog.delete()
+    return chosen
 
 
 async def _edit_dialog(stack: Stack, on_saved) -> None:
@@ -288,6 +485,70 @@ def _stack_card(stack: Stack, status: str, has_settings: bool, refresh) -> None:
             if result is not None:
                 refresh()
 
+        async def running() -> list[str] | None:
+            """The services you could get into, or None with the reason said out loud.
+
+            Both exec and attach need a *running process*, so a stopped stack has
+            nothing to offer either of them. Saying so is better than a menu with
+            nothing in it, and much better than handing docker a service name it
+            will only reject.
+            """
+            services = await asyncio.to_thread(stack.running_services)
+            if not services:
+                ui.notify(
+                    f"{stack.name} has no running containers. Start it first.",
+                    type="warning",
+                )
+                return None
+            return services
+
+        async def exec_() -> None:
+            """Exec, supervised -- the one command here that cannot clean up after
+            itself.
+
+            `docker compose exec` orphans its process inside the container when the
+            client goes away, and a closed browser tab is exactly that. So the
+            session we *run* wears a pidfile, and the session we *show* does not:
+            see :meth:`Stack.hangup`, which is also where the evidence lives.
+            """
+            if (services := await running()) is None:
+                return
+            chosen = await _exec_dialog(stack, services)
+            if chosen is None:
+                return
+            service, argv = chosen
+
+            pidfile = f"/tmp/.spiriconfig-exec-{uuid.uuid4().hex}"
+            await _terminal_dialog(
+                f"{stack.name} — exec {service}",
+                stack.exec(service, argv, pidfile=pidfile),
+                what="the command",
+                shown=stack.exec(service, argv),
+                reap=stack.hangup(service, pidfile),
+            )
+            refresh()
+
+        async def attach() -> None:
+            """Attach. Needs no supervision: it starts nothing, so it orphans nothing.
+
+            The picker is shown even when there is only one service to pick. It costs
+            a click on the common case, and it buys the two buttons behaving the same
+            way as each other -- a dropdown that appears or does not depending on how
+            many containers happen to be up is a UI you have to *learn*, and the first
+            thing anybody does is go looking for the menu that is not there.
+            """
+            if (services := await running()) is None:
+                return
+            service = await _pick_service(f"{stack.name} — attach", services)
+            if service is None:
+                return
+            await _terminal_dialog(
+                f"{stack.name} — attach {service}",
+                stack.attach(service),
+                what="the attachment",
+            )
+            refresh()
+
         with ui.row().classes("gap-2"):
             ui.button("Up", icon="play_arrow", on_click=lambda: act(stack.up(), "up"))
             ui.button("Down", icon="stop", on_click=lambda: act(stack.down(), "down"))
@@ -314,11 +575,20 @@ def _stack_card(stack: Stack, status: str, has_settings: bool, refresh) -> None:
                 on_click=lambda: act(stack.logs(), "logs"),
             ).props("flat")
 
-            # Advanced only: hand-editing the compose file is the most dangerous
-            # thing on this page. It stays fully available from the shell --
-            # `$EDITOR "$(spiriconfig docker config <stack>)"` -- because hiding a
-            # button is decluttering, not a permission.
+            # Advanced only, all three. Hand-editing the compose file is the most
+            # dangerous thing on this page; a prompt inside a container is the most
+            # *bewildering* one, and neither is anything an ordinary user came here
+            # for. All of it stays fully available from the shell --
+            # `$EDITOR "$(spiriconfig docker config <stack>)"`,
+            # `spiriconfig docker exec <stack> <service>` -- because hiding a button
+            # is decluttering, not a permission.
             with advanced.only():
+                ui.button("Exec", icon="terminal", on_click=exec_).props(
+                    "flat"
+                ).tooltip("Run a command in one of this app's containers")
+                ui.button("Attach", icon="cable", on_click=attach).props(
+                    "flat"
+                ).tooltip("Attach to a container's main process, stdin and all")
                 ui.button(
                     "Edit", icon="edit",
                     on_click=lambda: _edit_dialog(stack, refresh),

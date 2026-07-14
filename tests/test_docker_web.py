@@ -12,16 +12,20 @@ the screen a moment later.
 from __future__ import annotations
 
 import asyncio
+import inspect
 import re
 
+import pytest
 import typer
 from nicegui import ui
 from nicegui.element import Element
 from nicegui.testing import User
 
 from spiriconfig import theme, web
+from spiriconfig.commands import Command, Result
 from spiriconfig.plugins import Plugin
 from spiriconfig_docker import env
+from spiriconfig_docker import web as docker_web
 from spiriconfig_docker.config import DockerSettings
 from spiriconfig_docker.stacks import Stack
 
@@ -116,6 +120,296 @@ class TestTheOutputDialog:
         await user.should_see("hello")
         await user.should_see("Up")
         await user.should_see("Logs")
+
+
+class TestExecAndAttachAreDeveloperTools:
+    """A prompt inside a container is not what an ordinary user came here for.
+
+    So both buttons are advanced-only -- which, as ever, is decluttering and not a
+    permission: the CLI hands out the same shell to the same user regardless, and
+    the switch that reveals them is one click away in the sidebar.
+    """
+
+    def _one_running_service(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Pretend `hello` is up, without needing a daemon to make it so.
+
+        What is being tested here is the page's wiring, not docker's. The real
+        thing -- that an exec'd shell dies with the browser tab -- is in
+        `tests/test_stacks.py`, against a real container, because nothing less
+        would have caught it.
+        """
+        monkeypatch.setattr(Stack, "running_services", lambda self: ["hello"])
+
+    async def test_they_are_hidden_until_advanced_is_on(
+        self, user: User, settings: DockerSettings
+    ) -> None:
+        web.build([_DockerPage(settings)])
+        await user.open("/docker")
+        await user.should_see("hello")
+
+        await user.should_not_see("Exec")
+        await user.should_not_see("Attach")
+
+        user.find("Advanced").click()
+
+        await user.should_see("Exec")
+        await user.should_see("Attach")
+
+    async def test_an_app_that_is_not_running_says_so(
+        self, user: User, settings: DockerSettings
+    ) -> None:
+        """Both of these need a live process, so a stopped app has nothing to offer
+        either of them. Saying so beats a menu with nothing in it, and beats handing
+        docker a service name it will only reject."""
+        web.build([_DockerPage(settings)])
+        await user.open("/docker")
+        await user.should_see("hello")
+
+        user.find("Advanced").click()
+        user.find("Exec").click()
+
+        await user.should_see("no running containers", retries=20)
+
+    async def test_the_exec_dialog_shows_the_command_you_could_have_typed(
+        self, user: User, settings: DockerSettings, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """The honesty guarantee, and the reason `shown` exists at all.
+
+        What we *run* is wrapped in a pidfile babysitter, because docker orphans an
+        exec whose client goes away (moby#9098). What we *show* is the plain command
+        -- the one the CLI runs, the one worth copying, the one about the user's
+        container rather than about our implementation.
+        """
+        self._one_running_service(monkeypatch)
+        web.build([_DockerPage(settings)])
+        await user.open("/docker")
+        await user.should_see("hello")
+
+        user.find("Advanced").click()
+        user.find("Exec").click()
+        await user.should_see("hello — exec", retries=20)
+
+        await user.should_see("exec hello /bin/sh")
+        await user.should_not_see("spiriconfig-exec")
+
+    async def test_the_exec_dialog_will_run_more_than_a_shell(
+        self, user: User, settings: DockerSettings, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """It is `docker compose exec`, which runs anything the image has. A button
+        labelled "Shell" would be a smaller tool wearing a costume, so the command is
+        a box -- and the line rebuilds itself as you type in it."""
+        self._one_running_service(monkeypatch)
+        web.build([_DockerPage(settings)])
+        await user.open("/docker")
+        await user.should_see("hello")
+
+        user.find("Advanced").click()
+        user.find("Exec").click()
+        await user.should_see("hello — exec", retries=20)
+
+        user.find(ui.input).elements.pop().set_value("ls -la /etc")
+
+        await user.should_see("exec hello ls -la /etc")
+
+    async def test_attach_always_asks_which_container(
+        self, user: User, settings: DockerSettings, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Even with one service to choose from. A dropdown that appears or does not
+        depending on how many containers happen to be up is a UI you have to learn,
+        and the first thing anybody does is go looking for the menu that is not there.
+        """
+        self._one_running_service(monkeypatch)
+        web.build([_DockerPage(settings)])
+        await user.open("/docker")
+        await user.should_see("hello")
+
+        user.find("Advanced").click()
+        user.find("Attach").click()
+
+        await user.should_see("hello — attach", retries=20)
+        assert user.find(ui.select).elements
+
+
+class FakeSession:
+    """A :class:`PtySession` that records what was done to it instead of forking.
+
+    The same stand-in the terminal page's tests use, and for the same reason: what
+    is being tested here is the *dialog*, and it should not need a container.
+    """
+
+    def __init__(self, command: Command, **kwargs: object) -> None:
+        self.command = command
+        self.started = False
+        self.closed = False
+        self._ended = asyncio.Event()
+
+    async def start(self) -> None:
+        self.started = True
+
+    async def output(self):
+        await self._ended.wait()
+        return
+        yield  # pragma: no cover - makes this an async generator
+
+    def write(self, data: bytes | str) -> None:
+        pass
+
+    def resize(self, rows: int, columns: int) -> None:
+        pass
+
+    def close(self) -> None:
+        self.closed = True
+        self._ended.set()
+
+    async def wait(self) -> int:
+        return 0
+
+
+async def _eventually(condition, timeout: float = 5.0) -> None:
+    deadline = asyncio.get_running_loop().time() + timeout
+    while asyncio.get_running_loop().time() < deadline:
+        if condition():
+            return
+        await asyncio.sleep(0.02)
+    raise AssertionError(f"never became true within {timeout}s")
+
+
+class TestTheExecTerminalItself:
+    """Pressing Run. Nothing above this reached the terminal dialog at all.
+
+    Which is a gap worth naming: every test so far stopped at the picker, so the
+    part that actually spawns a process -- and the part that cleans up after docker
+    -- was covered by nothing. That is precisely the shape of the bug that once let
+    a whole feature ship broken while the suite was green.
+    """
+
+    @pytest.fixture
+    def spy(self, monkeypatch: pytest.MonkeyPatch) -> list[FakeSession]:
+        made: list[FakeSession] = []
+
+        def make(command: Command, **kwargs: object) -> FakeSession:
+            made.append(FakeSession(command, **kwargs))
+            return made[-1]
+
+        monkeypatch.setattr(docker_web, "PtySession", make)
+        monkeypatch.setattr(Stack, "running_services", lambda self: ["hello"])
+        return made
+
+    @pytest.fixture
+    def reaped(self, monkeypatch: pytest.MonkeyPatch) -> list[Command]:
+        """Every command the dialog runs *besides* the session -- i.e. the reaper."""
+        calls: list[Command] = []
+
+        def fake_run(command: Command, **kwargs: object) -> Result:
+            calls.append(command)
+            return Result(command, 0, "", "")
+
+        monkeypatch.setattr(docker_web, "run", fake_run)
+        return calls
+
+    async def _open_a_shell(self, user: User, settings: DockerSettings) -> None:
+        web.build([_DockerPage(settings)])
+        await user.open("/docker")
+        await user.should_see("hello")
+
+        user.find("Advanced").click()
+        user.find("Exec").click()
+        await user.should_see("hello — exec", retries=20)
+        user.find(marker="exec-run").click()
+
+    async def test_it_runs_the_supervised_exec_but_shows_the_plain_one(
+        self,
+        user: User,
+        settings: DockerSettings,
+        spy: list[FakeSession],
+        reaped: list[Command],
+    ) -> None:
+        """The whole trick, asserted from both ends at once."""
+        await self._open_a_shell(user, settings)
+        await _eventually(lambda: bool(spy) and spy[0].started)
+
+        # What we RUN carries the babysitter, because docker will not clean up.
+        assert "spiriconfig-exec" in str(spy[0].command)
+        assert 'exec "$@"' in str(spy[0].command)
+
+        # What we SHOW is the line a person could have typed.
+        await user.should_see("exec hello /bin/sh")
+        await user.should_not_see("spiriconfig-exec")
+
+    async def test_closing_the_dialog_hangs_up_and_reaps_the_container(
+        self,
+        user: User,
+        settings: DockerSettings,
+        spy: list[FakeSession],
+        reaped: list[Command],
+    ) -> None:
+        """Two kills, not one. Hanging up our end is what a terminal does; killing
+        the process docker left inside the container is what docker will not do."""
+        await self._open_a_shell(user, settings)
+        await _eventually(lambda: bool(spy) and spy[0].started)
+
+        user.find("Close").click()
+
+        await _eventually(lambda: spy[0].closed)
+        await _eventually(lambda: any("kill -HUP" in str(c) for c in reaped))
+
+    async def test_a_closed_browser_tab_reaps_too(
+        self,
+        user: User,
+        settings: DockerSettings,
+        spy: list[FakeSession],
+        reaped: list[Command],
+    ) -> None:
+        """The ending nobody announces. A dialog that only cleaned up on its Close
+        button would leak a shell into the container for every dropped wifi and
+        every closed laptop lid -- which is the common way a web terminal ends."""
+        web.build([_DockerPage(settings)])
+        client = await user.open("/docker")
+        await user.should_see("hello")
+
+        user.find("Advanced").click()
+        user.find("Exec").click()
+        await user.should_see("hello — exec", retries=20)
+        user.find(marker="exec-run").click()
+        await _eventually(lambda: bool(spy) and spy[0].started)
+
+        # Awaiting what comes back, because one of these handlers is a coroutine and
+        # calling it is not the same as running it. NiceGUI's own dispatcher hands an
+        # awaitable result to a background task; a test that only *called* them would
+        # be asserting that the reaper was constructed, not that it ran.
+        for handler in client.disconnect_handlers:
+            if inspect.isawaitable(result := handler()):
+                await result
+
+        await _eventually(lambda: spy[0].closed)
+        await _eventually(lambda: any("kill -HUP" in str(c) for c in reaped))
+
+    async def test_attach_needs_no_babysitter(
+        self,
+        user: User,
+        settings: DockerSettings,
+        spy: list[FakeSession],
+        reaped: list[Command],
+    ) -> None:
+        """It starts no new process, so it orphans none. Wrapping it would be
+        cargo-culting the workaround onto a command that does not need it."""
+        web.build([_DockerPage(settings)])
+        await user.open("/docker")
+        await user.should_see("hello")
+
+        user.find("Advanced").click()
+        user.find("Attach").click()
+        await user.should_see("hello — attach", retries=20)
+        user.find(marker="pick-open").click()
+
+        await _eventually(lambda: bool(spy) and spy[0].started)
+
+        assert "spiriconfig-exec" not in str(spy[0].command)
+        assert str(spy[0].command).endswith("attach hello")
+
+        user.find("Close").click()
+        await _eventually(lambda: spy[0].closed)
+        assert not [c for c in reaped if "kill -HUP" in str(c)]
 
 
 class TestTheEditorFollowsTheOperatingSystem:
