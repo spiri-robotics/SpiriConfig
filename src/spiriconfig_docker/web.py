@@ -24,6 +24,13 @@ from spiriconfig_docker.stacks import Stack, StackError, discover
 
 log = logger.bind(plugin="docker")
 
+#: What CodeMirror should make of a ``.env``. There is no ``.env`` mode, and this is
+#: the one it already has for ``KEY=value`` with ``#`` comments -- which is exactly
+#: what the file is. Shell is the tempting alternative and the wrong one: a ``.env``
+#: is not shell, it runs nothing, and highlighting it as though it did would be the
+#: editor telling a lie about the file it is editing.
+_ENV_LANGUAGE = "Properties files"
+
 #: Status word -> Quasar colour, for the badge on each stack.
 STATUS_COLOURS = {
     "running": "positive",
@@ -153,46 +160,84 @@ async def _settings_dialog(stack: Stack) -> str | None:
         ui.notify(str(exc), type="negative", multi_line=True, timeout=0)
         return None
 
+    # Asked for before the dialog is built, like _edit_dialog does, and for the same
+    # reason: it is a round trip, and it does not belong in the slot the elements are
+    # being created in.
+    editor_theme = await theme.codemirror_theme()
+
     with ui.dialog() as dialog, ui.card().classes("w-full max-w-2xl"):
         ui.label(f"{stack.name} — settings").classes("text-lg font-bold")
 
         with ui.column().classes("w-full gap-4"):
             bound = widgets.form(config.fields, current)
 
-        # Advanced only: the file, and the bytes we are about to put in it. The
-        # settings page is a nicer way to edit a .env, and a developer should be
-        # able to see through it to the file at any point -- including before the
-        # write, which is the moment the preview is actually worth anything.
+        # Advanced only: the file itself, editable. The settings page is a nicer way
+        # to edit a .env, and the form is the app author's idea of which knobs there
+        # are -- which is a fine default and a poor cage. A developer wanting a
+        # variable the author never declared, or a comment, or a key the form does
+        # not know about, should not have to leave the page to get one.
+        #
+        # What it shows is not the file on disk but the bytes we would write *right
+        # now*, form answers included. A preview is only worth anything before the
+        # write, and an editor seeded with anything else would silently undo whatever
+        # the user had just typed into the form above.
         with advanced.only(), ui.expansion(
             f"{config.env_file}", icon="description"
         ).classes(f"w-full {theme.COMMAND_CLASS}") as expansion:
-            preview = ui.label().classes(
-                "font-mono text-xs whitespace-pre-wrap break-all"
-            )
+            editor = ui.codemirror(
+                "", language=_ENV_LANGUAGE, theme=editor_theme
+            ).classes("w-full h-64")
+            ui.label(
+                "The bytes that will be written. Edit them and yours are written "
+                "instead, exactly as typed — the form above stops being consulted."
+            ).classes("text-xs text-gray-500")
+            problem = ui.label().classes("text-xs text-warning")
 
-            def show_preview() -> None:
-                """Render the .env as it would be written, with today's answers in it.
+            # The text we last put in the editor. Anything else in it is the user's,
+            # and is what gets saved. Comparing against this is the whole of "has this
+            # been hand-edited?" -- no dirty flag, no change handler, and no way for
+            # the two to disagree.
+            seeded = ""
 
-                Recomputed when the panel is opened rather than bound to the
-                widgets: a settings form is a handful of boxes, and re-rendering
-                the whole file on every keystroke of a password field buys nothing
-                anyone can see.
+            def show_file() -> None:
+                """Fill the editor with the .env as it would be written.
+
+                Done when the panel is opened rather than on every keystroke: a
+                settings form is a handful of boxes, and re-rendering the file as a
+                password is typed buys nothing anyone can see.
+
+                Hand edits are never overwritten. A user who typed in here and then
+                collapsed the panel by accident would not thank us for tidying their
+                work away when they opened it again.
                 """
-                if not expansion.value:
+                nonlocal seeded
+                if not expansion.value or editor.value != seeded:
                     return
                 try:
-                    preview.set_text(config.preview(widgets.values(bound)))
+                    seeded = config.preview(widgets.values(bound))
+                    problem.set_text("")
                 except SettingsError as exc:
-                    preview.set_text(f"# cannot preview: {exc}")
+                    # The form has an answer we would refuse to write, so there are no
+                    # bytes to show for it. The file as it stands is still worth
+                    # showing -- and is still worth editing, which is how someone digs
+                    # themselves out of a form they cannot satisfy.
+                    seeded = config.read()
+                    problem.set_text(f"Showing the file as it is on disk: {exc}")
+                editor.set_value(seeded)
 
-            expansion.on_value_change(show_preview)
+            expansion.on_value_change(show_file)
 
         async def save(apply: bool) -> None:
-            # Validation and the write both live in StackSettings.save, which puts
+            # Two doors into one file, and the user's own bytes win. Both writes put
             # the old .env back if docker compose will not read the new one -- so a
-            # bad save cannot leave a stack that will not start.
+            # bad save cannot leave a stack that will not start, whichever way it was
+            # made.
+            edited = editor.value != seeded
             try:
-                await asyncio.to_thread(config.save, widgets.values(bound))
+                if edited:
+                    await asyncio.to_thread(config.write, editor.value)
+                else:
+                    await asyncio.to_thread(config.save, widgets.values(bound))
             except (SettingsError, OSError) as exc:
                 ui.notify(str(exc), type="negative", multi_line=True, timeout=0)
                 return

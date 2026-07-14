@@ -412,18 +412,44 @@ class StackSettings:
         current = env.read(self.env_file)
         return {f.env: current.get(f.env, f.default) for f in self.fields}
 
+    def read(self) -> str:
+        """The ``.env``'s text, or ``""`` if the app has not got one yet.
+
+        A missing ``.env`` is the ordinary state of an app nobody has configured,
+        not an error -- and an empty buffer is the honest thing to show for one.
+        """
+        return self._original() or ""
+
     def preview(self, values: dict[str, str]) -> str:
         """The exact text :meth:`save` would write. Shown in the UI before it does.
 
         The same instinct as showing the command line before running it: a settings
         page that edits a file should be willing to say which bytes it is about to
-        put in it.
+        put in it. *Exact* is meant literally -- the advanced editor is filled with
+        this text and will write back whatever it then holds, so a preview that
+        differed from the write by so much as a header would be a preview that lied
+        the moment somebody edited it.
+        """
+        return self._rendered(self._checked(values))
+
+    def _original(self) -> str | None:
+        """The ``.env`` as it stands, or None if there is not one.
+
+        None and ``""`` are kept apart on purpose: they are different files to put
+        back if a save is rejected, and only one of them wants a header.
         """
         try:
-            original = self.env_file.read_text()
+            return self.env_file.read_text()
         except FileNotFoundError:
-            original = ""
-        return env.patch(original, self._checked(values))
+            return None
+
+    def _rendered(self, checked: dict[str, str]) -> str:
+        """The file, with ``checked`` patched into it. What a form save writes."""
+        original = self._original()
+        text = env.patch(original or "", checked)
+        if original is None and text:
+            text = _HEADER + text
+        return text
 
     def _checked(self, values: dict[str, str]) -> dict[str, str]:
         """Validate ``values`` against the schema, and drop anything undeclared.
@@ -458,27 +484,32 @@ class StackSettings:
     def save(self, values: dict[str, str]) -> None:
         """Write the values to the ``.env``, refusing to leave a broken one behind.
 
-        The same bargain :meth:`spiriconfig_docker.stacks.Stack.write` makes for the
-        compose file, and for the same reason: compose has to be able to read this
-        file, and a ``.env`` it rejects makes the stack unstartable -- including by
-        hand, from a shell, which is the escape hatch that must never close.
-
-        So the new file is written, ``docker compose config`` is asked whether it
-        can still read the project, and the original is put back if it says no. A
-        rejected save leaves the previous, working file exactly as it was.
+        The keys the form declares are patched into the file; everything else in it
+        -- the user's comments, their own variables, the order they chose -- comes
+        through untouched. See :func:`spiriconfig_docker.env.patch`.
         """
-        checked = self._checked(values)
+        self.write(self._rendered(self._checked(values)))
 
-        try:
-            original: str | None = self.env_file.read_text()
-        except FileNotFoundError:
-            original = None
+    def write(self, text: str) -> None:
+        """Write ``text`` to the ``.env`` as given, refusing to leave a broken one.
 
-        updated = env.patch(original or "", checked)
-        if original is None and updated:
-            updated = _HEADER + updated
+        The other door into the same file, for the advanced editor: bytes in, bytes
+        on disk. No patching, no header, no schema -- a file somebody edited by hand
+        is a file they own, and the form's opinion about which keys exist is not one
+        it gets to impose on a text editor. What they typed is what compose will
+        read, which is the entire reason to offer a text editor at all.
 
-        self.env_file.write_text(updated)
+        The check is the same bargain :meth:`spiriconfig_docker.stacks.Stack.write`
+        makes for the compose file, and for the same reason: compose has to be able
+        to read this file, and a ``.env`` it rejects makes the stack unstartable --
+        including by hand, from a shell, which is the escape hatch that must never
+        close. So the new file goes down, ``docker compose config`` is asked whether
+        it can still read the project, and the original is put back if it says no.
+        A rejected save leaves the previous, working file exactly as it was.
+        """
+        original = self._original()
+
+        self.env_file.write_text(text)
 
         try:
             result = run(

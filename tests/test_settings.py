@@ -547,6 +547,108 @@ class TestSaving:
         assert not stack_settings.env_file.exists()
 
 
+class TestReadingAndPreviewingTheFile:
+    """What the advanced editor is filled with. No docker needed for either -- these
+    are the two questions asked before anything is written."""
+
+    def test_reading_an_app_nobody_has_configured_gives_an_empty_buffer(
+        self, configurable: Stack
+    ) -> None:
+        assert settings.for_stack(configurable).read() == ""
+
+    def test_reading_gives_the_file_byte_for_byte(self, configurable: Stack) -> None:
+        stack_settings = settings.for_stack(configurable)
+        stack_settings.env_file.write_text("# mine\nMINE=keep\n")
+        assert stack_settings.read() == "# mine\nMINE=keep\n"
+
+    def test_the_preview_is_what_would_actually_be_written(
+        self, configurable: Stack
+    ) -> None:
+        """Including the header on a file that does not exist yet. The editor is
+        seeded with the preview and writes back whatever it then holds, so a preview
+        that differed from the write by so much as a header would be a preview that
+        lied the moment somebody edited it."""
+        stack_settings = settings.for_stack(configurable)
+        preview = stack_settings.preview({"GREETING": "hi"})
+
+        assert "editable by hand" in preview
+        assert "GREETING=hi" in preview
+
+
+@docker_required
+class TestWritingTheFileDirectly:
+    """`write` is the advanced editor's door into the same file: bytes in, bytes on
+    disk, checked by the same `docker compose config` a form save is checked by.
+
+    The form's schema does not apply -- that is the feature. A hand-edited file is
+    the user's, and the app author's idea of which knobs exist is a default, not a
+    cage.
+    """
+
+    def test_the_bytes_go_down_as_they_were_typed(self, configurable: Stack) -> None:
+        stack_settings = settings.for_stack(configurable)
+        text = "# hand written\nGREETING=typed\nPORT=9001\n"
+
+        stack_settings.write(text)
+
+        assert stack_settings.env_file.read_text() == text
+
+    def test_a_variable_the_form_never_declared_is_written_anyway(
+        self, configurable: Stack
+    ) -> None:
+        """The reason to offer a text editor at all: wanting a variable the app
+        author did not think to declare is not a mistake to be corrected."""
+        stack_settings = settings.for_stack(configurable)
+        stack_settings.write("UNDECLARED=mine\n")
+
+        assert env.read(stack_settings.env_file)["UNDECLARED"] == "mine"
+
+    def test_the_schema_is_not_enforced_over_a_hand_edited_file(
+        self, configurable: Stack
+    ) -> None:
+        """`SECRET` is `required:` in the form, and emptying it through the form is
+        refused. Deleting the line from the file is not the form, and compose is
+        perfectly happy with it -- so it is allowed, and the app falls back to the
+        `:-` default it was written with."""
+        stack_settings = settings.for_stack(configurable)
+        stack_settings.write("GREETING=alone\n")
+
+        assert "SECRET" not in stack_settings.env_file.read_text()
+
+    def test_no_header_is_added_to_a_file_the_user_typed(
+        self, configurable: Stack
+    ) -> None:
+        stack_settings = settings.for_stack(configurable)
+        stack_settings.write("GREETING=typed\n")
+
+        assert "editable by hand" not in stack_settings.env_file.read_text()
+
+    def test_a_rejected_file_is_put_back_exactly_as_it_was(
+        self, configurable: Stack
+    ) -> None:
+        """The same guarantee a form save makes, because it is the same guarantee:
+        an editor that could leave an unstartable app behind would be a worse tool
+        than the vim it is standing in for."""
+        stack_settings = settings.for_stack(configurable)
+        stack_settings.env_file.write_text("PORT=9000\n")
+
+        with pytest.raises(SettingsError, match="rejected"):
+            stack_settings.write("PORT=abc\n")
+
+        assert stack_settings.env_file.read_text() == "PORT=9000\n"
+
+    def test_a_rejected_first_write_leaves_no_env_file_behind(
+        self, configurable: Stack
+    ) -> None:
+        stack_settings = settings.for_stack(configurable)
+        assert not stack_settings.env_file.exists()
+
+        with pytest.raises(SettingsError, match="rejected"):
+            stack_settings.write("PORT=abc\n")
+
+        assert not stack_settings.env_file.exists()
+
+
 class TestTheWidgetRegistry:
     def test_every_declarable_widget_can_actually_be_built(self) -> None:
         """The schema validates `widget:` against one list and the page builds it

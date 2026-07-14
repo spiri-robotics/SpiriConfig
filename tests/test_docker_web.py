@@ -170,6 +170,17 @@ class TestTheEditorFollowsTheOperatingSystem:
         assert editor.props["theme"] == theme.CODEMIRROR_LIGHT
 
 
+def _a_browser_that_answers(user: User) -> None:
+    """Answer the question the settings dialog asks before it renders.
+
+    It carries an editor now, and an editor has to be told whether the page is dark
+    (see `theme.codemirror_theme`). A real browser replies in a millisecond; a test
+    user replies never, and the dialog waits out the round trip's own timeout before
+    giving up -- which is a second of nothing, in every test that opens the form.
+    """
+    user.javascript_rules[re.compile(r".*prefers-color-scheme.*")] = lambda _: False
+
+
 class TestTheSettingsForm:
     """The form generated from an app's `x-spiri-settings`.
 
@@ -179,6 +190,7 @@ class TestTheSettingsForm:
     """
 
     async def _open(self, user: User, settings: DockerSettings) -> None:
+        _a_browser_that_answers(user)
         web.build([_DockerPage(settings)])
         await user.open("/docker")
         await user.should_see("configurable")
@@ -243,6 +255,134 @@ class TestTheSettingsForm:
 
         user.find("Advanced").click()
         await user.should_see(str(configurable.path / ".env"))
+
+
+class TestEditingTheEnvFileFromTheSettingsWindow:
+    """Advanced mode turns the .env preview into an editor.
+
+    The form is the app author's idea of which knobs exist, which is a good default
+    and a poor cage: a developer who wants a variable the author never declared, or
+    a comment, or a key the form does not know about, should not have to leave the
+    page to get one. So the panel that showed them the file now lets them type in
+    it, and what they type is what is written.
+    """
+
+    async def _open(self, user: User, settings: DockerSettings) -> Element:
+        """Open the settings form, turn on advanced mode, and expand the file."""
+        _a_browser_that_answers(user)
+        web.build([_DockerPage(settings)])
+        await user.open("/docker")
+        await user.should_see("configurable")
+
+        user.find("Advanced").click()
+        user.find("Settings").click()
+        await user.should_see("configurable — settings", retries=20)
+
+        # Expanded by setting the value rather than by clicking: an expansion panel
+        # opens itself in the browser, and the click that does it never reaches the
+        # server. Assigning the value is the same event from the page's point of
+        # view, and it is what fills the editor -- the file is rendered when the
+        # panel opens, not on every keystroke of the form above it.
+        user.find(ui.expansion).elements.pop().value = True
+        return user.find(ui.codemirror).elements.pop()
+
+    async def test_the_editor_is_filled_with_the_bytes_that_would_be_written(
+        self, user: User, settings: DockerSettings, configurable: Stack
+    ) -> None:
+        """Not the file on disk -- the file *as it would be saved*, form answers
+        included. A preview is only worth anything before the write."""
+        editor = await self._open(user, settings)
+
+        assert "GREETING=hello" in editor.value
+        assert "PORT=8080" in editor.value
+
+    async def test_it_shows_what_the_user_already_had_in_the_file(
+        self, user: User, settings: DockerSettings, configurable: Stack
+    ) -> None:
+        (configurable.path / ".env").write_text("# mine\nMINE=keep\nGREETING=old\n")
+
+        editor = await self._open(user, settings)
+
+        assert "# mine" in editor.value
+        assert "MINE=keep" in editor.value
+
+    async def test_reopening_the_panel_does_not_tidy_away_a_hand_edit(
+        self, user: User, settings: DockerSettings, configurable: Stack
+    ) -> None:
+        """Someone who typed in here and then collapsed the panel by accident would
+        not thank us for rendering their work away when they opened it again."""
+        editor = await self._open(user, settings)
+        editor.set_value("GREETING=mine\n")
+
+        expansion = user.find(ui.expansion).elements.pop()
+        expansion.value = False
+        expansion.value = True
+
+        assert editor.value == "GREETING=mine\n"
+
+    @docker_required
+    async def test_what_the_user_types_is_what_is_written(
+        self, user: User, settings: DockerSettings, configurable: Stack
+    ) -> None:
+        """The whole feature: bytes in the editor, bytes on disk. Including a
+        variable the app never declared, which is the reason to have an editor."""
+        editor = await self._open(user, settings)
+        editor.set_value("# typed by hand\nGREETING=typed\nUNDECLARED=mine\n")
+
+        user.find("Save").click()
+        await user.should_see("Saved", retries=10)
+
+        written = (configurable.path / ".env").read_text()
+        assert written == "# typed by hand\nGREETING=typed\nUNDECLARED=mine\n"
+
+    @docker_required
+    async def test_a_hand_edit_wins_over_the_form_above_it(
+        self, user: User, settings: DockerSettings, configurable: Stack
+    ) -> None:
+        """Two doors into one file, and they can disagree. The bytes the user typed
+        are the ones they last looked at, so they are the ones that get written --
+        and the alternative, patching the form's answers over them, would silently
+        undo an edit they had made on purpose."""
+        editor = await self._open(user, settings)
+        editor.set_value("GREETING=from-the-editor\n")
+
+        user.find("Save").click()
+        await user.should_see("Saved", retries=10)
+
+        assert env.read(configurable.path / ".env") == {"GREETING": "from-the-editor"}
+
+    @docker_required
+    async def test_an_untouched_editor_leaves_the_form_in_charge(
+        self, user: User, settings: DockerSettings, configurable: Stack
+    ) -> None:
+        """Opening the panel to look at the file is not editing it. Someone who
+        peers at the preview and then changes a box in the form must get what the
+        form says, not a stale copy of the text they were shown."""
+        editor = await self._open(user, settings)
+        assert "GREETING=hello" in editor.value
+
+        user.find(marker="setting-GREETING").clear().type("good morning")
+        user.find("Save").click()
+        await user.should_see("Saved", retries=10)
+
+        assert env.read(configurable.path / ".env")["GREETING"] == "good morning"
+
+    @docker_required
+    async def test_a_rejected_edit_says_so_and_changes_nothing(
+        self, user: User, settings: DockerSettings, configurable: Stack
+    ) -> None:
+        """An editor that could leave an unstartable app behind would be a worse
+        tool than the vim it stands in for. `PORT` lands in a `ports:` mapping, so
+        `abc` is a file compose will refuse."""
+        (configurable.path / ".env").write_text("PORT=9000\n")
+
+        editor = await self._open(user, settings)
+        editor.set_value("PORT=abc\n")
+
+        user.find("Save").click()
+        await user.should_see("rejected", retries=10)
+
+        assert (configurable.path / ".env").read_text() == "PORT=9000\n"
 
     @docker_required
     async def test_saving_writes_the_env_file(

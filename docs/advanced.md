@@ -64,11 +64,14 @@ from merely looking safe.
 | Feature | Why |
 | --- | --- |
 | Editing a compose file | The most dangerous thing on the page. Still available from a shell: `$EDITOR "$(spiriconfig docker config whoami)"`. |
+| Editing an app's `.env` | The settings form is the app author's list of knobs, which is a good default and a poor cage. The panel under the form shows the exact bytes about to be written, and lets you type in them -- variables the author never declared, comments, anything. Still available from a shell: `$EDITOR "$(spiriconfig docker env whoami)"`. |
 | The raw command display | The `cd … && docker compose …` line and its copy button, in every action dialog. Developers want it; for everyone else it is noise. |
 
-Note what is *not* hidden: logs. A regular user is exactly the person who needs to
-see why a service failed, and the output of a command is not the same thing as the
-invocation that produced it.
+Note what is *not* hidden: logs, and the settings form itself. A regular user is
+exactly the person who needs to see why a service failed, and the output of a
+command is not the same thing as the invocation that produced it. And an app
+author decided which knobs are safe to turn, so turning one is an ordinary act --
+what is advanced is the file they land in.
 
 ## Setting the default
 
