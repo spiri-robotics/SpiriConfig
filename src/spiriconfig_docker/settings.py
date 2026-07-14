@@ -22,6 +22,13 @@ edit it::
         label: Admin password
         required: true
 
+      - env: GRAFANA_LOG_LEVEL
+        widget: select
+        label: Log level
+        options: [debug, info, warn, error]
+        default: info
+        advanced: true
+
     services:
       grafana:
         image: grafana/grafana:11.1.0
@@ -48,6 +55,16 @@ The alternative -- declaring an abstract type and having us guess a widget from 
 -- means an app author who wants a dropdown instead of a text box has to discover
 which incantation of ``type:`` and ``enum:`` we happen to map to one. Naming the
 widget is shorter, and it is honest about what it will do.
+
+``advanced: true`` is the app author's way of saying *this knob is for a developer*
+-- a log level, a debug flag, a tuning parameter nobody should have to read past on
+their way to the port number. The field is then only rendered in advanced mode (see
+:mod:`spiriconfig.advanced`), which makes a long form short for the person who did
+not want it long. It hides the *widget*, and nothing else: the variable is still
+read from the ``.env``, still written back on save, and the CLI still lists and sets
+it. An app author choosing to declutter a form is not choosing who may configure
+their app, and if this ever grew teeth it would be a permission system built out of
+somebody's UI preference.
 
 The form does not have to live in the compose file. It can sit in a sidecar --
 ``spiri-settings.yaml``, beside it -- and then the compose file needs no
@@ -156,6 +173,15 @@ class Field:
     pattern: str = ""
     """A regular expression the value must match. Checked in the form, and on save."""
 
+    advanced: bool = False
+    """Show this field only in advanced mode. Clutter, not secrecy.
+
+    A hidden field is still filled in from the ``.env``, still written back when the
+    form is saved, and still ``spiriconfig docker settings``'s business. See the
+    module docstring, and :mod:`spiriconfig.advanced`, which says the same thing
+    about every other advanced-only element on the page.
+    """
+
     @property
     def title(self) -> str:
         """The label to render: what the author wrote, or a readable fallback.
@@ -226,6 +252,7 @@ def _field_from(raw: Any, index: int, source: str = SETTINGS_KEY) -> Field:
         step=raw.get("step"),
         required=bool(raw.get("required", False)),
         pattern=str(raw.get("pattern", "")),
+        advanced=bool(raw.get("advanced", False)),
     )
 
 

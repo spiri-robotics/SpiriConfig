@@ -26,18 +26,30 @@ x-spiri-settings:
     default: admin
     required: true
 
+  - env: GRAFANA_ANONYMOUS
+    widget: switch
+    label: Allow anonymous viewing
+    help: Let anyone who can reach the port read the dashboards without logging in.
+    default: "false"
+
+  # `advanced: true` keeps a field off the form until the Advanced switch is on.
+  # Which knobs are worth a normal person's attention is a judgement only the app
+  # author can make, and it is the difference between a form with three questions on
+  # it and a form with eleven. A log level is the type case: nobody turning grafana
+  # on for the first time needs to be asked one, and the person debugging it at 2am
+  # very much does.
+  #
+  # It hides the widget and nothing else. The variable is still read from the .env,
+  # still written back when the form is saved, and `spiriconfig docker settings
+  # grafana` still lists and sets it -- decluttering a page is not deciding who may
+  # configure the app.
   - env: GRAFANA_LOG_LEVEL
     widget: select
     label: Log level
     help: How much grafana writes to `docker compose logs`.
     options: [debug, info, warn, error]
     default: info
-
-  - env: GRAFANA_ANONYMOUS
-    widget: switch
-    label: Allow anonymous viewing
-    help: Let anyone who can reach the port read the dashboards without logging in.
-    default: "false"
+    advanced: true
 
 services:
   grafana:

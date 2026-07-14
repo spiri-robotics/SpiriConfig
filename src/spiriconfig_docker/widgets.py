@@ -33,6 +33,8 @@ from typing import Any
 
 from nicegui import ui
 
+from spiriconfig import advanced
+
 from spiriconfig_docker.settings import Field
 
 #: Text a ``.env`` might hold for a boolean widget. Anything else is false.
@@ -253,9 +255,20 @@ class Bound:
 
 
 def render(field: Field, value: str) -> Bound:
-    """Render one field, showing ``value``, and return a handle on it."""
+    """Render one field, showing ``value``, and return a handle on it.
+
+    An ``advanced:`` field is rendered like any other and then marked, so that the
+    switch shows and hides it live -- and, crucially, so that it is *built* either
+    way. The element exists whatever the switch says; :func:`values` reads it back
+    whatever the switch says. Hiding a widget must not drop the variable out of the
+    ``.env``, which is what skipping the build would quietly do to anyone who saved
+    a form with advanced mode off.
+
+    The whole column is marked rather than the widget alone. A field is a widget
+    *and* its help text, and half a field left on the page would be worse than none.
+    """
     widget = REGISTRY[field.widget]
-    with ui.column().classes("w-full gap-1"):
+    with ui.column().classes("w-full gap-1") as column:
         element = widget.build(field, widget.parse(value, field))
         element.classes("w-full")
         # Named after the variable it sets, which is the only name it is guaranteed
@@ -264,6 +277,8 @@ def render(field: Field, value: str) -> Bound:
         element.mark(f"{MARKER_PREFIX}{field.env}")
         if field.help:
             ui.label(field.help).classes("text-xs text-gray-500")
+    if field.advanced:
+        advanced.mark(column)
     return Bound(field=field, element=element, widget=widget)
 
 

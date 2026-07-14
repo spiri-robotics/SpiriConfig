@@ -261,6 +261,27 @@ class TestDeclaring:
         )
         assert fields[0].default == "true"
 
+    def test_a_field_is_ordinary_unless_it_says_otherwise(
+        self, tmp_path: Path
+    ) -> None:
+        """The default has to be "everyone sees this". An app author who has never
+        heard of advanced mode should not be able to hide a field by accident."""
+        fields = self._fields(
+            tmp_path,
+            "x-spiri-settings:\n  - env: PORT\nservices:\n  a:\n    image: alpine\n",
+        )
+        assert fields[0].advanced is False
+
+    def test_a_field_can_declare_itself_advanced(self, tmp_path: Path) -> None:
+        fields = self._fields(
+            tmp_path,
+            "x-spiri-settings:\n"
+            "  - env: LOG_LEVEL\n"
+            "    advanced: true\n"
+            "services:\n  a:\n    image: alpine\n",
+        )
+        assert fields[0].advanced is True
+
     def test_a_missing_label_falls_back_to_something_readable(
         self, tmp_path: Path
     ) -> None:

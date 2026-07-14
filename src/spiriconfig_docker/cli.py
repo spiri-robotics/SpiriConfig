@@ -300,6 +300,12 @@ def _list_settings(stack_settings: StackSettings, *, show_secrets: bool) -> None
     The provenance column is the useful one: "this is the app's default" and "this
     is what you set last week" look identical in a value column, and only one of
     them changes when the app is updated.
+
+    Every field, including the ones the web form marks ``advanced:`` and hides. That
+    is not an oversight: ``advanced:`` is an app author decluttering a *form*, and a
+    CLI that took a UI hint as an instruction to withhold a setting would be hiding
+    it from the one person who went looking. The note says which they are, so that
+    "why can I not see this on the page?" has an answer here.
     """
     current = stack_settings.values()
     in_file = set(read_env(stack_settings.env_file))
@@ -309,7 +315,12 @@ def _list_settings(stack_settings: StackSettings, *, show_secrets: bool) -> None
         value = current[field.env]
         if field.widget == "password" and value and not show_secrets:
             value = MASK
-        origin = "" if field.env in in_file else "  (default)"
+        notes = []
+        if field.env not in in_file:
+            notes.append("default")
+        if field.advanced:
+            notes.append("advanced")
+        origin = f"  ({', '.join(notes)})" if notes else ""
         typer.echo(f"{field.env:<{width}}  {value or '(unset)'}{origin}")
 
     typer.echo(f"\n{stack_settings.env_file}")

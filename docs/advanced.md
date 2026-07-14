@@ -66,12 +66,48 @@ from merely looking safe.
 | Editing a compose file | The most dangerous thing on the page. Still available from a shell: `$EDITOR "$(spiriconfig docker config whoami)"`. |
 | Editing an app's `.env` | The settings form is the app author's list of knobs, which is a good default and a poor cage. The panel under the form shows the exact bytes about to be written, and lets you type in them -- variables the author never declared, comments, anything. Still available from a shell: `$EDITOR "$(spiriconfig docker env whoami)"`. |
 | The raw command display | The `cd … && docker compose …` line and its copy button, in every action dialog. Developers want it; for everyone else it is noise. |
+| Settings fields marked `advanced:` | The app author's own judgement about which of *their* knobs a developer wants: log levels, debug flags, tuning. A form asking eleven questions when three of them are the ones anybody came for is a form people learn to click past. See below. |
 
 Note what is *not* hidden: logs, and the settings form itself. A regular user is
 exactly the person who needs to see why a service failed, and the output of a
 command is not the same thing as the invocation that produced it. And an app
 author decided which knobs are safe to turn, so turning one is an ordinary act --
 what is advanced is the file they land in.
+
+## An app can mark its own settings advanced
+
+The only entry in that table an app author writes themselves. A field in
+`x-spiri-settings` with `advanced: true` on it is rendered only in advanced mode:
+
+```yaml
+x-spiri-settings:
+  - env: GRAFANA_PORT          # everyone is asked this
+    widget: number
+    label: HTTP port
+
+  - env: GRAFANA_LOG_LEVEL     # only a developer is
+    widget: select
+    label: Log level
+    options: [debug, info, warn, error]
+    default: info
+    advanced: true
+```
+
+It hides the *widget*, and nothing else. The variable is still read from the `.env`,
+still written back when the form is saved -- a value you cannot currently see is not
+a value we will quietly drop -- and the CLI lists and sets it whatever the switch
+says:
+
+```console
+$ spiriconfig docker settings grafana
+GRAFANA_PORT       3000  (default)
+GRAFANA_LOG_LEVEL  info  (default, advanced)
+```
+
+Which is the same bargain as the rest of this page. `advanced:` is an app author
+tidying a form, not one deciding who is allowed to configure their app; if it ever
+became the latter, it would be a permission system built out of somebody's opinion
+about clutter.
 
 ## Setting the default
 

@@ -551,6 +551,87 @@ class TestTheSettingsForm:
         await user.should_see(str(configurable.path / ".env"))
 
 
+class TestAnAppCanMarkItsOwnSettingsAdvanced:
+    """`advanced: true` on a field in `x-spiri-settings`.
+
+    `configurable` declares five ordinary fields and one advanced one, `PROFILING`.
+    The distinction is the app author's: which of *their* knobs is a developer's
+    business. It is about clutter, so it hides a widget and takes nothing away.
+    """
+
+    async def _open(self, user: User, settings: DockerSettings) -> None:
+        _a_browser_that_answers(user)
+        web.build([_DockerPage(settings)])
+        await user.open("/docker")
+        await user.should_see("configurable")
+        user.find("Settings").click()
+        await user.should_see("configurable — settings")
+
+    async def test_an_advanced_field_waits_for_the_switch(
+        self, user: User, settings: DockerSettings, configurable: Stack
+    ) -> None:
+        await self._open(user, settings)
+
+        # The ordinary fields are there for everybody, which is the point of hiding
+        # this one: a form of three questions instead of six.
+        await user.should_see("Greeting")
+        await user.should_not_see("Profiling endpoint")
+
+        user.find("Advanced").click()
+        await user.should_see("Profiling endpoint")
+
+    async def test_the_whole_field_is_marked_and_not_just_its_widget(
+        self, user: User, settings: DockerSettings, configurable: Stack
+    ) -> None:
+        """A field is a widget *and* the prose under it, so the column carries the
+        mark. Marking the widget alone would leave the help text behind: an
+        explanation, on the page, of a box that is not there.
+
+        The purple ring goes on with the binding, as it does for every other
+        advanced-only element -- one act, in `advanced.mark`, so a thing cannot be
+        advanced-only and fail to say so.
+
+        Asserted with the switch *on*, because `user.find` gathers only what is
+        visible: with it off there is nothing to find, which is the other half of the
+        claim and is what the test above checks."""
+        await self._open(user, settings)
+        user.find("Advanced").click()
+        await user.should_see("Profiling endpoint")
+
+        field = user.find(marker="setting-PROFILING").elements.pop().parent_slot.parent
+        assert theme.ADVANCED_CLASS in field.classes
+
+        # And an ordinary field is not wearing a developer's mark.
+        plain = user.find(marker="setting-GREETING").elements.pop().parent_slot.parent
+        assert theme.ADVANCED_CLASS not in plain.classes
+
+    @docker_required
+    async def test_a_hidden_field_is_still_saved(
+        self, user: User, settings: DockerSettings, configurable: Stack
+    ) -> None:
+        """The one that would hurt. Someone set `PROFILING` -- in the file, on the
+        CLI, in advanced mode last week -- and now a normal user opens the form with
+        the switch off and saves an unrelated change. The field they cannot see must
+        come back out of the form exactly as it went in.
+
+        Which is why an advanced field is built and then hidden, rather than not
+        built: a widget that never existed reads back as nothing, and `.env` is
+        patched from what the form says.
+        """
+        (configurable.path / ".env").write_text("PROFILING=true\n")
+
+        await self._open(user, settings)
+        await user.should_not_see("Profiling endpoint")
+
+        user.find(marker="setting-GREETING").clear().type("good morning")
+        user.find("Save").click()
+        await user.should_see("Saved")
+
+        written = env.read(configurable.path / ".env")
+        assert written["GREETING"] == "good morning"
+        assert written["PROFILING"] == "true"
+
+
 class TestEditingTheEnvFileFromTheSettingsWindow:
     """Advanced mode turns the .env preview into an editor.
 

@@ -74,6 +74,12 @@ x-spiri-settings:
     required: true
     default: hunter2
 
+  - env: PROFILING
+    widget: switch
+    label: Profiling endpoint
+    advanced: true
+    default: "false"
+
 services:
   app:
     image: alpine:latest
@@ -90,6 +96,7 @@ services:
       LEVEL: "${LEVEL:-info}"
       ANONYMOUS: "${ANONYMOUS:-false}"
       SECRET: "${SECRET:-}"
+      PROFILING: "${PROFILING:-false}"
 """
 
 

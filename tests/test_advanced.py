@@ -22,6 +22,9 @@ from nicegui.testing import User
 from spiriconfig import advanced, preferences, theme, web
 from spiriconfig.plugins import Plugin
 
+from spiriconfig_docker import settings as app_settings
+from spiriconfig_docker.stacks import Stack
+
 
 class Gated(Plugin):
     """A plugin with one plain feature and one advanced one."""
@@ -239,10 +242,38 @@ class TestItLooksLikeAdvanced:
 
 
 class TestItIsNotAPermissionSystem:
-    async def test_the_cli_is_complete_regardless_of_advanced_mode(self) -> None:
-        """The CLI never consults advanced mode. If this ever fails, someone has
-        started treating a display filter as an authorisation boundary."""
+    async def test_the_cli_never_consults_advanced_mode(self) -> None:
+        """If this fails, someone has started treating a display filter as an
+        authorisation boundary.
+
+        This used to assert the word "advanced" appeared nowhere in the CLI's source,
+        which was the same idea said less precisely -- and it stopped being true when
+        an app gained the ability to mark one of *its own settings* `advanced:`. The
+        CLI reads that flag, to print "(advanced)" beside the field and explain why
+        the web form is not showing it. Reading a schema flag in order to describe it
+        is not consulting the switch, and nothing about the CLI's behaviour turns on
+        it: see the test below, which is the guarantee this one only approximates.
+
+        So the check now names the thing it always meant. The CLI does not import the
+        advanced module and does not read the live state, because there is no answer
+        it could get from either that it would be entitled to act on: `advanced` is a
+        per-browser display preference, and the CLI has no browser.
+        """
         import spiriconfig_docker.cli as docker_cli
 
         source = __import__("inspect").getsource(docker_cli)
-        assert "advanced" not in source
+        assert "import advanced" not in source
+        assert "advanced.enabled" not in source
+        assert "advanced.state" not in source
+
+    async def test_the_cli_can_set_a_setting_the_web_form_hides(
+        self, configurable: Stack
+    ) -> None:
+        """The actual promise, and the reason the source-grep above is only a
+        tripwire: an `advanced:` field is fully configurable from the CLI, with no
+        mode to turn on first. Hiding a widget took nothing away."""
+        stack_settings = app_settings.for_stack(configurable)
+
+        hidden = app_settings.get(stack_settings, "PROFILING")
+        assert hidden.advanced is True
+        assert hidden.env in stack_settings.values()
