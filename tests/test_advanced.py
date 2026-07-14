@@ -19,7 +19,7 @@ import pytest
 from nicegui import ui
 from nicegui.testing import User
 
-from spiriconfig import advanced, preferences, web
+from spiriconfig import advanced, preferences, theme, web
 from spiriconfig.plugins import Plugin
 
 
@@ -32,8 +32,10 @@ class Gated(Plugin):
 
     def page(self) -> None:
         ui.label("everyone sees this")
+        ui.button("Ordinary")
         with advanced.only():
             ui.label("developers only")
+            ui.button("Developers Only")
 
 
 @pytest.fixture(autouse=True)
@@ -186,6 +188,54 @@ class TestTheStoreCanBeSwapped:
         # And toggling still works, even though the choice cannot be saved.
         user.find("Advanced").click()
         await user.should_see("developers only")
+
+
+class TestItLooksLikeAdvanced:
+    """Purple means advanced. The mark and the switch must agree, or the switch
+    stops being a legend for what it revealed."""
+
+    async def test_advanced_elements_carry_the_ring(
+        self, user: User, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.setenv("SPIRICONFIG_ADVANCED", "true")
+        web.build([Gated()])
+        await user.open("/gated")
+
+        marked = user.find("developers only").elements.pop()
+        assert theme.ADVANCED_CLASS in marked.classes
+
+        # And a feature everyone sees is not wearing a developer's mark.
+        plain = user.find("everyone sees this").elements.pop()
+        assert theme.ADVANCED_CLASS not in plain.classes
+
+    async def test_an_advanced_button_is_purple_rather_than_ringed(
+        self, user: User, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Quasar sets ``outline: 0`` on every ``.q-btn``, so the ring never paints
+        on a button, however carefully we write the rule. A button says it is
+        advanced with Quasar's own colour mechanism instead. This test is the only
+        thing standing between that and someone "simplifying" it back into a ring
+        nobody can see."""
+        monkeypatch.setenv("SPIRICONFIG_ADVANCED", "true")
+        web.build([Gated()])
+        await user.open("/gated")
+
+        advanced_button = user.find("Developers Only").elements.pop()
+        assert advanced_button.props["color"] == theme.ADVANCED
+
+        ordinary_button = user.find("Ordinary").elements.pop()
+        assert ordinary_button.props["color"] != theme.ADVANCED
+
+    async def test_the_toggle_wears_the_same_colour_it_marks_things_with(
+        self, user: User
+    ) -> None:
+        """Quasar paints the switch in this colour only while it is *on*, which is
+        the effect being asked for: purple once you have turned advanced mode on."""
+        web.build([Gated()])
+        await user.open("/gated")
+
+        switch = user.find(ui.switch).elements.pop()
+        assert switch.props["color"] == theme.ADVANCED
 
 
 class TestItIsNotAPermissionSystem:

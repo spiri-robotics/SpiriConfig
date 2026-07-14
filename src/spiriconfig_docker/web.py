@@ -13,7 +13,7 @@ import asyncio
 from loguru import logger
 from nicegui import ui
 
-from spiriconfig import advanced, terminal
+from spiriconfig import advanced, terminal, theme
 from spiriconfig.commands import Command, stream_pty
 
 from spiriconfig_docker.config import DockerSettings, docker_settings
@@ -54,7 +54,7 @@ async def _run_in_dialog(title: str, command: Command) -> None:
         # output below is shown to everyone -- a regular user still needs to see
         # what went wrong, they just do not need the invocation that caused it.
         with advanced.only(), ui.row().classes(
-            "w-full items-center gap-2 bg-gray-100 p-2 rounded"
+            f"w-full items-center gap-2 {theme.COMMAND_CLASS} p-2"
         ):
             ui.label(str(command)).classes("font-mono text-xs grow break-all")
             ui.button(
@@ -99,10 +99,15 @@ async def _edit_dialog(stack: Stack, on_saved) -> None:
         ui.notify(f"Could not read {stack.compose_file}: {exc}", type="negative")
         return
 
+    # Asked for before the dialog is built rather than inside it: both of these are
+    # round trips, and doing them up front keeps the awaits out of the slot the
+    # elements are being created in.
+    editor_theme = await theme.codemirror_theme()
+
     with ui.dialog() as dialog, ui.card().classes("w-full max-w-4xl"):
         ui.label(f"{stack.name} — {stack.compose_file}").classes("text-lg font-bold")
         editor = ui.codemirror(
-            text, language="YAML", theme="basicLight"
+            text, language="YAML", theme=editor_theme
         ).classes("w-full h-96")
 
         async def save() -> None:

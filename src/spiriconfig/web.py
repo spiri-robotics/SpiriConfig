@@ -16,7 +16,7 @@ import secrets
 from loguru import logger
 from nicegui import app, ui
 
-from spiriconfig import advanced
+from spiriconfig import advanced, theme
 from spiriconfig.config import Settings
 from spiriconfig.plugins import Plugin, discover
 
@@ -57,7 +57,12 @@ def _sidebar(plugins: list[Plugin], current: str | None) -> ui.left_drawer:
 
 
 def _layout(plugins: list[Plugin], current: str | None = None) -> None:
-    """The header and sidebar, shared by every page."""
+    """The header and sidebar, shared by every page.
+
+    The theme goes on first, before the sidebar and before the plugin: a plugin
+    that renders an advanced-only control gets the purple without asking for it.
+    """
+    theme.apply()
     drawer = _sidebar(plugins, current)
 
     with ui.header().classes("items-center gap-2"):
@@ -170,5 +175,9 @@ def serve(config: Settings, plugins: list[Plugin] | None = None) -> None:
         favicon="🐳",
         show=False,
         reload=False,
+        # None, not False: follow the operating system's light/dark setting. Any
+        # colour written into a page has to survive both, which is why the theme
+        # tints with translucency rather than naming a fixed light grey.
+        dark=None,
         storage_secret=_storage_secret(config),
     )

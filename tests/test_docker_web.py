@@ -12,11 +12,14 @@ the screen a moment later.
 from __future__ import annotations
 
 import asyncio
+import re
 
 import typer
+from nicegui import ui
+from nicegui.element import Element
 from nicegui.testing import User
 
-from spiriconfig import web
+from spiriconfig import theme, web
 from spiriconfig.plugins import Plugin
 from spiriconfig_docker.config import DockerSettings
 
@@ -109,3 +112,56 @@ class TestTheOutputDialog:
         await user.should_see("hello")
         await user.should_see("Up")
         await user.should_see("Logs")
+
+
+class TestTheEditorFollowsTheOperatingSystem:
+    """The app runs with ``dark=None``, so the *browser* decides whether the page
+    is dark and the server never finds out unless it asks. CodeMirror has no theme
+    that follows along, so an editor that is not told ends up as a white panel in
+    a dark page -- or, worse, unreadable the other way about.
+    """
+
+    async def _open_the_editor(self, user: User, settings: DockerSettings) -> Element:
+        web.build([_DockerPage(settings)])
+        await user.open("/docker")
+        await user.should_see("hello")
+
+        # Editing is a developer feature, so it is behind the advanced switch.
+        user.find("Advanced").click()
+        user.find("Edit").click()
+
+        # Wait on "Save", which exists only in this dialog. Waiting on the file
+        # name instead looks right and is a false positive: the stack's card is
+        # already showing "compose.yaml" behind the dialog, so the assertion
+        # passes before the editor has been built.
+        # Patiently, because a browser that never answers makes the dialog wait out
+        # the round trip's own timeout before it gives up and renders.
+        await user.should_see("Save", retries=20)
+        return user.find(ui.codemirror).elements.pop()
+
+    async def test_a_dark_browser_gets_the_dark_editor(
+        self, user: User, settings: DockerSettings
+    ) -> None:
+        user.javascript_rules[re.compile(r".*prefers-color-scheme.*")] = lambda _: True
+
+        editor = await self._open_the_editor(user, settings)
+        assert editor.props["theme"] == theme.CODEMIRROR_DARK
+
+    async def test_a_light_browser_gets_the_light_editor(
+        self, user: User, settings: DockerSettings
+    ) -> None:
+        user.javascript_rules[re.compile(r".*prefers-color-scheme.*")] = lambda _: False
+
+        editor = await self._open_the_editor(user, settings)
+        assert editor.props["theme"] == theme.CODEMIRROR_LIGHT
+
+    async def test_a_browser_that_never_answers_still_gets_an_editor(
+        self, user: User, settings: DockerSettings
+    ) -> None:
+        """No JavaScript rule is registered here, so the question goes unanswered
+        and the call times out -- which is the point. The editor is how a broken
+        compose file gets fixed, so it has to open even when the page is unwell
+        enough to drop a round trip. It opens light, which is legible either way."""
+        editor = await self._open_the_editor(user, settings)
+        assert editor.props["theme"] == theme.CODEMIRROR_LIGHT
+

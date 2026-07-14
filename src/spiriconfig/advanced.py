@@ -33,6 +33,7 @@ from loguru import logger
 from nicegui import app, binding, context, ui
 from nicegui.element import Element
 
+from spiriconfig import theme
 from spiriconfig.config import settings
 from spiriconfig.preferences import preferences
 
@@ -96,7 +97,21 @@ def set_enabled(value: bool) -> None:
 
 
 def mark(element: Element) -> Element:
-    """Show ``element`` only in advanced mode. Returns it, so it chains."""
+    """Show ``element`` only in advanced mode. Returns it, so it chains.
+
+    Also makes it *look* advanced, which is the same act: an element cannot be
+    advanced-only and yet fail to say so, because this is the only way to make it
+    advanced-only in the first place.
+
+    How it says so depends on what it is. A button takes the purple as its Quasar
+    ``color`` prop -- purple lettering on a flat button, a purple face on a solid
+    one -- because Quasar's own stylesheet sets ``outline: 0`` on ``.q-btn``, and
+    a ring drawn on a button is a fight with the framework that we would be
+    re-fighting at every upgrade. Everything else gets the dashed ring.
+    """
+    element.classes(add=theme.ADVANCED_CLASS)
+    if isinstance(element, ui.button):
+        element.props(f"color={theme.ADVANCED}")
     return element.bind_visibility_from(state(), "enabled")
 
 
@@ -118,10 +133,14 @@ def only() -> Iterator[None]:
 
 
 def toggle() -> ui.switch:
-    """A switch for advanced mode. Always visible -- it is the way back."""
+    """A switch for advanced mode. Always visible -- it is the way back.
+
+    Purple when it is on, and grey when it is off, wearing the same colour as the
+    ring around everything it reveals: the switch is the legend for the marks.
+    """
     switch = ui.switch(
         "Advanced",
         value=enabled(),
         on_change=lambda event: set_enabled(event.value),
-    )
+    ).props(f"color={theme.ADVANCED}")
     return switch.tooltip("Show developer features: raw commands, file editing")

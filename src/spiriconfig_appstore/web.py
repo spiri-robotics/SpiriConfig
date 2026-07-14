@@ -15,7 +15,7 @@ from pathlib import Path
 from loguru import logger
 from nicegui import ui
 
-from spiriconfig import advanced, terminal
+from spiriconfig import advanced, terminal, theme
 from spiriconfig.commands import Command, run, stream_pty
 from spiriconfig_docker.config import docker_settings
 
@@ -41,7 +41,7 @@ async def _run_in_dialog(title: str, commands: list[Command]) -> None:
         ui.label(title).classes("text-lg font-bold")
 
         with advanced.only(), ui.column().classes(
-            "w-full gap-1 bg-gray-100 p-2 rounded"
+            f"w-full gap-1 {theme.COMMAND_CLASS} p-2"
         ):
             for command in commands:
                 with ui.row().classes("w-full items-center gap-2"):
@@ -151,7 +151,7 @@ async def _confirm_adopt(install: Install) -> bool:
             "rm -rf in a shell."
         ).classes("text-sm text-gray-600")
 
-        with ui.column().classes("w-full gap-1 bg-gray-100 p-2 rounded"):
+        with ui.column().classes(f"w-full gap-1 {theme.COMMAND_CLASS} p-2"):
             for command in install.adopt_commands():
                 ui.label(str(command)).classes("font-mono text-xs break-all")
 
