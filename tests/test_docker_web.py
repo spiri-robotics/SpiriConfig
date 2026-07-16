@@ -27,7 +27,7 @@ from spiriconfig.plugins import Plugin
 from spiriconfig_docker import env
 from spiriconfig_docker import web as docker_web
 from spiriconfig_docker.config import DockerSettings
-from spiriconfig_docker.stacks import Stack
+from spiriconfig_docker.stacks import Stack, Usage
 
 from tests.conftest import docker_required
 
@@ -120,6 +120,50 @@ class TestTheOutputDialog:
         await user.should_see("hello")
         await user.should_see("Up")
         await user.should_see("Logs")
+
+
+class TestUsageOnTheCard:
+    """CPU and memory on each card, shown to everyone -- that is the whole feature.
+
+    Driven through the real page, because the risk here is not what number we
+    compute (that is tested in test_stacks.py) but whether it reaches the screen.
+    """
+
+    async def test_running_stack_shows_cpu_and_memory(
+        self, user: User, settings: DockerSettings, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.setattr(Stack, "status", lambda self: "running")
+        monkeypatch.setattr(
+            Stack, "usage", lambda self: Usage(cpu_percent=12.5, mem_bytes=45068554)
+        )
+        web.build([_DockerPage(settings)])
+        await user.open("/docker")
+        await user.should_see("12.5%")
+        await user.should_see("43.0 MiB")
+
+    async def test_not_behind_advanced_mode(
+        self, user: User, settings: DockerSettings, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """A regular user is exactly who "how much is this using" is for."""
+        monkeypatch.setattr(Stack, "status", lambda self: "running")
+        monkeypatch.setattr(
+            Stack, "usage", lambda self: Usage(cpu_percent=3.0, mem_bytes=1024**2)
+        )
+        web.build([_DockerPage(settings)])
+        await user.open("/docker")
+        # Without ever turning advanced mode on, the numbers are there.
+        await user.should_see("3.0%")
+
+    async def test_stopped_stack_shows_no_numbers(
+        self, user: User, settings: DockerSettings, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """None means "nothing to measure"; the badge already says it is stopped."""
+        monkeypatch.setattr(Stack, "status", lambda self: "stopped")
+        monkeypatch.setattr(Stack, "usage", lambda self: None)
+        web.build([_DockerPage(settings)])
+        await user.open("/docker")
+        await user.should_see("hello")
+        await user.should_not_see("%")
 
 
 class TestExecAndAttachAreDeveloperTools:

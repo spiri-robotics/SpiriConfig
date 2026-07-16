@@ -27,6 +27,7 @@ from spiriconfig_docker.stacks import (
     NEW_COMPOSE_TEMPLATE,
     Stack,
     StackError,
+    Usage,
     create,
     discover,
 )
@@ -517,14 +518,36 @@ async def _create_dialog(config: DockerSettings, on_created) -> None:
     dialog.open()
 
 
-def _stack_card(stack: Stack, status: str, has_settings: bool, refresh) -> None:
-    """One stack: its status, and the things you can do to it."""
+def _usage_row(usage: Usage) -> None:
+    """CPU and memory, shown to everyone. A regular user is exactly who this is for.
+
+    Not behind ``advanced.only()``: "how much is this app using" is an ordinary
+    question an ordinary user gets to ask, and the answer costs them nothing to
+    understand. Drawn only when there is a usage to draw -- a stopped stack has
+    :data:`None` here, and its badge already says why there are no numbers.
+    """
+    with ui.row().classes("items-center gap-4 text-sm text-gray-500"):
+        with ui.row().classes("items-center gap-1"):
+            ui.icon("speed").classes("text-base")
+            ui.label(usage.cpu_text()).tooltip("CPU, where 100% is one core")
+        with ui.row().classes("items-center gap-1"):
+            ui.icon("memory").classes("text-base")
+            ui.label(usage.mem_text()).tooltip("Memory in use")
+
+
+def _stack_card(
+    stack: Stack, status: str, usage: Usage | None, has_settings: bool, refresh
+) -> None:
+    """One stack: its status, what it is using, and the things you can do to it."""
     with ui.card().classes("w-full"):
         with ui.row().classes("w-full items-center justify-between"):
             with ui.column().classes("gap-0"):
                 ui.label(stack.name).classes("text-lg font-bold")
                 ui.label(str(stack.compose_file)).classes("text-xs text-gray-500")
-            ui.badge(status, color=STATUS_COLOURS.get(status, "grey"))
+            with ui.column().classes("gap-1 items-end"):
+                ui.badge(status, color=STATUS_COLOURS.get(status, "grey"))
+                if usage is not None:
+                    _usage_row(usage)
 
         async def act(command: Command, title: str) -> None:
             await _run_in_dialog(f"{stack.name} — {title}", command)
@@ -672,6 +695,30 @@ async def _statuses(stacks: list[Stack]) -> dict[str, str]:
     return statuses
 
 
+async def _usages(stacks: list[Stack]) -> dict[str, Usage | None]:
+    """Fetch every stack's CPU and memory concurrently, off the event loop.
+
+    Same shape as :func:`_statuses`, and separate from it on purpose: a status is
+    a ``compose ps`` and a usage is a ``docker stats``, two different commands with
+    two different latencies, and running the whole lot at once is what keeps a page
+    of stacks from adding those latencies up. A stack we cannot measure is ``None``
+    -- the card simply shows no numbers, which is the right amount to say about an
+    app whose resource use we could not read.
+    """
+    results = await asyncio.gather(
+        *(asyncio.to_thread(s.usage) for s in stacks),
+        return_exceptions=True,
+    )
+    usages: dict[str, Usage | None] = {}
+    for stack, result in zip(stacks, results, strict=True):
+        if isinstance(result, BaseException):
+            log.warning("could not get usage for {!r}: {}", stack.name, result)
+            usages[stack.name] = None
+        else:
+            usages[stack.name] = result
+    return usages
+
+
 def page(settings: DockerSettings | None = None) -> None:
     """Render the docker plugin's page."""
     config = settings or docker_settings()
@@ -686,7 +733,7 @@ def page(settings: DockerSettings | None = None) -> None:
     async def render() -> None:
         container.clear()
         stacks = await asyncio.to_thread(discover, config)
-        statuses = await _statuses(stacks)
+        statuses, usages = await asyncio.gather(_statuses(stacks), _usages(stacks))
 
         # Which stacks have a settings form, worked out in one hop off the event
         # loop. It is a small YAML parse per stack, but it is a disk read per
@@ -708,6 +755,7 @@ def page(settings: DockerSettings | None = None) -> None:
                 _stack_card(
                     stack,
                     statuses[stack.name],
+                    usages[stack.name],
                     settings_flags[stack.name],
                     refresh,
                 )
@@ -732,9 +780,17 @@ def page(settings: DockerSettings | None = None) -> None:
             ui.timer(0.1, render, once=True)
 
     with ui.row().classes("items-center gap-2"):
-        ui.button(
-            "New app", icon="add", on_click=lambda: _create_dialog(config, refresh)
-        ).mark("new-app")
+        # Advanced only: writing a compose file by hand is a developer's job, not
+        # something an ordinary user came here to do -- they install apps from a
+        # store, they do not author them. It stays fully available from the shell
+        # (`spiriconfig docker create <name>`), so hiding the button declutters the
+        # page without taking anything away.
+        with advanced.only():
+            ui.button(
+                "New app", icon="add", on_click=lambda: _create_dialog(config, refresh)
+            ).mark("new-app").tooltip(
+                "Create an empty compose project to edit by hand"
+            )
         ui.button("Refresh", icon="refresh", on_click=refresh).props("flat")
 
     refresh()

@@ -15,6 +15,7 @@ without a docker daemon anywhere in sight.
 from __future__ import annotations
 
 import json
+import re
 import shutil
 from collections.abc import Sequence
 from dataclasses import dataclass
@@ -82,6 +83,30 @@ log = logger.bind(plugin="docker")
 
 class StackError(Exception):
     """Something is wrong with a stack, or with the request made of it."""
+
+
+@dataclass(frozen=True, slots=True)
+class Usage:
+    """A stack's live resource use, summed across its running containers.
+
+    Two numbers, because they answer the two questions a user actually asks of an
+    app -- "is it working the processor" and "is it eating the memory" -- and
+    disk, the third, is deliberately not here: sizing an app's real footprint
+    means sizing its volumes, which the daemon will not tell us cheaply. That is a
+    separate feature with a separate cost, not a column to bolt on here.
+    """
+
+    cpu_percent: float
+    """Summed CPU use, where 100.0 is one core fully busy. Can exceed 100."""
+
+    mem_bytes: int
+    """Summed resident memory in use, in bytes."""
+
+    def cpu_text(self) -> str:
+        return f"{self.cpu_percent:.1f}%"
+
+    def mem_text(self) -> str:
+        return _humanize_bytes(self.mem_bytes)
 
 
 @dataclass(frozen=True, slots=True)
@@ -318,6 +343,64 @@ class Stack:
             }
         )
 
+    # -- resource use ---------------------------------------------------------
+
+    def stats(self, container_ids: Sequence[str], *, as_json: bool = False) -> Command:
+        """Live CPU and memory for the given containers, one snapshot then done.
+
+        Plain ``docker stats`` rather than ``docker compose stats``, because there
+        is no such compose subcommand -- stats is a daemon-level view, and the way
+        to scope it to one project is to name that project's containers. So the
+        caller passes the ids, which come from :meth:`containers`; run with none,
+        ``docker stats`` would report *every* container on the host, which is the
+        one thing this must not do.
+
+        ``--no-stream`` because a page is not a dashboard: we want the number as it
+        is right now and then our prompt back, not a live feed that never returns.
+
+        ``as_json`` is for the code that has to parse this; the CLI leaves it off
+        and gets docker's own table, which is already the thing a person would want
+        to read.
+        """
+        argv = [self.settings.docker_bin, "stats", "--no-stream"]
+        if as_json:
+            argv += ["--format", "json"]
+        return Command(argv=[*argv, *container_ids])
+
+    def usage(self) -> Usage | None:
+        """This stack's CPU and memory use right now, summed over its containers.
+
+        ``None`` when there is nothing to measure -- the stack is down, docker is
+        unreachable, or the snapshot could not be read. A stopped app consuming no
+        CPU and no memory is not the same as "0%", and saying nothing is the honest
+        way to draw the difference: the status badge already says it is stopped.
+
+        Only *running* containers are asked about. ``docker stats`` will happily
+        take a stopped container's id and report a row of dashes for it, which
+        parses as nothing and would only slow the snapshot down.
+        """
+        running = [
+            cid
+            for container in self.containers()
+            if container.get("State") == "running" and (cid := container.get("ID"))
+        ]
+        if not running:
+            return None
+
+        try:
+            result = run(
+                self.stats(running, as_json=True),
+                timeout=self.settings.command_timeout,
+                log=log,
+            )
+        except CommandError as exc:
+            log.warning("could not get stats for {!r}: {}", self.name, exc)
+            return None
+        if not result.ok:
+            log.warning("could not get stats for {!r}", self.name)
+            return None
+        return _parse_usage(result.stdout)
+
     # -- the compose file itself ----------------------------------------------
 
     def read(self) -> str:
@@ -359,11 +442,12 @@ class Stack:
         log.info("wrote {}", self.compose_file)
 
 
-def _parse_ps(stdout: str) -> list[dict]:
-    """Parse ``docker compose ps --format json`` output.
+def _parse_json_stream(stdout: str) -> list[dict]:
+    """Parse docker's ``--format json`` output, whichever shape it took.
 
-    Compose is inconsistent here: depending on version it emits either a single
-    JSON array, or one JSON object per line. Handle both.
+    Docker is inconsistent about this across commands and versions: some emit a
+    single JSON array, others one JSON object per line. ``compose ps`` and
+    ``stats`` both do it, so both lean on this. Handle either.
     """
     text = stdout.strip()
     if not text:
@@ -378,16 +462,80 @@ def _parse_ps(stdout: str) -> list[dict]:
             return parsed
         return [parsed]
 
-    containers = []
+    documents = []
     for line in text.splitlines():
         line = line.strip()
         if not line:
             continue
         try:
-            containers.append(json.loads(line))
+            documents.append(json.loads(line))
         except json.JSONDecodeError:
-            log.warning("could not parse compose ps line: {!r}", line)
-    return containers
+            log.warning("could not parse docker json line: {!r}", line)
+    return documents
+
+
+def _parse_ps(stdout: str) -> list[dict]:
+    """Parse ``docker compose ps --format json`` output."""
+    return _parse_json_stream(stdout)
+
+
+#: Suffix -> byte count, for the sizes docker prints. Memory is formatted with
+#: binary units (``MiB``), network and block IO with decimal ones (``MB``); we
+#: only read memory here, but knowing both makes the table complete and correct.
+_SIZE_UNITS = {
+    "B": 1,
+    "KB": 1000, "MB": 1000**2, "GB": 1000**3, "TB": 1000**4, "PB": 1000**5,
+    "KIB": 1024, "MIB": 1024**2, "GIB": 1024**3, "TIB": 1024**4, "PIB": 1024**5,
+}
+
+_SIZE_RE = re.compile(r"([0-9.]+)\s*([A-Za-z]+)")
+
+
+def _parse_bytes(text: str) -> int:
+    """Turn a docker size like ``42.98MiB`` into a byte count."""
+    match = _SIZE_RE.fullmatch(text.strip())
+    if match is None:
+        raise ValueError(f"not a docker size: {text!r}")
+    number, unit = match.groups()
+    try:
+        return round(float(number) * _SIZE_UNITS[unit.upper()])
+    except KeyError as exc:
+        raise ValueError(f"unknown size unit in {text!r}") from exc
+
+
+def _parse_percent(text: str) -> float:
+    """Turn a docker percentage like ``0.01%`` into a float."""
+    return float(text.strip().rstrip("%"))
+
+
+def _parse_usage(stdout: str) -> Usage:
+    """Sum a ``docker stats --format json`` snapshot into one :class:`Usage`.
+
+    A row we cannot read is skipped rather than fatal: one container reporting a
+    stat in a shape we did not expect should cost that container's contribution,
+    not the whole app's number. The zero that a fully unreadable snapshot leaves
+    behind is the truthful answer to "how much of this could we measure".
+    """
+    cpu = 0.0
+    mem = 0
+    for row in _parse_json_stream(stdout):
+        try:
+            cpu += _parse_percent(row.get("CPUPerc", ""))
+            # MemUsage is "used / limit"; only the used side is this app's.
+            mem += _parse_bytes(row.get("MemUsage", "").split("/")[0])
+        except ValueError as exc:
+            log.warning("could not parse a stats row: {}", exc)
+    return Usage(cpu_percent=cpu, mem_bytes=mem)
+
+
+def _humanize_bytes(n: int) -> str:
+    """Render a byte count the way docker does -- binary units, one decimal."""
+    value = float(n)
+    for unit in ("B", "KiB", "MiB", "GiB", "TiB"):
+        if value < 1024 or unit == "TiB":
+            return f"{value:.0f} {unit}" if unit == "B" else f"{value:.1f} {unit}"
+        value /= 1024
+    return f"{value:.1f} PiB"  # unreachable for any real container
 
 
 def find_compose_file(directory: Path) -> Path | None:
@@ -518,6 +666,7 @@ __all__ = [
     "NEW_COMPOSE_TEMPLATE",
     "Stack",
     "StackError",
+    "Usage",
     "create",
     "discover",
     "find_compose_file",

@@ -10,13 +10,17 @@ from pathlib import Path
 
 import pytest
 
-from spiriconfig.commands import PtySession, run
+from spiriconfig.commands import Command, PtySession, Result, run
 from spiriconfig_docker.config import DockerSettings
 from spiriconfig_docker.stacks import (
     NEW_COMPOSE_TEMPLATE,
     Stack,
     StackError,
+    Usage,
+    _humanize_bytes,
+    _parse_bytes,
     _parse_ps,
+    _parse_usage,
     create,
     discover,
     find_compose_file,
@@ -261,6 +265,131 @@ class TestParsePs:
         """A daemon warning printed among the JSON must not blow up a page render."""
         stdout = 'not json at all\n{"Name": "a"}'
         assert _parse_ps(stdout) == [{"Name": "a"}]
+
+
+class TestStatsCommand:
+    """`docker stats`, not `docker compose stats` -- there is no such subcommand."""
+
+    def test_names_the_given_containers(self, settings: DockerSettings) -> None:
+        argv = list(get(settings, "hello").stats(["abc", "def"]).argv)
+        assert argv == ["docker", "stats", "--no-stream", "abc", "def"]
+
+    def test_json_is_opt_in_for_the_parser(self, settings: DockerSettings) -> None:
+        """The CLI wants docker's own table; only the code that parses asks for JSON."""
+        assert "--format" not in list(get(settings, "hello").stats(["abc"]).argv)
+        argv = list(get(settings, "hello").stats(["abc"], as_json=True).argv)
+        assert argv[-3:] == ["--format", "json", "abc"]
+
+    def test_honours_a_custom_docker_binary(self, compose_dir: Path) -> None:
+        settings = DockerSettings(compose_dir=compose_dir, docker_bin="/usr/bin/podman")
+        assert list(get(settings, "hello").stats(["abc"]).argv)[0] == "/usr/bin/podman"
+
+
+class TestParseUsage:
+    """docker stats --format json is summed across a stack's containers."""
+
+    def test_sums_cpu_and_the_used_side_of_memory(self) -> None:
+        stdout = (
+            '{"CPUPerc": "0.50%", "MemUsage": "42.98MiB / 61.95GiB"}\n'
+            '{"CPUPerc": "1.50%", "MemUsage": "10MiB / 61.95GiB"}'
+        )
+        usage = _parse_usage(stdout)
+        assert usage.cpu_percent == pytest.approx(2.0)
+        # 42.98 MiB + 10 MiB, in bytes.
+        assert usage.mem_bytes == pytest.approx(round(52.98 * 1024**2), rel=1e-6)
+
+    def test_an_unreadable_row_costs_only_itself(self) -> None:
+        """One weird row must not zero out the whole app's number."""
+        stdout = (
+            '{"CPUPerc": "1.00%", "MemUsage": "10MiB / 1GiB"}\n'
+            '{"CPUPerc": "nonsense", "MemUsage": "also nonsense"}'
+        )
+        usage = _parse_usage(stdout)
+        assert usage.cpu_percent == pytest.approx(1.0)
+        assert usage.mem_bytes == 10 * 1024**2
+
+    def test_empty_snapshot_is_zero(self) -> None:
+        assert _parse_usage("") == Usage(cpu_percent=0.0, mem_bytes=0)
+
+
+class TestSizeFormatting:
+    """Docker prints memory in binary units; we parse and reprint them the same."""
+
+    @pytest.mark.parametrize(
+        ("text", "expected"),
+        [
+            ("42.98MiB", round(42.98 * 1024**2)),
+            ("1GiB", 1024**3),
+            ("512B", 512),
+            # Decimal units appear on network/block IO; parse them too.
+            ("5.67MB", round(5.67 * 1000**2)),
+            ("100 kB", round(100 * 1000)),
+        ],
+    )
+    def test_parse_bytes(self, text: str, expected: int) -> None:
+        assert _parse_bytes(text) == expected
+
+    def test_parse_bytes_rejects_nonsense(self) -> None:
+        with pytest.raises(ValueError, match="not a docker size"):
+            _parse_bytes("not a size")
+
+    @pytest.mark.parametrize(
+        ("n", "expected"),
+        [
+            (0, "0 B"),
+            (512, "512 B"),
+            (round(43.0 * 1024**2), "43.0 MiB"),
+            (1024**3, "1.0 GiB"),
+        ],
+    )
+    def test_humanize_bytes(self, n: int, expected: str) -> None:
+        assert _humanize_bytes(n) == expected
+
+
+class TestUsage:
+    """The end-to-end read: containers -> docker stats -> one summed Usage.
+
+    Stack is a frozen, slotted dataclass, so fakes go on the class.
+    """
+
+    def test_sums_only_running_containers(
+        self, settings: DockerSettings, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.setattr(
+            Stack,
+            "containers",
+            lambda self: [
+                {"ID": "run1", "State": "running"},
+                {"ID": "dead1", "State": "exited"},
+            ],
+        )
+
+        seen: list[list[str]] = []
+
+        def fake_run(command: Command, **kwargs: object) -> Result:
+            seen.append(list(command.argv))
+            return Result(command, 0, '{"CPUPerc": "2.00%", "MemUsage": "5MiB / 1GiB"}', "")
+
+        monkeypatch.setattr("spiriconfig_docker.stacks.run", fake_run)
+
+        usage = get(settings, "hello").usage()
+        assert usage == Usage(cpu_percent=2.0, mem_bytes=5 * 1024**2)
+        # Only the running container's id was handed to docker stats.
+        assert "run1" in seen[0] and "dead1" not in seen[0]
+
+    def test_nothing_running_is_none_not_zero(
+        self, settings: DockerSettings, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """A stopped app has no usage to show, which is not the same as 0%."""
+        monkeypatch.setattr(
+            Stack, "containers", lambda self: [{"ID": "x", "State": "exited"}]
+        )
+        # run must never be reached -- there is nothing to ask docker stats about.
+        monkeypatch.setattr(
+            "spiriconfig_docker.stacks.run",
+            lambda *a, **k: pytest.fail("docker stats should not run"),
+        )
+        assert get(settings, "hello").usage() is None
 
 
 class TestStatus:

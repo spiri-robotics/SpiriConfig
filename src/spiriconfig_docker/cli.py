@@ -190,6 +190,27 @@ def ps(stack: StackArg, show: ShowOption = False) -> None:
     _execute(_stack(stack).ps(), show=show)
 
 
+@app.command()
+def stats(stack: StackArg, show: ShowOption = False) -> None:
+    """Show a compose project's live CPU and memory use.
+
+    A single snapshot -- ``docker stats --no-stream`` -- of the app's running
+    containers, in docker's own table. Only running containers are asked about,
+    since a stopped one has nothing to report; if none are up, that is said and
+    nothing is run.
+    """
+    s = _stack(stack)
+    running = [
+        cid
+        for container in s.containers()
+        if container.get("State") == "running" and (cid := container.get("ID"))
+    ]
+    if not running:
+        typer.echo(f"{stack} has no running containers.")
+        return
+    _execute(s.stats(running), show=show)
+
+
 def _execute_interactively(command: Command, *, show: bool) -> None:
     """Hand our terminal to the command, and get out of the way.
 
