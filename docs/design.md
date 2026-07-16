@@ -224,7 +224,7 @@ config file the maintainer forgot to bump a number for.
 
 Which is the escape from a genuinely hard problem. "What version is this bag of
 containers?" has no good answer, so we do not need one to be right. The version
-string is *cosmetic*: `x-spiriconfig-version` if a maintainer set one, and the
+string is *cosmetic*: `x-spiri-config-version` if a maintainer set one, and the
 date of the last commit touching the app if they did not. A store maintainer who
 never thinks about versioning still gets one that moves when the app does.
 

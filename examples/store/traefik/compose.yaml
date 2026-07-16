@@ -5,7 +5,7 @@
 # Deliberately does NOT publish the docker socket read-write, and does not
 # enable the dashboard on a public port. A store is a place people copy from,
 # so what it shows them should be the version they can leave running.
-x-spiriconfig-version: "3.1"
+x-spiri-config-version: "3.1"
 
 services:
   traefik:

@@ -85,7 +85,7 @@ answer the unanswerable question of what "version 2" of a set of containers mean
 If the store's author set one, that is what you see:
 
 ```yaml
-x-spiriconfig-version: "1.10.1"
+x-spiri-config-version: "1.10.1"
 services:
   whoami:
     image: traefik/whoami:v1.10.1
@@ -254,7 +254,7 @@ volumes:
   nextcloud-data:
 ```
 
-Set `x-spiriconfig-version` if you have a version worth naming. If you do not,
+Set `x-spiri-config-version` if you have a version worth naming. If you do not,
 leave it out -- the commit date is a perfectly good label, and a stale version
 number is worse than none.
 

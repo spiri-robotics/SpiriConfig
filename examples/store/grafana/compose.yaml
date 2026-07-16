@@ -5,7 +5,7 @@
 # extension fields, which compose ignores by spec, so this runs unchanged under a
 # bare `docker compose up -d` on a machine that has never heard of SpiriConfig.
 # The settings form is an *addition* to a working app, never a requirement of one.
-x-spiriconfig-version: "11.1.0"
+x-spiri-config-version: "11.1.0"
 
 # Each field names a variable in this app's .env, and the NiceGUI widget that
 # edits it. SpiriConfig's settings page is generated from this list; nothing else

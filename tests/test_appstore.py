@@ -39,7 +39,7 @@ git_required = pytest.mark.skipif(
 pytestmark = git_required
 
 WHOAMI = """\
-x-spiriconfig-version: "1.10.1"
+x-spiri-config-version: "1.10.1"
 services:
   whoami:
     image: traefik/whoami:v1.10.1
@@ -172,7 +172,7 @@ class TestVersion:
         assert store.app("whoami").version() == "1.10.1"
 
     def test_falls_back_to_the_last_commit_date(self, store) -> None:
-        """No x-spiriconfig-version, so the date of the commit that touched it.
+        """No x-spiri-config-version, so the date of the commit that touched it.
 
         The whole point of the fallback: a store maintainer who never thinks
         about versioning still gets one that moves when the app does.

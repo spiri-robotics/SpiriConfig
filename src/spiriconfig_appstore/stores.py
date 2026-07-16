@@ -49,7 +49,7 @@ from spiriconfig_appstore.config import AppStoreSettings
 #: monotonic, and requires no discipline from the maintainer.
 #:
 #: Nothing depends on it. See :meth:`App.version`.
-VERSION_KEY = "x-spiriconfig-version"
+VERSION_KEY = "x-spiri-config-version"
 
 #: The upstream ref, as git spells it: the branch our checkout tracks.
 #:
