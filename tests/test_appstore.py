@@ -27,7 +27,9 @@ from spiriconfig_appstore.installs import install_command, installed, uninstall
 from spiriconfig_appstore.stores import (
     StoreError,
     find_app,
+    remote_url,
     slug_for,
+    store_for_url,
     stores,
     update_plan,
 )
@@ -236,6 +238,76 @@ class TestInstalled:
     ) -> None:
         (compose_root / "handmade").mkdir()
         assert installed(settings, compose_root) == []
+
+
+class TestStoreManagement:
+    """Adding and removing stores, and discovering them from disk.
+
+    The model these exercise: a store *is* a git checkout under ``store_dir``. The
+    seed list only seeds; the disk is the truth.
+    """
+
+    def test_a_seed_shows_up_not_cloned_until_it_is(
+        self, settings: AppStoreSettings
+    ) -> None:
+        [only] = stores(settings)
+        assert not only.is_cloned
+        only.path.parent.mkdir(parents=True, exist_ok=True)
+        run(only.clone_command()).check()
+        [again] = stores(settings)
+        assert again.is_cloned
+        # Still one store, not the seed plus its clone.
+        assert len(stores(settings)) == 1
+
+    def test_discovers_a_checkout_that_was_never_seeded(
+        self, upstream: Path, tmp_path: Path
+    ) -> None:
+        """A store the user cloned themselves, with an empty seed list, is first
+        class -- disk is the source of truth."""
+        settings = AppStoreSettings(stores=[], store_dir=tmp_path / "stores")
+        target = store_for_url(settings, str(upstream))
+        target.path.parent.mkdir(parents=True, exist_ok=True)
+        run(target.clone_command()).check()
+
+        [found] = stores(settings)
+        assert found.slug == slug_for(str(upstream))
+        assert found.is_cloned
+        assert [a.name for a in found.apps()] == ["nextcloud", "whoami"]
+
+    def test_reads_a_stores_url_back_off_its_remote(
+        self, upstream: Path, tmp_path: Path
+    ) -> None:
+        settings = AppStoreSettings(stores=[], store_dir=tmp_path / "stores")
+        target = store_for_url(settings, str(upstream))
+        target.path.parent.mkdir(parents=True, exist_ok=True)
+        run(target.clone_command()).check()
+
+        assert remote_url(settings, target.path) == str(upstream)
+        # And stores() surfaces that URL rather than inventing one.
+        assert stores(settings)[0].url == str(upstream)
+
+    def test_store_for_url_names_and_places_the_clone(
+        self, tmp_path: Path
+    ) -> None:
+        settings = AppStoreSettings(stores=[], store_dir=tmp_path / "stores")
+        store = store_for_url(settings, "https://example.com/team/apps.git")
+        assert store.slug == "apps"
+        assert store.path == (tmp_path / "stores").resolve() / "apps"
+
+    def test_remove_command_is_an_rm_rf_of_the_checkout(
+        self, store
+    ) -> None:
+        command = store.remove_command()
+        assert command.argv == ["rm", "-rf", str(store.path)]
+
+    def test_remove_deletes_the_checkout_and_it_leaves_the_listing(
+        self, store, settings: AppStoreSettings
+    ) -> None:
+        assert store.is_cloned
+        run(store.remove_command()).check()
+        assert not store.path.exists()
+        # The seed reappears as not-cloned; the clone is gone.
+        assert all(not s.is_cloned for s in stores(settings))
 
     def test_ignores_symlinks_pointing_outside_the_stores(
         self, settings: AppStoreSettings, compose_root: Path, tmp_path: Path
@@ -580,7 +652,7 @@ class TestThePage:
         settings = AppStoreSettings(stores=[], store_dir=tmp_path / "none")
         web.build([_PinnedPlugin(settings, compose_root)])
         await user.open("/appstore")
-        await user.should_see("No app stores configured")
+        await user.should_see("No app stores yet")
 
 
 class TestTheExampleStore:

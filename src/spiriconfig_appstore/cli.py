@@ -30,6 +30,8 @@ from spiriconfig_appstore.stores import (
     App,
     StoreError,
     find_app,
+    get_store,
+    store_for_url,
     stores,
     update_plan,
 )
@@ -131,8 +133,8 @@ def list_stores() -> None:
     configured = stores(appstore_settings())
     if not configured:
         typer.echo(
-            "No app stores configured. Set SPIRICONFIG_APPSTORE_STORES to a JSON "
-            'list of git URLs, e.g. \'["https://github.com/spiri/spiri-apps"]\'.'
+            "No app stores yet. Add one with `spiriconfig appstore add <git-url>`, "
+            "or seed one with SPIRICONFIG_APPSTORE_STORES."
         )
         return
     width = max(len(s.slug) for s in configured)
@@ -158,7 +160,7 @@ def sync(show: ShowOption = False) -> None:
     settings = appstore_settings()
     configured = stores(settings)
     if not configured:
-        typer.echo("No app stores configured.")
+        typer.echo("No app stores yet. Add one with: spiriconfig appstore add <git-url>")
         return
 
     commands = []
@@ -170,6 +172,96 @@ def sync(show: ShowOption = False) -> None:
                 store.path.parent.mkdir(parents=True, exist_ok=True)
             commands.append(store.clone_command())
     _execute_streaming(commands, show=show)
+
+
+@app.command()
+def add(
+    url: Annotated[str, typer.Argument(help="Git URL (or local path) of the app store.")],
+    show: ShowOption = False,
+) -> None:
+    """Add an app store: clone a git repository into the store directory.
+
+    Adding a store *is* cloning it -- there is no list to edit, because the clone
+    on disk is the record (see `appstore stores`). Afterwards its apps show up in
+    `appstore list`, and you install them the usual way.
+    """
+    settings = appstore_settings()
+    store = store_for_url(settings, url)
+
+    if store.is_cloned:
+        raise _fail(
+            f"{store.slug!r} is already here ({store.path}). Remove it first if you "
+            f"want to re-add it, or run `appstore sync` to fetch its latest."
+        )
+
+    if not show:
+        store.path.parent.mkdir(parents=True, exist_ok=True)
+    _execute_streaming([store.clone_command()], show=show)
+    if not show:
+        typer.echo(f"Added {store.slug}. See its apps with: spiriconfig appstore list")
+
+
+@app.command()
+def remove(
+    slug: Annotated[str, typer.Argument(help="Store slug, as shown by `appstore stores`.")],
+    yes: Annotated[
+        bool,
+        typer.Option("--yes", "-y", help="Do not ask for confirmation."),
+    ] = False,
+    show: ShowOption = False,
+) -> None:
+    """Remove an app store: delete its checkout.
+
+    The inverse of `add`, and the one command here that deletes a directory. It is
+    safe to offer because SpiriConfig cloned that directory in the first place --
+    removing it just undoes the clone. Apps you installed from it are left as
+    dangling symlinks, harmless but worth cleaning up; this warns you which.
+
+    Cannot be undone (short of adding the store again and re-cloning), so it asks
+    first. `--yes` skips the question; `--show` prints the command without running.
+    """
+    settings = appstore_settings()
+    try:
+        store = get_store(settings, slug)
+    except StoreError as exc:
+        raise _fail(str(exc)) from exc
+
+    if not store.is_cloned:
+        raise _fail(
+            f"{slug!r} is not cloned, so there is nothing to remove. It is a seed "
+            f"from SPIRICONFIG_APPSTORE_STORES; drop it from there to stop offering it."
+        )
+
+    dangling = [
+        i for i in installed(settings, _compose_dir()) if i.store.slug == store.slug
+    ]
+
+    if show:
+        _execute(store.remove_command(), show=True)
+        return
+
+    if not yes:
+        typer.echo(f"Remove {store.slug} ({store.path})?\n")
+        typer.echo(f"    {store.remove_command()}")
+        if dangling:
+            typer.echo(
+                f"\n{len(dangling)} installed app(s) point into it and will be left "
+                f"dangling:\n"
+                + "\n".join(f"    {i.name}" for i in dangling)
+            )
+        typer.echo(
+            "\nThis deletes the checkout, including any local edits you have not "
+            "pushed.\nThere is no undo besides adding the store again."
+        )
+        typer.confirm("\nRemove it?", abort=True)
+
+    _execute(store.remove_command(), show=False)
+    typer.echo(f"Removed {store.slug}.")
+    if dangling:
+        typer.echo(
+            "Left dangling (remove with `spiriconfig appstore uninstall <name>`): "
+            + ", ".join(i.name for i in dangling)
+        )
 
 
 @app.command()

@@ -77,6 +77,29 @@ def slug_for(url: str) -> str:
     return tail.removesuffix(".git") or "store"
 
 
+def remote_url(settings: AppStoreSettings, path: Path) -> str | None:
+    """Read a checkout's origin URL, or None if it has none we can read.
+
+    This is what makes disk the source of truth: a store is a clone, and a clone
+    remembers where it came from, so we ask *it* rather than keeping a list of our
+    own. ``git remote get-url origin`` is the same question ``readlink`` answers
+    for an installed app -- "where did this come from?" asked of the filesystem.
+
+    None for a directory with no ``origin`` (someone's local-only repo, say): still
+    a perfectly good store to install from, just one with no upstream to show or
+    pull. The caller decides what to display for it.
+    """
+    command = Command(argv=[settings.git_bin, "-C", str(path), "remote", "get-url", "origin"])
+    try:
+        result = run(command, timeout=settings.command_timeout, log=log)
+    except CommandError as exc:
+        log.warning("could not read origin for {}: {}", path, exc)
+        return None
+    if not result.ok:
+        return None
+    return result.stdout.strip() or None
+
+
 @dataclass(frozen=True, slots=True)
 class App:
     """One app in a store: a directory with a compose file in it."""
@@ -296,6 +319,23 @@ class Store:
         """Throw away every local edit in this store. Asked for, never assumed."""
         return self._git("checkout", "--", ".")
 
+    def remove_command(self) -> Command:
+        """Delete this store's checkout: ``rm -rf`` the clone.
+
+        The counterpart to :meth:`clone_command`, and safe to offer for exactly the
+        reason ``adopt`` is: we made this directory with ``git clone``, so removing
+        it puts the machine back where it was before we added the store. Nothing
+        else here deletes a directory -- an app uninstall only unlinks -- and this
+        one is allowed to precisely because it is undoing our own ``clone`` and
+        touching nothing the user created.
+
+        Apps installed from the store become dangling symlinks, which the docker
+        plugin and :func:`spiriconfig_appstore.installs.installed` already tolerate.
+        The caller is expected to warn about them first; git will not, because as
+        far as it is concerned this is just a directory.
+        """
+        return Command(argv=["rm", "-rf", str(self.path)])
+
     def status_command(self) -> Command:
         return self._git("status", "--short")
 
@@ -494,20 +534,65 @@ def _absolute(url: str) -> str:
 
 
 def stores(settings: AppStoreSettings) -> list[Store]:
-    """Every configured store, cloned or not.
+    """Every store: the clones on disk, plus any not-yet-cloned seeds.
+
+    Disk is the source of truth. A store *is* a git checkout under
+    :attr:`~spiriconfig_appstore.config.AppStoreSettings.store_dir`, so the live
+    list is whatever is actually cloned there -- which is what lets the UI add one
+    (clone it) and remove one (delete it) without SpiriConfig keeping a list of its
+    own. Each clone's URL is read back off the clone itself; see :func:`remote_url`.
+
+    :attr:`~spiriconfig_appstore.config.AppStoreSettings.stores` is a *seed* list,
+    not the authority. Any seed whose slug is not already cloned is included as a
+    not-yet-cloned store, so ``sync`` (or the Clone button) can bring it down -- and
+    the moment it is cloned, disk discovery takes over and the seed entry is
+    deduplicated away. A store the user cloned themselves and never listed is a
+    first-class store; a seed the user removed stays gone until they clone it again.
 
     Paths are resolved here, once, so that nothing downstream has to remember to.
     """
     root = settings.store_dir.expanduser().resolve()
-    return [
-        Store(
-            slug=slug_for(url),
+
+    found: dict[str, Store] = {}
+    if root.is_dir():
+        for child in sorted(root.iterdir()):
+            if not (child / ".git").exists():
+                continue
+            found[child.name] = Store(
+                slug=child.name,
+                url=remote_url(settings, child) or "",
+                path=child,
+                settings=settings,
+            )
+
+    for url in settings.stores:
+        slug = slug_for(url)
+        if slug in found:
+            continue
+        found[slug] = Store(
+            slug=slug,
             url=_absolute(url),
-            path=root / slug_for(url),
+            path=root / slug,
             settings=settings,
         )
-        for url in settings.stores
-    ]
+
+    # Insertion order: the cloned stores first (in sorted directory order, from the
+    # scan above), then any not-yet-cloned seeds in the order they are listed. Stable
+    # without re-sorting the two groups together, which would let a seed jump above a
+    # cloned store just because of its name.
+    return list(found.values())
+
+
+def store_for_url(settings: AppStoreSettings, url: str) -> Store:
+    """Build the :class:`Store` that adding ``url`` would create.
+
+    Not necessarily one of :func:`stores` -- this is how a *new* store is named and
+    placed before it exists, so the caller can run its :meth:`Store.clone_command`.
+    Once cloned, :func:`stores` rediscovers it from disk like any other.
+    """
+    root = settings.store_dir.expanduser().resolve()
+    slug = slug_for(url)
+    return Store(slug=slug, url=_absolute(url), path=root / slug, settings=settings)
 
 
 def get_store(settings: AppStoreSettings, slug: str) -> Store:
@@ -542,7 +627,9 @@ __all__ = [
     "VERSION_KEY",
     "find_app",
     "get_store",
+    "remote_url",
     "slug_for",
+    "store_for_url",
     "stores",
     "update_plan",
 ]

@@ -21,7 +21,14 @@ from spiriconfig_docker.config import docker_settings
 
 from spiriconfig_appstore.config import AppStoreSettings, appstore_settings
 from spiriconfig_appstore.installs import Install, install_command, installed
-from spiriconfig_appstore.stores import App, Store, StoreError, stores, update_plan
+from spiriconfig_appstore.stores import (
+    App,
+    Store,
+    StoreError,
+    store_for_url,
+    stores,
+    update_plan,
+)
 
 log = logger.bind(plugin="appstore")
 
@@ -257,11 +264,92 @@ def _app_card(
                     )
 
 
-def _store_header(store: Store, refresh) -> None:
-    """One store: where it came from, and the two things you can do to it."""
+async def _add_store_dialog(config: AppStoreSettings, refresh) -> None:
+    """Add a store by cloning its git repository.
+
+    Adding a store is cloning it -- there is no list we keep, because the clone on
+    disk is the record (see :func:`spiriconfig_appstore.stores.stores`). So this is
+    a URL box and a ``git clone``, shown in the same output dialog as every other
+    git action here.
+    """
+    with ui.dialog() as dialog, ui.card().classes("w-full max-w-2xl"):
+        ui.label("Add an app store").classes("text-lg font-bold")
+        ui.label(
+            "A git repository with one directory per app. It is cloned into "
+            f"{config.store_dir}; afterwards its apps appear below."
+        ).classes("text-sm text-gray-500")
+        url = ui.input("Git URL").classes("w-full").props("outlined").mark("add-store-url")
+
+        async def do_add() -> None:
+            target = url.value.strip()
+            if not target:
+                ui.notify("Enter a git URL.", type="warning")
+                return
+            store = store_for_url(config, target)
+            if store.is_cloned:
+                ui.notify(
+                    f"{store.slug!r} is already here. Remove it first to re-add it.",
+                    type="warning",
+                )
+                return
+            dialog.close()
+            store.path.parent.mkdir(parents=True, exist_ok=True)
+            await _run_in_dialog(f"{store.slug} — clone", [store.clone_command()])
+            refresh()
+
+        with ui.row().classes("w-full justify-end gap-2"):
+            ui.button("Cancel", on_click=dialog.close).props("flat")
+            ui.button("Add", icon="add", on_click=do_add).props("color=primary").mark(
+                "add-store-add"
+            )
+
+    dialog.open()
+
+
+async def _confirm_remove(store: Store, dangling: list[str]) -> bool:
+    """Ask before deleting a store's checkout.
+
+    The store counterpart to :func:`_confirm_adopt`, and it earns a confirmation
+    for the same reason: it deletes a directory. The difference is that this one is
+    ours to delete -- we cloned it -- so the danger is not that SpiriConfig
+    oversteps, but that the checkout may hold local edits the user never pushed, and
+    that apps installed from it will be left dangling. Both are named here, because
+    both are invisible until it is too late.
+    """
+    with ui.dialog() as dialog, ui.card().classes("w-full max-w-2xl"):
+        ui.label(f"Remove {store.slug}?").classes("text-lg font-bold")
+        ui.label(
+            "This deletes the store's checkout, including any local edits you have "
+            "not pushed. There is no undo besides adding the store again."
+        ).classes("text-sm")
+        if dangling:
+            ui.label(
+                f"{len(dangling)} installed app(s) point into it and will be left "
+                f"dangling (harmless, but worth uninstalling): "
+                + ", ".join(dangling)
+            ).classes("text-sm text-warning")
+
+        with ui.column().classes(f"w-full gap-1 {theme.COMMAND_CLASS} p-2"):
+            ui.label(str(store.remove_command())).classes("font-mono text-xs break-all")
+
+        with ui.row().classes("w-full justify-end gap-2"):
+            ui.button("Cancel", on_click=lambda: dialog.submit(False)).props("flat")
+            ui.button("Remove it", on_click=lambda: dialog.submit(True)).props(
+                "color=negative"
+            )
+
+    answer = bool(await dialog)
+    dialog.delete()
+    return answer
+
+
+def _store_header(store: Store, dangling: list[str], refresh) -> None:
+    """One store: where it came from, and the things you can do to it."""
     with ui.row().classes("w-full items-center gap-2 mt-4"):
         ui.label(store.slug).classes("text-xl font-bold")
-        ui.label(store.url).classes("text-xs text-gray-500 grow break-all")
+        ui.label(store.url or "(no remote)").classes(
+            "text-xs text-gray-500 grow break-all"
+        )
 
         async def do(commands: list[Command], title: str) -> None:
             await _run_in_dialog(f"{store.slug} — {title}", commands)
@@ -299,6 +387,23 @@ def _store_header(store: Store, refresh) -> None:
             "Merge the store's changes into your copy, keeping your edits. "
             "Rewrites files; restarts nothing."
         )
+
+        # Advanced only, like the app-level Adopt: removing a store is decluttered
+        # off the default view because it is a rare, deliberate act, not because the
+        # switch protects anything (it does not -- see :doc:`advanced`). The
+        # confirmation is the actual guard.
+        async def do_remove() -> None:
+            if not await _confirm_remove(store, dangling):
+                return
+            await do([store.remove_command()], "remove")
+
+        with advanced.only():
+            ui.button("Remove", icon="delete", on_click=do_remove).props(
+                "flat color=negative"
+            ).tooltip(
+                "Delete this store's checkout. Undoes the clone; leaves apps you "
+                "installed from it as dangling links."
+            )
 
 
 def _conflict_banner(store: Store, refresh) -> None:
@@ -350,11 +455,11 @@ def _conflict_banner(store: Store, refresh) -> None:
 
 def _empty() -> None:
     with ui.card().classes("w-full"):
-        ui.label("No app stores configured.").classes("text-lg")
+        ui.label("No app stores yet.").classes("text-lg")
         ui.label(
             "An app store is a git repository with one directory per app, each "
-            "containing a compose file. Point SpiriConfig at one by setting "
-            "SPIRICONFIG_APPSTORE_STORES to a JSON list of git URLs."
+            "containing a compose file. Press Add store above to clone one, or seed "
+            "one on every machine by setting SPIRICONFIG_APPSTORE_STORES."
         ).classes("text-sm text-gray-500")
         with advanced.only():
             ui.code(
@@ -390,13 +495,12 @@ def page(
                 _empty()
                 return
 
-            links = {
-                (i.store.slug, i.app_name): i
-                for i in await asyncio.to_thread(installed, config, compose_root)
-            }
+            installs = await asyncio.to_thread(installed, config, compose_root)
+            links = {(i.store.slug, i.app_name): i for i in installs}
 
             for store in configured:
-                _store_header(store, refresh)
+                dangling = [i.name for i in installs if i.store.slug == store.slug]
+                _store_header(store, dangling, refresh)
                 if not store.is_cloned:
                     ui.label("Not cloned yet.").classes("text-sm text-gray-500")
                     continue
@@ -440,6 +544,10 @@ def page(
             ui.timer(0.1, render, once=True)
 
     with ui.row().classes("items-center gap-2"):
+        ui.button(
+            "Add store", icon="add",
+            on_click=lambda: _add_store_dialog(config, refresh),
+        ).mark("add-store")
         ui.button("Refresh", icon="refresh", on_click=refresh).props("flat")
 
     refresh()

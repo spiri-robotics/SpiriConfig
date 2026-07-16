@@ -17,12 +17,19 @@ class AppStoreSettings(BaseSettings):
     )
 
     stores: list[str] = ["test_data/example-store"]
-    """Git URLs of app stores. ``SPIRICONFIG_APPSTORE_STORES``, as a JSON list.
+    """*Seed* git URLs of app stores. ``SPIRICONFIG_APPSTORE_STORES``, a JSON list.
 
     An app store is an ordinary git repository with one top-level directory per
     app, each containing a compose file. Nothing else. That is the whole format,
     which means anyone can host one, and a user can inspect one with ``git
     clone`` and read it with ``ls``.
+
+    Not the live list -- disk is (see :func:`spiriconfig_appstore.stores.stores`).
+    These are stores to *offer* on a machine that has none yet: each one that is
+    not already cloned shows up ready to clone, and once cloned it is an ordinary
+    store discovered from disk like any the user added themselves. Removing a store
+    in the UI deletes its checkout; a seed listed here then reappears as
+    not-yet-cloned, because this list says what to offer, not what must exist.
 
     The default is the example store this repository ships, built by
     ``./scripts/test-data.sh``. A git URL and a local path are the same thing to
