@@ -602,6 +602,41 @@ class TestThePage:
         await user.should_see("whoami")
         await user.should_see("nextcloud")
 
+    async def test_the_add_dialog_does_not_ask_for_a_login(
+        self, user: User, store, settings: AppStoreSettings, compose_root: Path
+    ) -> None:
+        """A login is a host's, not a store's, so Add is just a URL.
+
+        It points at the logins section rather than carrying credential fields of
+        its own.
+        """
+        web.build([_PinnedPlugin(settings, compose_root)])
+        await user.open("/appstore")
+        await user.should_see("whoami")
+        user.find("Add store").click()
+        await user.should_see("Add an app store")
+        await user.should_not_see("Access token")
+
+    async def test_the_logins_section_is_hidden_until_advanced(
+        self, user: User, store, settings: AppStoreSettings, compose_root: Path,
+        monkeypatch: pytest.MonkeyPatch, tmp_path: Path,
+    ) -> None:
+        """Managing host logins is a section on this page, behind advanced.
+
+        Decluttering, not a boundary (see advanced.py): the section is hidden with
+        advanced off and appears when it is on. HOME is redirected so the section
+        reads a throwaway credential file, not the developer's.
+        """
+        monkeypatch.setenv("HOME", str(tmp_path / "fakehome"))
+        (tmp_path / "fakehome").mkdir()
+        web.build([_PinnedPlugin(settings, compose_root)])
+        await user.open("/appstore")
+        await user.should_see("whoami")
+        await user.should_not_see("App store logins")
+
+        user.find("Advanced").click()
+        await user.should_see("App store logins")
+
     async def test_an_installed_app_says_so(
         self, user: User, store, settings: AppStoreSettings, compose_root: Path
     ) -> None:

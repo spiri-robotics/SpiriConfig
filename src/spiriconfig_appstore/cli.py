@@ -20,6 +20,12 @@ from spiriconfig.commands import Command, run, stream
 from spiriconfig_docker.config import docker_settings
 
 from spiriconfig_appstore.config import appstore_settings
+from spiriconfig_appstore.credentials import (
+    CredentialError,
+    forget_credentials,
+    logins as list_logins,
+    store_credentials,
+)
 from spiriconfig_appstore.installs import (
     Install,
     install_command,
@@ -184,6 +190,10 @@ def add(
     Adding a store *is* cloning it -- there is no list to edit, because the clone
     on disk is the record (see `appstore stores`). Afterwards its apps show up in
     `appstore list`, and you install them the usual way.
+
+    For a private store, run `appstore login <host>` first: the credential is
+    keyed on the host, so one login covers the clone here and the later image
+    pulls, and is shared by every store on that host.
     """
     settings = appstore_settings()
     store = store_for_url(settings, url)
@@ -199,6 +209,64 @@ def add(
     _execute_streaming([store.clone_command()], show=show)
     if not show:
         typer.echo(f"Added {store.slug}. See its apps with: spiriconfig appstore list")
+
+
+@app.command()
+def login(
+    host: Annotated[
+        str, typer.Argument(help="Host to log in to, e.g. gitea.example.com.")
+    ],
+    username: Annotated[
+        str, typer.Option("--username", "-u", prompt=True, help="Account username.")
+    ],
+) -> None:
+    """Log in to a private store's host, for both the git clone and the image pull.
+
+    The credential is keyed on the host, not on a store: one login is shared by
+    every store on that host, and stays put when you add or remove one. Because a
+    private Gitea serves its repositories and its registry from the same host, a
+    single token covers the clone and the pulls.
+
+    You are prompted for the token, so it never reaches your shell history. Use a
+    scoped token you can revoke, not your account password -- it is stored in
+    cleartext on this machine. Undo with `appstore logout <host>`.
+    """
+    settings = appstore_settings()
+    token = typer.prompt("Access token", hide_input=True)
+    try:
+        store_credentials(settings, host, username, token)
+    except CredentialError as exc:
+        raise _fail(str(exc)) from exc
+    typer.echo(f"Logged in to {host}.")
+
+
+@app.command()
+def logout(
+    host: Annotated[str, typer.Argument(help="Host to log out of.")],
+) -> None:
+    """Remove a host login from git and docker.
+
+    Keyed by host, so it clears the login for every store on that host -- there
+    was only ever one to share. Forgetting a host you were never logged into is
+    not an error.
+    """
+    settings = appstore_settings()
+    try:
+        forget_credentials(settings, host)
+    except CredentialError as exc:
+        raise _fail(str(exc)) from exc
+    typer.echo(f"Logged out of {host}.")
+
+
+@app.command()
+def logins() -> None:
+    """List the private-store host logins currently stored."""
+    current = list_logins()
+    if not current:
+        typer.echo("No logins yet. Add one with: spiriconfig appstore login <host>")
+        return
+    for entry in current:
+        typer.echo(f"{entry.host}\t{entry.username or '(no username)'}")
 
 
 @app.command()

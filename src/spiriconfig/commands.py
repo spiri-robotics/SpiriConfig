@@ -87,6 +87,7 @@ def run(
     command: Command,
     *,
     timeout: float | None = 60.0,
+    input: str | None = None,
     log: Logger = logger,
 ) -> Result:
     """Run ``command`` to completion and capture its output.
@@ -99,6 +100,12 @@ def run(
     overwhelmingly read-only queries -- statuses, listings -- and logging each
     one at INFO buries the commands that actually changed something.
 
+    ``input`` is written to the process's stdin and, crucially, is **never
+    logged** -- unlike :attr:`Command.argv`, which is. That asymmetry is the
+    point: it is the one channel for a secret a command must be told but that
+    must not appear in the log or in the copy-pasteable line. ``docker login
+    --password-stdin`` and ``git credential approve`` are exactly why it exists.
+
     Pass ``log`` to attribute the command to a plugin, e.g.
     ``log=logger.bind(plugin="docker")``.
     """
@@ -108,6 +115,7 @@ def run(
             list(command.argv),
             cwd=command.cwd,
             env=_popen_env(command),
+            input=input,
             capture_output=True,
             text=True,
             timeout=timeout,

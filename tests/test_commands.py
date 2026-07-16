@@ -9,6 +9,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+from loguru import logger
 
 from spiriconfig.commands import Command, CommandError, run, stream, stream_pty
 
@@ -88,6 +89,26 @@ class TestRun:
         stdout = result.stdout.strip()
         assert stdout.startswith("x:")
         assert len(stdout) > len("x:"), "PATH was lost when env was set"
+
+    def test_input_is_delivered_on_stdin(self) -> None:
+        result = run(Command(argv=["cat"]), input="a secret on stdin")
+        assert result.stdout == "a secret on stdin"
+
+    def test_input_is_never_logged(self) -> None:
+        """The one channel a secret may travel on must not leak into the log.
+
+        ``docker login --password-stdin`` and ``git credential approve`` rely on
+        this: the argv is logged, the stdin is not, and that is the whole reason
+        the token goes on stdin rather than in an argument.
+        """
+        logged: list[str] = []
+        recorder = logger.bind()
+        handle = logger.add(lambda message: logged.append(message), level="DEBUG")
+        try:
+            run(Command(argv=["cat"]), input="hunter2", log=recorder)
+        finally:
+            logger.remove(handle)
+        assert "hunter2" not in "".join(logged)
 
 
 class TestStream:

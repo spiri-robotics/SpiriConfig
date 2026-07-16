@@ -21,6 +21,12 @@ from spiriconfig_docker.config import docker_settings
 from spiriconfig_docker.stacks import Stack, find_compose_file
 
 from spiriconfig_appstore.config import AppStoreSettings, appstore_settings
+from spiriconfig_appstore.credentials import (
+    CredentialError,
+    forget_credentials,
+    logins,
+    store_credentials,
+)
 from spiriconfig_appstore.installs import Install, install_command, installed
 from spiriconfig_appstore.stores import (
     App,
@@ -411,6 +417,13 @@ async def _add_store_dialog(config: AppStoreSettings, refresh) -> None:
             f"{config.store_dir}; afterwards its apps appear below."
         ).classes("text-sm text-gray-500")
         url = ui.input("Git URL").classes("w-full").props("outlined").mark("add-store-url")
+        # A private store needs a login, but that is a *host* concern, not a
+        # per-store one -- one credential is shared by every store on a host -- so
+        # it lives in its own section (see _logins_section), not here.
+        ui.label(
+            "For a private store, add the host login first under App store logins "
+            "below (advanced)."
+        ).classes("text-xs text-gray-500")
 
         async def do_add() -> None:
             target = url.value.strip()
@@ -600,6 +613,81 @@ def _empty() -> None:
             ).classes("w-full text-xs")
 
 
+def _logins_section(config: AppStoreSettings) -> None:
+    """Manage the host logins private stores authenticate with.
+
+    Advanced-only, and a section rather than a field on the add dialog, because a
+    login is a *host's*, not a store's: one credential is shared by every store on
+    a host, outlives any of them, and is added and removed on its own schedule
+    (see :mod:`spiriconfig_appstore.credentials`). So this is where you log in to a
+    host once and where you log back out -- adding or removing a store never
+    touches it.
+    """
+    with advanced.only(), ui.card().classes("w-full mt-6"):
+        ui.label("App store logins").classes("text-lg font-bold")
+        ui.label(
+            "A username and access token per private host, shared by every store "
+            "on it and used for the git clone and the image pull alike. Stored in "
+            "cleartext on this machine — use a scoped access token you can revoke, "
+            "not your account password."
+        ).classes("text-sm text-gray-500")
+
+        listing = ui.column().classes("w-full gap-1")
+
+        def render_list() -> None:
+            listing.clear()
+            with listing:
+                current = logins()
+                if not current:
+                    ui.label("No logins yet.").classes("text-sm text-gray-500")
+                for login in current:
+                    with ui.row().classes("w-full items-center gap-2"):
+                        ui.label(login.host).classes("font-mono text-sm")
+                        ui.label(login.username or "(no username)").classes(
+                            "text-xs text-gray-500 grow"
+                        )
+
+                        async def do_forget(host: str = login.host) -> None:
+                            try:
+                                await asyncio.to_thread(forget_credentials, config, host)
+                            except CredentialError as exc:
+                                ui.notify(str(exc), type="negative", multi_line=True, timeout=0)
+                                return
+                            ui.notify(f"Logged out of {host}.", type="positive")
+                            render_list()
+
+                        ui.button(
+                            "Log out", icon="logout", on_click=do_forget
+                        ).props("flat color=negative").mark(f"logout-{login.host}")
+
+        with ui.row().classes("w-full items-end gap-2"):
+            host = ui.input("Host").props("outlined").classes("grow").mark("login-host")
+            user = ui.input("Username").props("outlined").classes("grow").mark("login-username")
+            token = (
+                ui.input("Access token")
+                .props("outlined type=password")
+                .classes("grow")
+                .mark("login-token")
+            )
+
+            async def do_login() -> None:
+                target = host.value.strip()
+                try:
+                    await asyncio.to_thread(
+                        store_credentials, config, target, user.value.strip(), token.value
+                    )
+                except CredentialError as exc:
+                    ui.notify(str(exc), type="negative", multi_line=True, timeout=0)
+                    return
+                ui.notify(f"Logged in to {target}.", type="positive")
+                host.value = user.value = token.value = ""
+                render_list()
+
+            ui.button("Log in", icon="login", on_click=do_login).mark("login-add")
+
+        render_list()
+
+
 def page(
     settings: AppStoreSettings | None = None,
     compose_dir: Path | None = None,
@@ -681,6 +769,8 @@ def page(
             on_click=lambda: _add_store_dialog(config, refresh),
         ).mark("add-store")
         ui.button("Refresh", icon="refresh", on_click=refresh).props("flat")
+
+    _logins_section(config)
 
     refresh()
 

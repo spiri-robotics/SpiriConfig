@@ -265,14 +265,32 @@ class Store:
         No ``cwd``: both the source and the target are absolute (see
         :func:`stores`), so this runs correctly from anywhere, and git creates
         the leading directories itself.
+
+        ``credential.helper=store`` lets a private store authenticate from the
+        credential a user saved when adding it (see
+        :mod:`spiriconfig_appstore.credentials`). It is on the line unconditionally
+        because it is harmless without one -- with no matching entry the helper
+        finds nothing and the clone proceeds exactly as before, anonymous for a
+        public store and prompting nowhere -- and putting it here keeps the token
+        itself off the command line, where it would otherwise have to live.
         """
         return Command(
-            argv=[self.settings.git_bin, "clone", self.url, str(self.path)],
+            argv=[
+                self.settings.git_bin,
+                "-c", "credential.helper=store",
+                "clone", self.url, str(self.path),
+            ],
         )
 
     def fetch_command(self) -> Command:
-        """Ask the remote what it has, without touching the working tree."""
-        return self._git("fetch", "origin")
+        """Ask the remote what it has, without touching the working tree.
+
+        Carries ``credential.helper=store`` for the same reason
+        :meth:`clone_command` does: a private store's periodic ``sync`` has to
+        authenticate too, from the same saved credential, and the flag is inert
+        when there is none.
+        """
+        return self._git("-c", "credential.helper=store", "fetch", "origin")
 
     def merge_command(self) -> Command:
         """Merge the fetched upstream into the checkout.
