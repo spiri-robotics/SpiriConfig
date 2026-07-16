@@ -62,6 +62,25 @@ async def _run_quietly(commands: list[Command], done: str) -> bool:
     return True
 
 
+def _stack_for(install: Install) -> Stack | None:
+    """The docker stack behind an installed app, or None if its compose file is gone.
+
+    An installed app is just a stack the docker plugin can see (see
+    :mod:`spiriconfig_appstore.installs`), so once we have found its compose file
+    we can drive it the same way the Apps page does -- to read its status, or to
+    bring it down.
+    """
+    compose_file = find_compose_file(install.link)
+    if compose_file is None:
+        return None
+    return Stack(
+        name=install.name,
+        path=install.link,
+        compose_file=compose_file,
+        settings=docker_settings(),
+    )
+
+
 def _is_up(install: Install) -> bool:
     """Whether the installed app has any containers right now.
 
@@ -77,16 +96,8 @@ def _is_up(install: Install) -> bool:
     :meth:`Stack.status` treats "cannot tell" as "no containers" -- so this never
     blocks an uninstall on a box that could not have started the app anyway.
     """
-    compose_file = find_compose_file(install.link)
-    if compose_file is None:
-        return False
-    stack = Stack(
-        name=install.name,
-        path=install.link,
-        compose_file=compose_file,
-        settings=docker_settings(),
-    )
-    return stack.status() != "down"
+    stack = _stack_for(install)
+    return stack is not None and stack.status() != "down"
 
 
 async def _run_in_dialog(title: str, commands: list[Command]) -> None:
@@ -183,6 +194,32 @@ async def _diff_dialog(entry: App) -> None:
     dialog.open()
 
 
+async def _confirm_stop(install: Install) -> bool:
+    """Ask to stop a running app that is in the way of an uninstall.
+
+    Uninstall only removes the symlink, and a running app whose symlink is gone
+    is orphaned (see :func:`_is_up`), so the app has to come down first. The old
+    behaviour was a wall of text telling the user to go to the Apps page and do
+    it themselves; this offers to do the one thing that clears the way, in one
+    click, and says nothing about symlinks.
+    """
+    with ui.dialog() as dialog, ui.card().classes("w-full max-w-md"):
+        ui.label(f"{install.name} is running").classes("text-lg font-bold")
+        ui.label(
+            "It has to be stopped before it can be uninstalled. Stop it now?"
+        ).classes("text-sm")
+        with ui.row().classes("w-full justify-end gap-2"):
+            ui.button("Cancel", on_click=lambda: dialog.submit(False)).props("flat")
+            ui.button("Stop it", on_click=lambda: dialog.submit(True)).props(
+                "color=primary"
+            )
+
+    # A dismissed dialog (escape, click-away) submits None, which is a "no".
+    answer = bool(await dialog)
+    dialog.delete()
+    return answer
+
+
 async def _confirm_adopt(install: Install) -> bool:
     """Ask before the one action here that cannot be undone.
 
@@ -273,29 +310,47 @@ def _app_card(
                     except StoreError as exc:
                         ui.notify(str(exc), type="negative", multi_line=True, timeout=0)
                         return
-                    # Instant filesystem op, no output: a toast, not the streaming
-                    # dialog the git actions use. See _run_quietly.
-                    if await _run_quietly([command], f"Installed {entry.name}"):
-                        refresh()
+                    # Symlink, then pull the app's images so a later `up` on the
+                    # Apps page starts from something already downloaded. The bare
+                    # `ln -s` used to be a silent toast; a pull streams for long
+                    # enough to watch, so this is the streaming dialog the git
+                    # actions use, showing both commands it ran. Pull fetches
+                    # images and starts nothing, so install still means "ready to
+                    # run", not "running" -- the promise the tooltip makes.
+                    stack = Stack(
+                        name=entry.name,
+                        path=entry.link_path(compose_dir),
+                        compose_file=entry.compose_file,
+                        settings=docker_settings(),
+                    )
+                    await _run_in_dialog(
+                        f"Install {entry.name}", [command, stack.pull()]
+                    )
+                    refresh()
 
                 ui.button("Install", icon="add", on_click=do_install).tooltip(
-                    f"Symlink {entry.name} into the compose directory. "
-                    f"Does not start it — use Apps for that."
+                    f"Symlink {entry.name} into the compose directory and pull its "
+                    f"images. Does not start it — use Apps for that."
                 )
             else:
                 async def do_uninstall(install: Install = install) -> None:
-                    # Refuse while the app is up: uninstall only unlinks, and a
-                    # running app with no symlink is one nothing here can reach to
-                    # stop. See _is_up.
+                    # A running app has to come down before its symlink goes, or
+                    # it is orphaned -- see _is_up. Offer to stop it here rather
+                    # than sending the user to another page to do it by hand.
                     if await asyncio.to_thread(_is_up, install):
-                        ui.notify(
-                            f"{install.name} is still up. Stop it first — Down, on "
-                            f"the Apps page. Uninstalling only removes the symlink, "
-                            f"and a running app with no symlink is one nothing here "
-                            f"can reach to bring down.",
-                            type="warning", multi_line=True, timeout=0,
-                        )
-                        return
+                        if not await _confirm_stop(install):
+                            return
+                        stack = _stack_for(install)
+                        if stack is not None:
+                            # Stop it, then remove the symlink: the two commands
+                            # the user would otherwise run on two pages, in one
+                            # terminal. Down streams, so it earns the dialog.
+                            await _run_in_dialog(
+                                f"Stop and uninstall {install.name}",
+                                [stack.down(), install.uninstall_command()],
+                            )
+                            refresh()
+                            return
                     if await _run_quietly(
                         [install.uninstall_command()], f"Uninstalled {install.name}"
                     ):
@@ -304,8 +359,8 @@ def _app_card(
                 ui.button(
                     "Uninstall", icon="link_off", on_click=do_uninstall,
                 ).props("flat").tooltip(
-                    "Remove the symlink. Deletes no files and no data. Stop the "
-                    "app first — a running app cannot be uninstalled."
+                    "Remove the symlink. Deletes no files and no data. If the app "
+                    "is running, you'll be asked to stop it first."
                 )
 
             if modified or updatable:
