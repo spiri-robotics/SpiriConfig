@@ -12,7 +12,7 @@ variables always win.
 
 | Variable | Default | Meaning |
 | --- | --- | --- |
-| `SPIRICONFIG_HOST` | `0.0.0.0` | Address the web UI binds to. |
+| `SPIRICONFIG_HOST` | `127.0.0.1` | Address the web UI binds to. Loopback by default; set `0.0.0.0` to expose it on the network. |
 | `SPIRICONFIG_PORT` | `8080` | Port the web UI binds to. |
 | `SPIRICONFIG_LOG_LEVEL` | `INFO` | `DEBUG`, `INFO`, `WARNING`, `ERROR`. |
 | `SPIRICONFIG_LOG_FILE` | *(none)* | Also log to this file, rotated at 10 MB. |

@@ -24,8 +24,13 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    host: str = "0.0.0.0"
-    """Address the web UI binds to. ``SPIRICONFIG_HOST``."""
+    host: str = "127.0.0.1"
+    """Address the web UI binds to. ``SPIRICONFIG_HOST``.
+
+    Defaults to loopback so a fresh install is not exposed to the network. Set
+    ``SPIRICONFIG_HOST=0.0.0.0`` to bind all interfaces once you have decided the
+    UI should be reachable from elsewhere.
+    """
 
     port: int = 8080
     """Port the web UI binds to. ``SPIRICONFIG_PORT``."""
