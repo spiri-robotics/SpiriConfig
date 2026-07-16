@@ -7,7 +7,10 @@ requires-python = ">=3.13"
 dependencies = [
     "loguru>=0.7.3",
     "nicegui>=3.14.0",
+    "pamela>=1.2.0",
     "pydantic-settings>=2.14.2",
+    # Pure-Python (ctypes over libpam), so it cross-compiles onto the Yocto/Debian
+    # drone images with no C build step. Backs the optional PAM login (SPIRICONFIG_AUTH).
     "pyyaml>=6.0.3",
     "typer>=0.26.8",
 ]

@@ -12,6 +12,8 @@ e.g. ``SPIRICONFIG_DOCKER_``.
 
 from __future__ import annotations
 
+from typing import Literal
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -58,6 +60,41 @@ class Settings(BaseSettings):
     Set this to something secret and stable, or per-person settings (advanced mode
     today, anything user-scoped later) reset every time the process restarts,
     because the cookie they were keyed on can no longer be verified.
+    """
+
+    auth: Literal["none", "pam"] = "none"
+    """Whether the web UI requires a login, and how. ``SPIRICONFIG_AUTH``.
+
+    ``none`` (the default) serves the UI to anyone who can reach the port, which is
+    right for a checkout on loopback and wrong the moment the UI is exposed. ``pam``
+    puts a login in front of every page, authenticating against the host's PAM stack
+    -- see :mod:`spiriconfig.auth`. A deployment that reaches the network turns this
+    on; nothing about a developer's loopback session changes until they do.
+
+    Off by default on purpose, the same reason the compose dir defaults somewhere
+    harmless: running out of a checkout should not suddenly demand a password.
+    """
+
+    auth_service: str = "login"
+    """PAM service to authenticate against. ``SPIRICONFIG_AUTH_SERVICE``.
+
+    The name of a file under ``/etc/pam.d/``. ``login`` exists on essentially every
+    system and reads the normal password stack, so it is the default. A deployment
+    that wants its own policy ships ``/etc/pam.d/spiriconfig`` and sets this to
+    ``spiriconfig``. Only consulted when :attr:`auth` is ``pam``.
+    """
+
+    auth_group: str = "wheel"
+    """Group whose members may log in, *when SpiriConfig runs as root*. ``SPIRICONFIG_AUTH_GROUP``.
+
+    Running as root, PAM can verify any account's password, so we would otherwise
+    let every system user (``nobody``, service accounts, ...) into the admin UI.
+    Membership of this group is the gate. ``wheel`` on Arch/RHEL, ``sudo`` on Debian
+    -- set it to match the box.
+
+    Ignored when SpiriConfig does not run as root: PAM can then only verify the one
+    account the process runs as, so there is nothing to gate. See
+    :func:`spiriconfig.auth.authenticate`.
     """
 
 

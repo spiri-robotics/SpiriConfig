@@ -162,9 +162,17 @@ boundary, and it is not trying to be.
 
 ### Permissions, if they ever happen, belong to the OS
 
-Not planned. But the intended design, so that nobody invents a worse one:
+The intended design, so that nobody invents a worse one:
 
 **Log the user in with PAM, then fork to that unix user.**
+
+The first half exists: `SPIRICONFIG_AUTH=pam` gates the UI behind a PAM login
+(see {mod}`spiriconfig.auth` and [configuration](configuration.md#authentication)),
+authenticating against the host's own accounts with no user list of ours. The
+*fork to that unix user* half does not — once logged in, everyone shares the one
+process. So today this is authentication, not authorization: it answers "does the
+machine trust this person?", and the paragraphs below are still the plan for
+answering "what may they do?".
 
 Authorisation is then whatever the kernel says it is -- file modes, group
 membership, whether they are in the `docker` group. No role model, no ACL table,

@@ -18,6 +18,41 @@ variables always win.
 | `SPIRICONFIG_LOG_FILE` | *(none)* | Also log to this file, rotated at 10 MB. |
 | `SPIRICONFIG_ADVANCED` | `false` | Default for [advanced mode](advanced.md), for someone who has not chosen. |
 | `SPIRICONFIG_STORAGE_SECRET` | *(generated)* | Signs the cookie per-person settings are keyed on. Set it, or those settings reset on every restart. |
+| `SPIRICONFIG_AUTH` | `none` | `none` or `pam`. `pam` puts a login in front of every page. See [Authentication](#authentication). |
+| `SPIRICONFIG_AUTH_SERVICE` | `login` | PAM service (a file under `/etc/pam.d/`) to authenticate against. |
+| `SPIRICONFIG_AUTH_GROUP` | `wheel` | Group whose members may log in, *when SpiriConfig runs as root*. `sudo` on Debian. |
+
+## Authentication
+
+By default the web UI has no login: on loopback, in a checkout, that is the point.
+Set `SPIRICONFIG_AUTH=pam` and every page requires a password, checked against the
+host's PAM stack — the same accounts that can `ssh` in or `sudo`, no separate user
+list of ours. Turn it on for any deployment the UI can be reached from off-box;
+`spiriconfig serve` warns if you bind a non-loopback address and leave it off.
+
+Who can log in depends on whether SpiriConfig runs as root, because only root can
+verify another account's password:
+
+- **As root**, it can authenticate any system user, so a group gates who counts as
+  an administrator. Membership of `SPIRICONFIG_AUTH_GROUP` (default `wheel`) is the
+  gate — set it to `sudo` on Debian, or to whatever group your admins are in.
+- **Not as root**, it can only authenticate the one account it runs as. That is the
+  only login the page will accept (it prefills the name for you), and the group
+  setting does not apply.
+
+`login` is used as the PAM service because it exists on essentially every system.
+A deployment that wants its own policy can drop a `/etc/pam.d/spiriconfig` file and
+set `SPIRICONFIG_AUTH_SERVICE=spiriconfig`.
+
+Set `SPIRICONFIG_STORAGE_SECRET` when auth is on: it signs the session cookie, and
+without a stable one everybody is logged out every time the process restarts.
+
+:::{note}
+This is authentication, not authorization. Once logged in, everyone drives the
+same process with the same access — the plan is to fork to the logged-in unix user
+so the kernel decides what they may do, but that half does not exist yet. Until it
+does, anyone you let log in can do anything the UI can. See [design](design.md).
+:::
 
 ## Docker plugin
 

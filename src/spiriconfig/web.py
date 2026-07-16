@@ -16,7 +16,7 @@ import secrets
 from loguru import logger
 from nicegui import app, ui
 
-from spiriconfig import advanced, theme
+from spiriconfig import advanced, auth, theme
 from spiriconfig.config import Settings
 from spiriconfig.plugins import Plugin, discover
 
@@ -80,6 +80,10 @@ def _layout(plugins: list[Plugin], current: str | None = None) -> None:
         ).mark("sidebar-toggle").tooltip("Show or hide the sidebar")
         with ui.link(target="/").classes("no-underline text-white"):
             ui.label("SpiriConfig").classes("text-xl font-bold")
+
+        # Draws nothing unless someone is logged in, so it is safe with auth off:
+        # a session that never authenticated carries no username to show.
+        auth.header_account()
 
 
 def _index(plugins: list[Plugin]) -> None:
@@ -165,21 +169,52 @@ def _storage_secret(config: Settings) -> str:
     """The secret signing the cookie that per-person settings are keyed on.
 
     Generated if unset, so that a first run works with no configuration at all --
-    but say so, because the consequence (everyone's advanced-mode setting resets
-    on restart) is otherwise a confusing little mystery.
+    but say so, because the consequence is otherwise a confusing little mystery.
+    With auth on that consequence has teeth (every login drops on restart), so the
+    warning sharpens to match.
     """
     if config.storage_secret:
         return config.storage_secret
-    logger.warning(
-        "no SPIRICONFIG_STORAGE_SECRET set: using a temporary one, so per-person "
-        "settings such as advanced mode will reset when this process restarts"
-    )
+    if config.auth != "none":
+        logger.warning(
+            "no SPIRICONFIG_STORAGE_SECRET set: using a temporary one, so everyone "
+            "is logged out whenever this process restarts. Set it to something "
+            "secret and stable for a real deployment"
+        )
+    else:
+        logger.warning(
+            "no SPIRICONFIG_STORAGE_SECRET set: using a temporary one, so per-person "
+            "settings such as advanced mode will reset when this process restarts"
+        )
     return secrets.token_urlsafe(32)
+
+
+def _is_loopback(host: str) -> bool:
+    """Whether ``host`` keeps the UI on the box, so no-auth is not exposure."""
+    return host in {"localhost", "::1"} or host.startswith("127.")
 
 
 def serve(config: Settings, plugins: list[Plugin] | None = None) -> None:
     """Build the UI and block, serving it."""
     build(plugins)
+
+    if config.auth == "pam":
+        # Order matters only in that both happen before ui.run starts the server:
+        # the login route has to exist to be reachable, and the middleware has to
+        # be mounted before the first request it is meant to gate.
+        auth.login_page(config)
+        app.add_middleware(auth.AuthMiddleware)
+        logger.info("PAM login enabled (service {!r})", config.auth_service)
+    elif not _is_loopback(config.host):
+        # The one genuinely dangerous default: reachable off-box, no login. Docker
+        # socket access is root-equivalent, so this is handing the machine out.
+        logger.warning(
+            "web UI on {} has no authentication (SPIRICONFIG_AUTH=none) and is "
+            "reachable off this host; anyone who can connect has full control. "
+            "Set SPIRICONFIG_AUTH=pam",
+            config.host,
+        )
+
     app.on_startup(lambda: logger.info("web UI on http://{}:{}", config.host, config.port))
     ui.run(
         host=config.host,
