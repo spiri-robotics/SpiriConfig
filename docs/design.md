@@ -19,6 +19,11 @@ is a bug, however convenient it seems.
 
 ## Consequences
 
+### Traditional devops workflows continue to work
+
+You can manage a drone with ansible, terraform, whatever sysadmin tools make sense for
+managing your cluster of drones and sensor platforms.
+
 ### We shell out, on purpose
 
 Everything SpiriConfig does to the system is done by running the command a human
@@ -64,7 +69,7 @@ a read boundary would be mangled; the browser reassembles the stream.
 interaction — the person still has to *read* the thing. So the dialog returns
 when it is dismissed, not when the command exits.
 
-This is not fussiness, it is a bug we shipped. Every action does
+Every action does
 `await _run_in_dialog(...)` and then `refresh()`, and refresh clears the
 container the dialog was created inside — deleting it. `up` and `pull` stream for
 long enough that nobody noticed. `logs` returns instantly, so the modal appeared
