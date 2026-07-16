@@ -130,3 +130,58 @@ class TestConfig:
         printed = Path(result.stdout.strip())
         assert printed == compose_dir / "hello" / "compose.yaml"
         assert printed.is_file()
+
+
+class TestSettingsReset:
+    """`spiriconfig docker settings <app> --reset KEY`.
+
+    The CLI half of the form's per-field reset button: it restores a setting to the
+    `default:` its app declared, through the same `.env`-writing, compose-checked
+    door every other settings change goes through.
+    """
+
+    @docker_required
+    def test_reset_restores_the_declared_default(
+        self, configurable, compose_dir: Path
+    ) -> None:
+        env_file = compose_dir / "configurable" / ".env"
+        env_file.write_text("GREETING=changed\n")
+
+        result = runner.invoke(
+            docker_app, ["settings", "configurable", "--reset", "GREETING"]
+        )
+        assert result.exit_code == 0, result.output
+
+        from spiriconfig_docker.env import read as read_env
+
+        assert read_env(env_file)["GREETING"] == "hello"
+
+    @docker_required
+    def test_a_later_assignment_wins_over_a_reset_on_the_same_line(
+        self, configurable, compose_dir: Path
+    ) -> None:
+        """`--reset` is applied first, so an explicit value beside it is the more
+        specific, later word and is the one that lands."""
+        env_file = compose_dir / "configurable" / ".env"
+        env_file.write_text("GREETING=changed\n")
+
+        result = runner.invoke(
+            docker_app,
+            ["settings", "configurable", "--reset", "GREETING", "GREETING=explicit"],
+        )
+        assert result.exit_code == 0, result.output
+
+        from spiriconfig_docker.env import read as read_env
+
+        assert read_env(env_file)["GREETING"] == "explicit"
+
+    def test_resetting_an_unknown_setting_is_a_clean_error(
+        self, configurable
+    ) -> None:
+        """No docker needed: the name is rejected before anything is written."""
+        result = runner.invoke(
+            docker_app, ["settings", "configurable", "--reset", "NOPE"]
+        )
+        assert result.exit_code == 1
+        assert "NOPE" in result.output
+        assert "Nothing was changed" in result.output

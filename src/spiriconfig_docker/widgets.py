@@ -48,6 +48,10 @@ TRUTHY = frozenset({"true", "1", "yes", "on"})
 #: ``setting-GRAFANA_PORT``. See :func:`render`.
 MARKER_PREFIX = "setting-"
 
+#: NiceGUI marker put on each field's reset button, followed by the variable it
+#: resets: ``reset-GRAFANA_PORT``. See :func:`render`.
+RESET_PREFIX = "reset-"
+
 
 def _to_bool(text: str, _: Field) -> bool:
     return text.strip().lower() in TRUTHY
@@ -253,6 +257,27 @@ class Bound:
         """What the user has put in, as the ``.env`` will hold it."""
         return self.widget.format(self.element.value)
 
+    @property
+    def default(self) -> Any:
+        """The field's declared default, parsed into the element's ``value`` type.
+
+        The same trip the ``.env``'s text takes on the way into the widget, so that
+        comparing it against ``element.value`` is comparing like with like -- a
+        number widget holds ``8080.0``, and ``field.default`` is the string
+        ``"8080"``, and only one of those is what the widget will read back.
+        """
+        return self.widget.parse(self.field.default, self.field)
+
+    def reset(self) -> None:
+        """Put the widget back to the field's declared default.
+
+        Only the widget -- nothing is written. The reset is undone by a Cancel and
+        made real by a Save, exactly like typing into the box by hand, because that
+        is all it is: :meth:`value` reads the element back whatever put the value
+        there.
+        """
+        self.element.set_value(self.default)
+
 
 def render(field: Field, value: str) -> Bound:
     """Render one field, showing ``value``, and return a handle on it.
@@ -266,6 +291,18 @@ def render(field: Field, value: str) -> Bound:
 
     The whole column is marked rather than the widget alone. A field is a widget
     *and* its help text, and half a field left on the page would be worse than none.
+
+    The widget stays a *direct* child of the column, with the help text and the
+    reset button on a row of their own beneath it. That is not just tidy: the mark
+    lands one level above the widget, and :func:`spiriconfig.advanced.mark` is on the
+    column, so "the field" the switch reveals and "the field" a test reaches for from
+    the widget are the same element either way.
+
+    The reset button appears only when the value has drifted from the default (see
+    :meth:`Bound.default`), and puts the widget back to it. A reset button on a field
+    already at its default is a button that does nothing, and one on every field is
+    clutter, so it shows itself when there is something to undo and hides again the
+    moment the value is back.
     """
     widget = REGISTRY[field.widget]
     with ui.column().classes("w-full gap-1") as column:
@@ -275,11 +312,43 @@ def render(field: Field, value: str) -> Bound:
         # to have -- `label:` is optional, and two apps may well both call something
         # "Port". Tests find widgets by it, and so can anything else driving the page.
         element.mark(f"{MARKER_PREFIX}{field.env}")
-        if field.help:
-            ui.label(field.help).classes("text-xs text-gray-500")
+        bound = Bound(field=field, element=element, widget=widget)
+
+        with ui.row().classes("w-full items-center gap-2"):
+            if field.help:
+                ui.label(field.help).classes("text-xs text-gray-500")
+            # `ml-auto` pins the reset to the right whether or not there is help text
+            # to its left -- the alternative, an empty spacer when there is none, is a
+            # second way to say the same thing and a second thing to keep in step.
+            reset = (
+                ui.button(icon="restart_alt", on_click=bound.reset)
+                .props("flat dense round size=sm")
+                .classes("ml-auto")
+                .mark(f"{RESET_PREFIX}{field.env}")
+            )
+            reset.tooltip(_reset_tooltip(field))
+
+            def sync_reset() -> None:
+                reset.set_visibility(element.value != bound.default)
+
+            # Fires on a hand edit and on the reset's own `set_value` alike, so the
+            # button that undid the change is the same event that hides it again.
+            element.on_value_change(sync_reset)
+            sync_reset()
     if field.advanced:
         advanced.mark(column)
-    return Bound(field=field, element=element, widget=widget)
+    return bound
+
+
+def _reset_tooltip(field: Field) -> str:
+    """The reset button's tooltip, naming the default unless it is a secret.
+
+    Showing which value it restores is the useful thing -- except for a password,
+    whose default is the one value not to print onto the page beside its own box.
+    """
+    if field.default and field.widget != "password":
+        return f"Reset to default ({field.default})"
+    return "Reset to default"
 
 
 def form(fields: list[Field], values: dict[str, str]) -> list[Bound]:
@@ -295,6 +364,7 @@ def values(bound: list[Bound]) -> dict[str, str]:
 __all__ = [
     "MARKER_PREFIX",
     "REGISTRY",
+    "RESET_PREFIX",
     "TRUTHY",
     "Bound",
     "Widget",

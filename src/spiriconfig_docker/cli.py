@@ -231,6 +231,14 @@ def settings(
             help="Settings to change. With none, the current ones are listed.",
         ),
     ] = None,
+    reset: Annotated[
+        list[str] | None,
+        typer.Option(
+            "--reset",
+            help="Reset a setting to its declared default. Repeatable, and applied "
+            "before any KEY=VALUE, so `--reset PORT PORT=9000` still ends at 9000.",
+        ),
+    ] = None,
     apply: Annotated[
         bool,
         typer.Option("--apply", help="Run `up -d` afterwards, so the change takes effect."),
@@ -244,7 +252,9 @@ def settings(
 
     Writes the same ``.env`` the web UI's settings page writes, with the same
     validation in front of it -- the CLI is not a back door around the form's
-    rules, it is the same door.
+    rules, it is the same door. ``--reset`` is that door's other handle: the form's
+    per-field reset button, spelled for a shell, restoring a field to the ``default:``
+    its app declared.
     """
     stack_settings = _settings(stack)
 
@@ -255,12 +265,24 @@ def settings(
         )
         return
 
-    if not assignments:
+    if not assignments and not reset:
         _list_settings(stack_settings, show_secrets=show_secrets)
         return
 
     values = dict(stack_settings.values())
-    for assignment in assignments:
+
+    # Resets first, so a `--reset PORT PORT=9000` on the same line lands on 9000
+    # rather than being undone by its own reset -- the explicit value is the later,
+    # more specific word about what the user wants.
+    for key in reset or []:
+        try:
+            field = app_settings.get(stack_settings, key)
+        except SettingsError as exc:
+            typer.secho(f"{exc}. Nothing was changed.", fg=typer.colors.RED, err=True)
+            raise typer.Exit(1) from exc
+        values[key] = field.default
+
+    for assignment in assignments or []:
         key, separator, value = assignment.partition("=")
         if not separator:
             typer.secho(

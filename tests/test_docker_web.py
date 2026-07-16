@@ -551,6 +551,91 @@ class TestTheSettingsForm:
         await user.should_see(str(configurable.path / ".env"))
 
 
+class TestResettingAFieldToItsDefault:
+    """The per-field reset button.
+
+    It restores the widget to the `default:` the app declared -- the value the form
+    offered before anyone touched it -- and it is there only when there is something
+    to undo, so a form nobody has changed does not wear a reset on every field.
+    """
+
+    async def _open(self, user: User, settings: DockerSettings) -> None:
+        _a_browser_that_answers(user)
+        web.build([_DockerPage(settings)])
+        await user.open("/docker")
+        await user.should_see("configurable")
+        user.find("Settings").click()
+        await user.should_see("configurable — settings")
+
+    async def test_a_field_at_its_default_has_no_reset_button(
+        self, user: User, settings: DockerSettings, configurable: Stack
+    ) -> None:
+        """A fresh form shows every field at its default, so there is nothing to
+        reset and the button hides itself -- which `should_not_see` is exactly the
+        check for, since a hidden element is one the page does not show."""
+        await self._open(user, settings)
+        await user.should_not_see(marker="reset-GREETING")
+
+    async def test_the_button_appears_once_the_value_drifts(
+        self, user: User, settings: DockerSettings, configurable: Stack
+    ) -> None:
+        """A live value change reveals the reset. `set_value` rather than `type`,
+        because it is what fires the change event the harness leaves out of a
+        simulated keystroke -- a real q-input emits it as you type, which is why this
+        form's own validation lights up under the box."""
+        await self._open(user, settings)
+        await user.should_not_see(marker="reset-GREETING")
+
+        user.find(marker="setting-GREETING").elements.pop().set_value("something else")
+        await user.should_see(marker="reset-GREETING")
+
+    async def test_reset_puts_a_changed_text_field_back(
+        self, user: User, settings: DockerSettings, configurable: Stack
+    ) -> None:
+        """Set in the file, shown in the box, and put back by the button -- without
+        touching the file, which a Cancel would leave exactly as it was."""
+        (configurable.path / ".env").write_text("GREETING=from-the-file\n")
+        await self._open(user, settings)
+
+        greeting = user.find(marker="setting-GREETING").elements.pop()
+        assert greeting.value == "from-the-file"
+
+        user.find(marker="reset-GREETING").click()
+        assert greeting.value == "hello"
+
+        # Having undone the change, the button has nothing left to do and retires.
+        await user.should_not_see(marker="reset-GREETING")
+
+    async def test_reset_works_for_a_number_widget(
+        self, user: User, settings: DockerSettings, configurable: Stack
+    ) -> None:
+        """The default takes the same trip through the widget the .env's text does --
+        `"8080"` the string becomes `8080` the number -- so the reset restores, and
+        compares to decide its own visibility, like with like."""
+        (configurable.path / ".env").write_text("PORT=9000\n")
+        await self._open(user, settings)
+
+        port = user.find(marker="setting-PORT").elements.pop()
+        assert port.value == 9000
+
+        user.find(marker="reset-PORT").click()
+        assert port.value == 8080
+
+    async def test_reset_is_not_written_to_the_file_on_its_own(
+        self, user: User, settings: DockerSettings, configurable: Stack
+    ) -> None:
+        """Reset is a change to the widget, not to disk. Dismissing the form after a
+        reset must leave the file it never saved exactly as it was found -- the same
+        bargain typing into the box and cancelling makes."""
+        (configurable.path / ".env").write_text("GREETING=from-the-file\n")
+        await self._open(user, settings)
+
+        user.find(marker="reset-GREETING").click()
+        user.find("Cancel").click()
+
+        assert (configurable.path / ".env").read_text() == "GREETING=from-the-file\n"
+
+
 class TestAnAppCanMarkItsOwnSettingsAdvanced:
     """`advanced: true` on a field in `x-spiri-settings`.
 
