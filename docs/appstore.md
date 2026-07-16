@@ -30,12 +30,15 @@ Everything below is a convenience on top of that.
 
 ```console
 $ export SPIRICONFIG_APPSTORE_STORES='["https://github.com/spiri/spiri-apps"]'
-$ spiriconfig appstore sync
+$ spiriconfig appstore check
 ```
 
-`sync` clones stores you have not got yet, and fetches the ones you have. It is
+`check` clones stores you have not got yet, and fetches the ones you have. It is
 safe to run at any time: fetching only updates git's idea of what the remote has,
-and changes no installed app.
+and changes no installed app -- it is what makes `list`'s "update available"
+markers truthful. The web UI fetches every store once on startup, and again
+whenever you press **Check for updates**, so the same markers stay honest there
+without you running anything.
 
 You can configure several stores. If two of them have an app with the same name,
 say which you mean: `spiriconfig appstore install spiri-apps/whoami`.
@@ -280,7 +283,7 @@ managing the containers on your actual machine. A deployment sets absolute paths
 
 ```console
 $ ./scripts/test-data.sh
-$ uv run spiriconfig appstore sync
+$ uv run spiriconfig appstore check
 $ uv run spiriconfig appstore install whoami
 $ uv run spiriconfig docker up whoami
 $ curl localhost:8080

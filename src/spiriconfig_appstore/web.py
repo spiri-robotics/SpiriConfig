@@ -32,6 +32,7 @@ from spiriconfig_appstore.stores import (
     App,
     Store,
     StoreError,
+    check_plan,
     store_for_url,
     stores,
     update_plan,
@@ -515,11 +516,6 @@ def _store_header(store: Store, dangling: list[str], refresh) -> None:
             ui.badge("conflict", color="negative")
             return
 
-        ui.button(
-            "Sync", icon="sync",
-            on_click=lambda: do([store.fetch_command()], "fetch"),
-        ).props("flat").tooltip("Fetch from the remote. Changes no installed app.")
-
         async def do_update() -> None:
             try:
                 plan = update_plan(store)
@@ -763,11 +759,37 @@ def page(
         with container.parent_slot:
             ui.timer(0.1, render, once=True)
 
+    async def do_check() -> None:
+        """Fetch every cloned store, then re-render so the markers are current.
+
+        One button for all of them, because "check for updates" is not a per-store
+        question a user thinks in: they want to know whether anything, anywhere,
+        has an update -- and a fetch is cheap and touches nothing installed. A
+        store still to be cloned has its own Clone button; there is nothing to
+        check on it yet.
+        """
+        plan = await asyncio.to_thread(check_plan, config)
+        if not plan:
+            ui.notify("No cloned stores to check yet.", type="info")
+            return
+        # Quiet, not a streaming dialog: a fetch that finds nothing prints nothing,
+        # so the terminal dialog every git action here uses would open on a black
+        # rectangle and sit there waiting to be dismissed. The commands still go to
+        # the log; see :func:`_run_quietly`.
+        await _run_quietly(plan, "Checked every store for updates.")
+        refresh()
+
     with ui.row().classes("items-center gap-2"):
         ui.button(
             "Add store", icon="add",
             on_click=lambda: _add_store_dialog(config, refresh),
         ).mark("add-store")
+        ui.button(
+            "Check for updates", icon="sync", on_click=do_check,
+        ).props("flat").tooltip(
+            "Fetch every store from its remote. Changes no installed app; only "
+            "refreshes which apps show an update."
+        )
         ui.button("Refresh", icon="refresh", on_click=refresh).props("flat")
 
     _logins_section(config)
@@ -777,3 +799,29 @@ def page(
 
 def _flags(entry: App) -> tuple[bool, bool]:
     return entry.is_modified(), entry.has_update()
+
+
+async def fetch_on_startup(config: AppStoreSettings | None = None) -> None:
+    """Fetch every cloned store once, when the web server boots.
+
+    The "update available" markers compare each checkout against the *last
+    fetched* state of its remote, so they only tell the truth after a fetch.
+    Doing it once at startup means a user who never presses "Check for updates"
+    still opens the page to honest markers, without paying a git round-trip on
+    every page render.
+
+    Deliberately quiet and forgiving. There is no client to show a dialog to yet,
+    so this logs and nothing more. It runs each fetch off the event loop, and a
+    fetch that fails (an unreachable remote, no network at boot) is logged and
+    stepped over rather than raised: a stale marker is a smaller problem than a
+    UI that will not come up because one remote was down. It is launched as a
+    background task (see :meth:`AppStorePlugin.on_startup`) precisely so a slow
+    remote cannot hold the server back from serving.
+    """
+    config = config or appstore_settings()
+    for command in await asyncio.to_thread(check_plan, config):
+        log.info("startup fetch: $ {}", command)
+        try:
+            (await asyncio.to_thread(run, command, log=log)).check()
+        except CommandError as exc:
+            log.warning("startup fetch failed, leaving markers as they were: {}", exc)

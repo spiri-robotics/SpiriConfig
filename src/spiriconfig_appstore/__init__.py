@@ -38,5 +38,18 @@ class AppStorePlugin(Plugin):
 
         web.page()
 
+    async def on_startup(self) -> None:
+        # Fetch every cloned store once, so the "update available" markers are
+        # honest the first time anyone opens the page. Launched as a background
+        # task and returned from immediately: the fetch reaches the network, and
+        # the server must not wait on a slow remote before it starts serving.
+        from nicegui import background_tasks
+
+        from spiriconfig_appstore import web
+
+        background_tasks.create(
+            web.fetch_on_startup(), name="appstore-startup-fetch",
+        )
+
 
 __all__ = ["AppStorePlugin"]

@@ -26,6 +26,7 @@ from spiriconfig_appstore.config import AppStoreSettings
 from spiriconfig_appstore.installs import install_command, installed, uninstall
 from spiriconfig_appstore.stores import (
     StoreError,
+    check_plan,
     find_app,
     remote_url,
     slug_for,
@@ -105,7 +106,7 @@ def settings(upstream: Path, tmp_path: Path) -> AppStoreSettings:
 
 @pytest.fixture
 def store(settings: AppStoreSettings):
-    """The store, cloned -- i.e. the state right after `appstore sync`."""
+    """The store, cloned -- i.e. the state right after `appstore check`."""
     only = stores(settings)[0]
     only.path.parent.mkdir(parents=True, exist_ok=True)
     run(only.clone_command()).check()
@@ -424,6 +425,33 @@ class TestUpdates:
         assert not any("commit" in c.argv for c in plan)
 
 
+class TestCheck:
+    """`check` / "Check for updates": fetch every cloned store, touch nothing else."""
+
+    def test_check_makes_an_update_visible(self, store, upstream: Path) -> None:
+        """The point of checking: the marker is a lie until a fetch happens."""
+        app = store.app("whoami")
+        _bump_upstream(upstream, "whoami:v1.10.1", "whoami:v1.11.0", "bump")
+        assert not app.has_update()  # the remote moved, but we have not looked
+
+        for command in check_plan(store.settings):
+            run(command).check()
+
+        assert app.has_update()
+
+    def test_check_skips_a_store_that_is_not_cloned(
+        self, settings: AppStoreSettings
+    ) -> None:
+        """A seed has nothing to fetch; its Clone action is what brings it down."""
+        assert check_plan(settings) == []
+
+    def test_check_only_fetches(self, store) -> None:
+        """It is half of git on purpose: no merge, no commit, no working-tree change."""
+        verbs = {verb for command in check_plan(store.settings) for verb in command.argv}
+        assert "fetch" in verbs
+        assert "merge" not in verbs and "commit" not in verbs
+
+
 @pytest.fixture
 def conflicted(store, upstream: Path, compose_root: Path):
     """A store mid-merge, because the user and the store changed the same line."""
@@ -667,11 +695,13 @@ class TestThePage:
         await user.open("/appstore")
         await user.should_see("whoami")
 
-        # Sync, because there is exactly one of it -- every app has its own
-        # Install button, so finding "Install" by label is ambiguous. Any dialog
-        # exercises the same path: it refreshes the page when it closes.
-        user.find("Sync").click()
-        await user.should_see(f"{store.slug} — fetch")
+        # Update, because there is exactly one of it -- one store, one per-store
+        # Update button -- whereas every app has its own Install button, so finding
+        # "Install" by label is ambiguous. (Check for updates is quiet: it toasts
+        # rather than opening a dialog.) Any dialog exercises the same path: it
+        # refreshes the page when it closes.
+        user.find("Update").click()
+        await user.should_see(f"{store.slug} — update")
         await asyncio.sleep(1.0)
 
         user.find("Close").click()

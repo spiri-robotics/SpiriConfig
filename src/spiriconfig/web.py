@@ -196,7 +196,15 @@ def _is_loopback(host: str) -> bool:
 
 def serve(config: Settings, plugins: list[Plugin] | None = None) -> None:
     """Build the UI and block, serving it."""
-    build(plugins)
+    found = discover() if plugins is None else plugins
+    build(found)
+
+    # Per-process startup, distinct from per-page render: a plugin may want to do
+    # work once when the server comes up (the app store fetches its stores here, so
+    # its "update available" markers are truthful on the first page load). The base
+    # method is a no-op, so this costs nothing for the plugins that do not use it.
+    for plugin in found:
+        app.on_startup(plugin.on_startup)
 
     if config.auth == "pam":
         # Order matters only in that both happen before ui.run starts the server:

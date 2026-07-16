@@ -146,7 +146,7 @@ def list_stores() -> None:
     width = max(len(s.slug) for s in configured)
     for store in configured:
         if not store.is_cloned:
-            state = "not cloned (run: appstore sync)"
+            state = "not cloned (run: appstore check)"
         elif store.in_merge:
             state = "UPDATE STOPPED ON A CONFLICT (run: appstore resolve)"
         elif store.is_dirty():
@@ -157,11 +157,16 @@ def list_stores() -> None:
 
 
 @app.command()
-def sync(show: ShowOption = False) -> None:
-    """Clone any missing stores and fetch the rest. Changes no installed app.
+def check(show: ShowOption = False) -> None:
+    """Check every store for updates. Changes no installed app.
 
-    Safe to run whenever: fetching only updates git's idea of what the remote
-    has. Installed apps keep the exact files they had until `update` merges.
+    Fetches each cloned store, and clones any you have configured but not got
+    yet -- you cannot check a store that is not on disk. "Check" is deliberately
+    only half of git: fetching updates git's idea of what the remote has, which
+    is what makes `list`'s "update available" markers truthful, but installed
+    apps keep the exact files they had until `update` merges the changes in.
+
+    Safe to run whenever, and as often as you like.
     """
     settings = appstore_settings()
     configured = stores(settings)
@@ -201,7 +206,7 @@ def add(
     if store.is_cloned:
         raise _fail(
             f"{store.slug!r} is already here ({store.path}). Remove it first if you "
-            f"want to re-add it, or run `appstore sync` to fetch its latest."
+            f"want to re-add it, or run `appstore check` to fetch its latest."
         )
 
     if not show:
@@ -357,7 +362,7 @@ def update(
     settings = appstore_settings()
     cloned = [s for s in stores(settings) if s.is_cloned]
     if not cloned:
-        typer.echo("No stores cloned yet. Run: spiriconfig appstore sync")
+        typer.echo("No stores cloned yet. Run: spiriconfig appstore check")
         return
 
     try:
@@ -447,7 +452,7 @@ def list_apps() -> None:
 
     cloned = [s for s in stores(settings) if s.is_cloned]
     if not cloned:
-        typer.echo("No stores cloned yet. Run: spiriconfig appstore sync")
+        typer.echo("No stores cloned yet. Run: spiriconfig appstore check")
         return
 
     links = {i.app_name: i for i in installed(settings, compose_dir)}
@@ -587,7 +592,7 @@ def diff(name: AppArg, show: ShowOption = False) -> None:
 
     The two halves of an update, separately, before you run one. "Yours" is
     against the version you have checked out; "store" is against what was
-    fetched, so run `appstore sync` first if you want it to be current.
+    fetched, so run `appstore check` first if you want it to be current.
     """
     entry = _app(name)
 

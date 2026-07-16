@@ -286,7 +286,7 @@ class Store:
         """Ask the remote what it has, without touching the working tree.
 
         Carries ``credential.helper=store`` for the same reason
-        :meth:`clone_command` does: a private store's periodic ``sync`` has to
+        :meth:`clone_command` does: a private store's periodic ``check`` has to
         authenticate too, from the same saved credential, and the flag is inert
         when there is none.
         """
@@ -527,6 +527,24 @@ def update_plan(store: Store, *, discard_local: bool = False) -> list[Command]:
     return plan
 
 
+def check_plan(settings: AppStoreSettings) -> list[Command]:
+    """A fetch for every cloned store: "check for updates", across the board.
+
+    One ``git fetch`` per store that is actually on disk. A store that is only a
+    seed (not cloned yet) has nothing to check and is skipped -- its own Clone
+    action is what brings it down.
+
+    This is the whole of what "check for updates" does, and it is deliberately
+    only half of git. Fetching never touches a working tree: it updates git's
+    record of where the remote is, which is exactly what makes the "update
+    available" markers truthful (they compare the checked-out commit against that
+    record -- see :meth:`App.has_update`). Nothing installed changes until someone
+    runs an :func:`update_plan`. That is what makes this safe to run on boot, and
+    safe to run as often as you like.
+    """
+    return [store.fetch_command() for store in stores(settings) if store.is_cloned]
+
+
 def _absolute(url: str) -> str:
     """Make a *local path* store absolute, and leave a real URL alone.
 
@@ -562,7 +580,7 @@ def stores(settings: AppStoreSettings) -> list[Store]:
 
     :attr:`~spiriconfig_appstore.config.AppStoreSettings.stores` is a *seed* list,
     not the authority. Any seed whose slug is not already cloned is included as a
-    not-yet-cloned store, so ``sync`` (or the Clone button) can bring it down -- and
+    not-yet-cloned store, so ``check`` (or the Clone button) can bring it down -- and
     the moment it is cloned, disk discovery takes over and the seed entry is
     deduplicated away. A store the user cloned themselves and never listed is a
     first-class store; a seed the user removed stays gone until they clone it again.
@@ -643,6 +661,7 @@ __all__ = [
     "Store",
     "StoreError",
     "VERSION_KEY",
+    "check_plan",
     "find_app",
     "get_store",
     "remote_url",

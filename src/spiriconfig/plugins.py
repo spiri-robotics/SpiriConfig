@@ -73,6 +73,19 @@ class Plugin(abc.ABC):
         """
         raise NotImplementedError(f"plugin {self.name!r} has no web page")
 
+    async def on_startup(self) -> None:
+        """Run once when the web server starts. Default: nothing.
+
+        Registered with the server's startup hook, for work that belongs to the
+        process rather than to a page load -- warming a cache, a first fetch. Do
+        not block: the server does not begin serving until every plugin's
+        ``on_startup`` has returned, so anything slow (or reaching the network)
+        should launch a background task and return, not await it here.
+
+        Only fires in the web path (``spiriconfig web``); the CLI never starts a
+        server, so it never calls this.
+        """
+
     @property
     def has_page(self) -> bool:
         """Whether this plugin overrides :meth:`page`."""
