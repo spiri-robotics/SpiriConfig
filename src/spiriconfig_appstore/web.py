@@ -16,8 +16,9 @@ from loguru import logger
 from nicegui import ui
 
 from spiriconfig import advanced, terminal, theme
-from spiriconfig.commands import Command, run, stream_pty
+from spiriconfig.commands import Command, CommandError, run, stream_pty
 from spiriconfig_docker.config import docker_settings
+from spiriconfig_docker.stacks import Stack, find_compose_file
 
 from spiriconfig_appstore.config import AppStoreSettings, appstore_settings
 from spiriconfig_appstore.installs import Install, install_command, installed
@@ -31,6 +32,61 @@ from spiriconfig_appstore.stores import (
 )
 
 log = logger.bind(plugin="appstore")
+
+
+async def _run_quietly(commands: list[Command], done: str) -> bool:
+    """Run no-output commands in order, toast the outcome, say whether it worked.
+
+    Install, uninstall, and adopt are files appearing and disappearing: ``ln -s``,
+    ``rm``, and ``cp -r`` print nothing on success, so the streaming output dialog
+    every git action here uses would open on an empty terminal and sit there
+    waiting to be dismissed -- a modal whose whole content is a black rectangle. A
+    toast is the honest widget for a command whose entire story is "it worked" or
+    "here is why it did not". The commands still go to the log at INFO, so the
+    record of what we changed to the machine is kept where the other state-changing
+    commands keep theirs -- we relax the show-it-on-screen habit here, not the
+    audit.
+
+    Stops at the first failure: adopt is rm-then-cp, and a green "Adopted" after
+    the rm succeeded but the cp did not would be a lie about a half-done operation
+    that has just deleted the symlink and put nothing in its place.
+    """
+    for command in commands:
+        log.info("$ {}", command)
+        try:
+            (await asyncio.to_thread(run, command, log=log)).check()
+        except CommandError as exc:
+            ui.notify(str(exc), type="negative", multi_line=True, timeout=0)
+            return False
+    ui.notify(done, type="positive")
+    return True
+
+
+def _is_up(install: Install) -> bool:
+    """Whether the installed app has any containers right now.
+
+    Uninstall removes the symlink and nothing else. A *running* app whose symlink
+    is gone is orphaned from this page and from ``docker compose`` run in the
+    compose directory -- the project is still up, but there is no longer a
+    directory for either to find it by, so nothing here can reach it to bring it
+    down. So uninstall refuses until the app is down, for the same reason it
+    refuses to delete a directory it did not create: the guard is against leaving
+    the user somewhere they have no button to get back from.
+
+    A machine with no docker (or an unreachable daemon) reports ``down`` here --
+    :meth:`Stack.status` treats "cannot tell" as "no containers" -- so this never
+    blocks an uninstall on a box that could not have started the app anyway.
+    """
+    compose_file = find_compose_file(install.link)
+    if compose_file is None:
+        return False
+    stack = Stack(
+        name=install.name,
+        path=install.link,
+        compose_file=compose_file,
+        settings=docker_settings(),
+    )
+    return stack.status() != "down"
 
 
 async def _run_in_dialog(title: str, commands: list[Command]) -> None:
@@ -205,10 +261,6 @@ def _app_card(
                 if updatable:
                     ui.badge("update available", color="info")
 
-        async def do(commands: list[Command], title: str) -> None:
-            await _run_in_dialog(f"{entry.name} — {title}", commands)
-            refresh()
-
         # Every button says what it does on hover. None of these verbs mean what a
         # user would guess: "install" does not start anything, "uninstall" does not
         # delete anything, and "adopt" is a one-way door. A label cannot carry that,
@@ -221,19 +273,39 @@ def _app_card(
                     except StoreError as exc:
                         ui.notify(str(exc), type="negative", multi_line=True, timeout=0)
                         return
-                    await do([command], "install")
+                    # Instant filesystem op, no output: a toast, not the streaming
+                    # dialog the git actions use. See _run_quietly.
+                    if await _run_quietly([command], f"Installed {entry.name}"):
+                        refresh()
 
                 ui.button("Install", icon="add", on_click=do_install).tooltip(
                     f"Symlink {entry.name} into the compose directory. "
                     f"Does not start it — use Apps for that."
                 )
             else:
+                async def do_uninstall(install: Install = install) -> None:
+                    # Refuse while the app is up: uninstall only unlinks, and a
+                    # running app with no symlink is one nothing here can reach to
+                    # stop. See _is_up.
+                    if await asyncio.to_thread(_is_up, install):
+                        ui.notify(
+                            f"{install.name} is still up. Stop it first — Down, on "
+                            f"the Apps page. Uninstalling only removes the symlink, "
+                            f"and a running app with no symlink is one nothing here "
+                            f"can reach to bring down.",
+                            type="warning", multi_line=True, timeout=0,
+                        )
+                        return
+                    if await _run_quietly(
+                        [install.uninstall_command()], f"Uninstalled {install.name}"
+                    ):
+                        refresh()
+
                 ui.button(
-                    "Uninstall", icon="link_off",
-                    on_click=lambda: do([install.uninstall_command()], "uninstall"),
+                    "Uninstall", icon="link_off", on_click=do_uninstall,
                 ).props("flat").tooltip(
-                    "Remove the symlink. Deletes no files and no data, and does "
-                    "not stop the app if it is running."
+                    "Remove the symlink. Deletes no files and no data. Stop the "
+                    "app first — a running app cannot be uninstalled."
                 )
 
             if modified or updatable:
@@ -252,7 +324,12 @@ def _app_card(
                 async def do_adopt() -> None:
                     if not await _confirm_adopt(install):
                         return
-                    await do(install.adopt_commands(), "adopt")
+                    # rm + cp -r, both silent on success: a toast, like install and
+                    # uninstall, not the empty streaming dialog. See _run_quietly.
+                    if await _run_quietly(
+                        install.adopt_commands(), f"Adopted {install.name}"
+                    ):
+                        refresh()
 
                 with advanced.only():
                     ui.button(
