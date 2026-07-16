@@ -4,12 +4,12 @@ Off unless ``SPIRICONFIG_AUTH=pam`` (see :class:`~spiriconfig.config.Settings`).
 When on, every page redirects to ``/login`` until the browser has authenticated
 against the host's PAM stack, exactly as ``login`` or ``sshd`` would.
 
-This is the *login* half of the model :doc:`design </design>` commits to --
-"log the user in with PAM, then fork to that unix user". The fork half is not
-here yet: once logged in, everyone shares the one process, which runs as whoever
-launched it. So this gate answers "is this a person the machine trusts?", not
-"what may this particular person do?" -- the second question is the OS's to
-answer once the fork exists, and there is no role model of ours in the meantime.
+This is only a login gate -- authentication, not authorization (see
+:doc:`design </design>`). Once past it everyone shares the one process, which runs
+as whoever launched it, so every authenticated user has the same access. It answers
+"is this a person the machine trusts?", not "what may this particular person do?";
+the second question has no answer here, because per-user permissions are not part
+of the model.
 
 Why the login rule below is shaped the way it is: only root can read
 ``/etc/shadow``, so only a root process can verify *another* user's password. A

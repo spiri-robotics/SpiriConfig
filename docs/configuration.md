@@ -48,10 +48,10 @@ Set `SPIRICONFIG_STORAGE_SECRET` when auth is on: it signs the session cookie, a
 without a stable one everybody is logged out every time the process restarts.
 
 :::{note}
-This is authentication, not authorization. Once logged in, everyone drives the
-same process with the same access — the plan is to fork to the logged-in unix user
-so the kernel decides what they may do, but that half does not exist yet. Until it
-does, anyone you let log in can do anything the UI can. See [design](design.md).
+This is authentication, not authorization. It only decides who may log in. Once
+logged in, everyone drives the same process with the same access — anyone you let
+in can do anything the UI can. Per-user permissions are not part of the model. See
+[design](design.md).
 :::
 
 ## Docker plugin

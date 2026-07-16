@@ -40,13 +40,11 @@ the same footing as a dark-mode switch.
 
 ## If you need real permissions
 
-Not this. Permissions are not planned, but if they land, the intended design is:
-
-**Log the user in with PAM, then fork to that unix user.**
-
-The OS then enforces authorisation -- file modes, group membership, whether they
-are in the `docker` group at all. There is no application-level role model, no ACL
-table, and nothing for us to get wrong.
+Not this. Permissions are not planned. If they ever landed, they would belong to
+the OS, not to us -- file modes, group membership, whether someone is in the
+`docker` group at all -- with no application-level role model, no ACL table, and
+nothing of ours to get wrong. But that is a hypothetical, not a roadmap: today PAM
+only decides who may log in, and everyone who does is equal.
 
 That is the same principle as the rest of SpiriConfig. We drive the machine by
 running the commands a human would run, so a person should be able to do exactly

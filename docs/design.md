@@ -160,35 +160,27 @@ Nothing is withheld from anyone, so there is nothing here to lean on.
 Advanced mode is a preference, like a dark-mode switch. Nothing about it is a
 boundary, and it is not trying to be.
 
-### Permissions, if they ever happen, belong to the OS
+### PAM is a login gate, not a permission model
 
-The intended design, so that nobody invents a worse one:
+`SPIRICONFIG_AUTH=pam` gates the UI behind a PAM login (see
+{mod}`spiriconfig.auth` and [configuration](configuration.md#authentication)),
+authenticating against the host's own accounts with no user list of ours. That is
+all it does. It answers one question -- "does the machine trust this person enough
+to let them in?" -- and nothing past the door.
 
-**Log the user in with PAM, then fork to that unix user.**
+So **everyone who gets in is equal.** They share the one process, running as
+whatever unix user SpiriConfig runs as, and can do everything the UI can do. PAM
+tells us *who* is at the keyboard; it does not, and is not trying to, tell us what
+they may touch once inside. There is no authorization layer, and none planned --
+this is a login gate, not a permissions system.
 
-The first half exists: `SPIRICONFIG_AUTH=pam` gates the UI behind a PAM login
-(see {mod}`spiriconfig.auth` and [configuration](configuration.md#authentication)),
-authenticating against the host's own accounts with no user list of ours. The
-*fork to that unix user* half does not — once logged in, everyone shares the one
-process. So today this is authentication, not authorization: it answers "does the
-machine trust this person?", and the paragraphs below are still the plan for
-answering "what may they do?".
-
-Authorisation is then whatever the kernel says it is -- file modes, group
-membership, whether they are in the `docker` group. No role model, no ACL table,
-nothing of ours to get wrong or to keep in sync.
-
-This is the same argument as [there is no state that is ours](#there-is-no-state-that-is-ours),
-pointed at permissions. We drive the machine by running the commands a human would
-run, so a person should be able to do precisely what their shell account could do.
-An application-level permission model would be a second, weaker source of truth in
-front of a capability the OS already governs, and the first time the two disagreed
-the OS would win and our UI would be the one lying.
-
-It also means the answer to "can this person restart whoami?" is not a question
-about SpiriConfig at all. It is a question about a unix account, which the sysadmin
-already knows how to answer, with tools that already exist. Which is the whole
-point of the project.
+If we ever did want per-user permissions, they would belong to the OS, not to us:
+file modes, group membership, whether they are in the `docker` group -- no role
+model, no ACL table, nothing of ours to get wrong or to keep in sync. That is the
+same argument as [there is no state that is ours](#there-is-no-state-that-is-ours),
+and it is the only permission design we would entertain. But that is a hypothetical,
+not a roadmap. Today the honest statement is the one above: authenticated users are
+undifferentiated.
 
 ### An installed app is a symlink, and that is the whole app store
 
