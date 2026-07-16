@@ -15,6 +15,7 @@ without a docker daemon anywhere in sight.
 from __future__ import annotations
 
 import json
+import shutil
 from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -33,6 +34,19 @@ COMPOSE_FILENAMES = (
     "docker-compose.yaml",
     "docker-compose.yml",
 )
+
+#: What a freshly created compose file starts as, when the user gives us no text of
+#: their own. Deliberately a working stack and not an empty file: ``docker compose
+#: config`` rejects a file with no services, so a blank template would fail the very
+#: validation :func:`create` runs, and the first thing a new user saw would be an
+#: error. ``whoami`` is tiny, real, and starts.
+NEW_COMPOSE_TEMPLATE = """\
+services:
+  whoami:
+    image: traefik/whoami
+    ports:
+      - "8080:80"
+"""
 
 #: Container states that mean "this is not coming back on its own".
 #:
@@ -429,11 +443,82 @@ def get(settings: DockerSettings, name: str) -> Stack:
     raise StackError(f"no such stack: {name!r} (known stacks: {known})")
 
 
+def _valid_name(name: str) -> bool:
+    """Whether ``name`` is a single, safe directory name.
+
+    One path component, no separators, no ``..``, not hidden. Same guard
+    :meth:`get` leans on -- a name is only ever a directory *inside* the compose
+    directory, so anything that could climb out of it is not a name.
+    """
+    return bool(name) and name not in {".", ".."} and "/" not in name and not name.startswith(".")
+
+
+def create(settings: DockerSettings, name: str, text: str = NEW_COMPOSE_TEMPLATE) -> Stack:
+    """Create a new compose project: a directory with a ``compose.yaml`` in it.
+
+    The one place SpiriConfig makes a project directory rather than discovering
+    one -- see :attr:`~spiriconfig_docker.config.DockerSettings.compose_dir`, which
+    is otherwise a tree we only ever read. It is a deliberate, opt-in exception, and
+    it earns its keep the same way :meth:`Stack.write` does: the file is validated
+    with ``docker compose config`` before we call the project made, so a new stack
+    cannot land unstartable.
+
+    The asymmetry with the rest of the module is the point. We *created* this
+    directory, so if compose rejects the file we delete the directory again and the
+    machine is exactly as it was -- unlike a hand-made project, cleaning up after
+    ourselves here is ours to do. That is the same bargain the app store's ``adopt``
+    strikes in reverse: touch only what you made.
+    """
+    if not _valid_name(name):
+        raise StackError(
+            f"{name!r} is not a usable project name: it must be a single directory "
+            f"name, with no '/' and no leading dot."
+        )
+
+    try:
+        yaml.safe_load(text)
+    except yaml.YAMLError as exc:
+        raise StackError(f"not valid YAML: {exc}") from exc
+
+    path = settings.compose_dir / name
+    if path.exists():
+        raise StackError(
+            f"{path} already exists, so it is not ours to create. Pick another name, "
+            f"or edit the existing project."
+        )
+
+    # From here on we have made something, so every failure path has to undo it.
+    path.mkdir(parents=True)
+    compose_file = path / "compose.yaml"
+    stack = Stack(name=name, path=path, compose_file=compose_file, settings=settings)
+    try:
+        compose_file.write_text(text)
+        result = run(stack.validate(), timeout=settings.command_timeout, log=log)
+    except CommandError as exc:
+        shutil.rmtree(path)
+        raise StackError(f"could not run docker compose to check the file: {exc}") from exc
+    except OSError:
+        shutil.rmtree(path, ignore_errors=True)
+        raise
+
+    if not result.ok:
+        shutil.rmtree(path)
+        raise StackError(
+            f"docker compose rejected the file, so nothing was created:\n"
+            f"{result.stderr.strip()}"
+        )
+
+    log.info("created {}", compose_file)
+    return stack
+
+
 __all__ = [
     "COMPOSE_FILENAMES",
     "DEFAULT_EXEC_COMMAND",
+    "NEW_COMPOSE_TEMPLATE",
     "Stack",
     "StackError",
+    "create",
     "discover",
     "find_compose_file",
     "get",

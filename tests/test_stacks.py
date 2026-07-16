@@ -13,9 +13,11 @@ import pytest
 from spiriconfig.commands import PtySession, run
 from spiriconfig_docker.config import DockerSettings
 from spiriconfig_docker.stacks import (
+    NEW_COMPOSE_TEMPLATE,
     Stack,
     StackError,
     _parse_ps,
+    create,
     discover,
     find_compose_file,
     get,
@@ -501,3 +503,59 @@ class TestWrite:
         except StackError:  # no docker: the YAML check still passed
             pytest.skip("needs docker to complete the write")
         assert "# keep me!" in stack.read()
+
+
+class TestCreate:
+    def test_rejects_an_unsafe_name_without_making_anything(
+        self, settings: DockerSettings
+    ) -> None:
+        before = set(settings.compose_dir.iterdir())
+        for bad in ("", ".", "..", "a/b", ".hidden"):
+            with pytest.raises(StackError, match="usable project name"):
+                create(settings, bad)
+        # Nothing new appeared in the compose directory.
+        assert set(settings.compose_dir.iterdir()) == before
+
+    def test_refuses_to_clobber_an_existing_directory(
+        self, settings: DockerSettings
+    ) -> None:
+        # `hello` already exists in the fixture; creating it again must not touch it.
+        original = (settings.compose_dir / "hello" / "compose.yaml").read_text()
+        with pytest.raises(StackError, match="already exists"):
+            create(settings, "hello")
+        assert (settings.compose_dir / "hello" / "compose.yaml").read_text() == original
+
+    def test_rejects_invalid_yaml_before_making_a_directory(
+        self, settings: DockerSettings
+    ) -> None:
+        with pytest.raises(StackError, match="not valid YAML"):
+            create(settings, "brand-new", "services: [unclosed")
+        assert not (settings.compose_dir / "brand-new").exists()
+
+    @docker_required
+    def test_creates_a_project_and_returns_its_stack(
+        self, settings: DockerSettings
+    ) -> None:
+        stack = create(settings, "made-here", HELLO_COMPOSE)
+        assert stack.name == "made-here"
+        assert stack.compose_file == settings.compose_dir / "made-here" / "compose.yaml"
+        assert stack.read() == HELLO_COMPOSE
+        # It is a real stack, discoverable like any other.
+        assert get(settings, "made-here").compose_file == stack.compose_file
+
+    @docker_required
+    def test_a_rejected_file_leaves_no_directory_behind(
+        self, settings: DockerSettings
+    ) -> None:
+        """We made the directory, so a compose rejection must clean it up."""
+        with pytest.raises(StackError, match="docker compose rejected"):
+            create(settings, "doomed", "services:\n  x:\n    not_a_real_key: true\n")
+        assert not (settings.compose_dir / "doomed").exists()
+
+    def test_the_default_template_is_valid_yaml(self) -> None:
+        """A blank template would fail compose's 'must have services' check, so the
+        starter has to be a real, startable stack -- assert it at least parses."""
+        import yaml
+
+        parsed = yaml.safe_load(NEW_COMPOSE_TEMPLATE)
+        assert "services" in parsed

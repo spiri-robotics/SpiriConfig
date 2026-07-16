@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import asyncio
 import os
+from pathlib import Path
 from typing import Annotated
 
 import typer
@@ -23,8 +24,10 @@ from spiriconfig_docker.env import read as read_env
 from spiriconfig_docker.settings import SettingsError, StackSettings
 from spiriconfig_docker.stacks import (
     DEFAULT_EXEC_COMMAND,
+    NEW_COMPOSE_TEMPLATE,
     Stack,
     StackError,
+    create as create_stack,
     discover,
     get,
 )
@@ -90,6 +93,58 @@ def list_stacks() -> None:
     width = max(len(s.name) for s in stacks)
     for stack in stacks:
         typer.echo(f"{stack.name:<{width}}  {stack.status()}")
+
+
+@app.command()
+def create(
+    name: Annotated[str, typer.Argument(help="Name for the new compose project.")],
+    file: Annotated[
+        Path | None,
+        typer.Option(
+            "--file", "-f",
+            help="Read the compose file from here. Without it, a small starter is written.",
+        ),
+    ] = None,
+    show: ShowOption = False,
+) -> None:
+    """Create a new compose project: a directory with a compose.yaml in it.
+
+    The scriptable form of `mkdir <dir> && $EDITOR compose.yaml`, with one thing
+    added that the shell version does not do for you: the file is checked with
+    `docker compose config` before the project is called made, and if it is
+    rejected the directory is removed again -- so this cannot leave a half-made
+    stack that will not start.
+
+    It does not start anything. Run `spiriconfig docker up <name>` when you want it
+    up.
+    """
+    settings = docker_settings()
+
+    if file is not None:
+        try:
+            text = file.read_text()
+        except OSError as exc:
+            typer.secho(str(exc), fg=typer.colors.RED, err=True)
+            raise typer.Exit(1) from exc
+    else:
+        text = NEW_COMPOSE_TEMPLATE
+
+    if show:
+        # The directory part is a real command; the file is written by hand (or by
+        # $EDITOR), because a compose file is content, not an invocation. Show both.
+        project = settings.compose_dir.expanduser().resolve() / name
+        typer.echo(str(Command(argv=["mkdir", "-p", str(project)])))
+        typer.echo(f"# then write your compose file to {project / 'compose.yaml'}")
+        return
+
+    try:
+        stack = create_stack(settings, name, text)
+    except (StackError, OSError) as exc:
+        typer.secho(str(exc), fg=typer.colors.RED, err=True)
+        raise typer.Exit(1) from exc
+
+    typer.echo(f"Created {stack.compose_file}")
+    typer.echo(f"Start it with: spiriconfig docker up {name}")
 
 
 @app.command()

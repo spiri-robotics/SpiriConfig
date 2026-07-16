@@ -20,7 +20,11 @@ class DockerSettings(BaseSettings):
     """Directory holding one subdirectory per compose project.
 
     ``SPIRICONFIG_DOCKER_COMPOSE_DIR``. We only ever look one level deep, and we
-    never create, move, or delete project directories -- the user owns this tree.
+    never move or delete project directories -- the user owns this tree. The one
+    exception is :func:`~spiriconfig_docker.stacks.create`, which makes a new
+    project directory on explicit request and deletes it again if the compose file
+    it just wrote does not validate; it touches only what it made, and nothing that
+    was already here.
 
     The default is *relative*, and deliberately so: running out of a checkout
     should not reach for ``/srv/compose`` and start managing the containers on

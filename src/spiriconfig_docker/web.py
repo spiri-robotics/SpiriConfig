@@ -24,8 +24,10 @@ from spiriconfig_docker.config import DockerSettings, docker_settings
 from spiriconfig_docker.settings import SettingsError
 from spiriconfig_docker.stacks import (
     DEFAULT_EXEC_COMMAND,
+    NEW_COMPOSE_TEMPLATE,
     Stack,
     StackError,
+    create,
     discover,
 )
 
@@ -460,6 +462,61 @@ async def _settings_dialog(stack: Stack) -> str | None:
     return result
 
 
+async def _create_dialog(config: DockerSettings, on_created) -> None:
+    """Make a new compose project from pasted or uploaded YAML.
+
+    The one screen where SpiriConfig writes a project directory instead of reading
+    one -- see :func:`spiriconfig_docker.stacks.create`. Upload is a shortcut *into*
+    the same editor, not a second way out: a dropped file fills the box, and the
+    user still reviews and presses Create, so there is one thing that gets written
+    and one validation in front of it.
+    """
+    editor_theme = await theme.codemirror_theme()
+
+    with ui.dialog() as dialog, ui.card().classes("w-full max-w-4xl"):
+        ui.label("New app").classes("text-lg font-bold")
+        ui.label(
+            f"Creates a directory under {config.compose_dir} with this compose file "
+            f"in it. It is not started -- use Up afterwards."
+        ).classes("text-sm text-gray-500")
+
+        name = ui.input("Name").classes("w-full").props("outlined").mark("new-app-name")
+        editor = ui.codemirror(
+            NEW_COMPOSE_TEMPLATE, language="YAML", theme=editor_theme
+        ).classes("w-full h-96")
+
+        def loaded(event) -> None:
+            """Drop an uploaded file's text into the editor for review."""
+            editor.set_value(event.content.read().decode("utf-8", errors="replace"))
+            ui.notify(f"Loaded {event.name}. Review it and press Create.", type="info")
+
+        # `auto_upload` so a single pick lands without a second "upload" click, which
+        # for one file is a step with nothing behind it.
+        ui.upload(on_upload=loaded, auto_upload=True, label="Upload a compose file").props(
+            "flat"
+        ).classes("w-full")
+
+        async def do_create() -> None:
+            try:
+                stack = await asyncio.to_thread(
+                    create, config, name.value.strip(), editor.value
+                )
+            except (StackError, OSError) as exc:
+                ui.notify(str(exc), type="negative", multi_line=True, timeout=0)
+                return
+            ui.notify(f"Created {stack.compose_file}", type="positive")
+            dialog.close()
+            on_created()
+
+        with ui.row().classes("w-full justify-end"):
+            ui.button("Cancel", on_click=dialog.close).props("flat")
+            ui.button("Create", on_click=do_create).props("color=primary").mark(
+                "new-app-create"
+            )
+
+    dialog.open()
+
+
 def _stack_card(stack: Stack, status: str, has_settings: bool, refresh) -> None:
     """One stack: its status, and the things you can do to it."""
     with ui.card().classes("w-full"):
@@ -675,6 +732,9 @@ def page(settings: DockerSettings | None = None) -> None:
             ui.timer(0.1, render, once=True)
 
     with ui.row().classes("items-center gap-2"):
+        ui.button(
+            "New app", icon="add", on_click=lambda: _create_dialog(config, refresh)
+        ).mark("new-app")
         ui.button("Refresh", icon="refresh", on_click=refresh).props("flat")
 
     refresh()
