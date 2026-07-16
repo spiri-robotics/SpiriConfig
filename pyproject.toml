@@ -25,6 +25,7 @@ spiriconfig = "spiriconfig.cli:app"
 docker = "spiriconfig_docker:DockerPlugin"
 appstore = "spiriconfig_appstore:AppStorePlugin"
 terminal = "spiriconfig_terminal:TerminalPlugin"
+users = "spiriconfig_users:UsersPlugin"
 
 [build-system]
 requires = ["hatchling"]
@@ -36,6 +37,7 @@ packages = [
     "src/spiriconfig_docker",
     "src/spiriconfig_appstore",
     "src/spiriconfig_terminal",
+    "src/spiriconfig_users",
 ]
 
 [tool.pytest.ini_options]
