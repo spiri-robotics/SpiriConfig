@@ -23,3 +23,6 @@ docs/_build/
 
 # NiceGUI's on-disk storage for the running dev server.
 .nicegui/
+
+# aider local tooling state
+.aider*
