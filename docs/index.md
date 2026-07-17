@@ -65,6 +65,7 @@ It shows up in the UI on the next refresh.
 :maxdepth: 2
 :caption: Contents
 
+install
 configuration
 advanced
 docker

@@ -135,8 +135,10 @@ a clean record of what SpiriConfig actually did to the machine. Set
 
 ## Running as a service
 
-Nothing about SpiriConfig is special here; it is a normal program that reads its
-environment.
+`spiriconfig install` writes a unit like the one below and enables it for you --
+see [Installing SpiriConfig](install.md). This section shows the unit itself,
+because nothing about SpiriConfig is special here: it is a normal program that
+reads its environment, so you can also just write the unit by hand.
 
 ```ini
 [Unit]
