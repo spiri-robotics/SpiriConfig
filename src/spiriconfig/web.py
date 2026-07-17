@@ -246,6 +246,10 @@ def serve(config: Settings, plugins: list[Plugin] | None = None) -> None:
         # be mounted before the first request it is meant to gate.
         auth.login_page(config)
         app.add_middleware(auth.AuthMiddleware)
+        # The middleware gates page renders; this gates the WebSocket those pages
+        # run over, which no HTTP middleware ever sees. Without it the login is
+        # only skin-deep -- see spiriconfig.auth.install_websocket_guard.
+        auth.install_websocket_guard()
         logger.info("PAM login enabled (service {!r})", config.auth_service)
         if tls_plan.generate:
             # The whole reason TLS defaults on: with PAM the login sends a real host

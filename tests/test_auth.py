@@ -11,9 +11,12 @@ that a stub we wrote returns what we told it to.
 
 from __future__ import annotations
 
+import base64
+import json
 import sys
 import types
 
+import itsdangerous
 import pytest
 
 from spiriconfig import auth
@@ -198,3 +201,71 @@ class TestGroupMembership:
 
         monkeypatch.setattr(auth.grp, "getgrnam", raise_keyerror)
         assert auth._in_group("alice", "nope") is False
+
+
+def _starlette_session_cookie(session: dict, secret: str) -> str:
+    """Sign a session the way starlette.middleware.sessions does, for the header.
+
+    The websocket guard has to read exactly what Starlette wrote, so the test
+    forges a cookie the same way rather than trusting our own reader to round-trip
+    with itself: a TimestampSigner over the storage secret, wrapping base64(JSON).
+    """
+    signer = itsdangerous.TimestampSigner(str(secret))
+    data = base64.b64encode(json.dumps(session).encode())
+    return f"session={signer.sign(data).decode()}"
+
+
+class TestSessionCookieDecode:
+    """The socket guard trusts a cookie only if it verifies under the storage
+    secret; every other outcome must collapse to "no session", i.e. deny."""
+
+    SECRET = "storage-secret-under-test"
+
+    def test_valid_cookie_yields_its_session_id(self) -> None:
+        header = _starlette_session_cookie({"id": "sess-42"}, self.SECRET)
+        assert auth._session_id_from_cookie(header, self.SECRET) == "sess-42"
+
+    def test_wrong_secret_is_rejected(self) -> None:
+        """A cookie an attacker minted (or one signed under a rotated secret) does
+        not verify, so it names no session -- the whole point of signing it."""
+        header = _starlette_session_cookie({"id": "sess-42"}, "a-different-secret")
+        assert auth._session_id_from_cookie(header, self.SECRET) is None
+
+    def test_tampered_cookie_is_rejected(self) -> None:
+        header = _starlette_session_cookie({"id": "sess-42"}, self.SECRET)
+        assert auth._session_id_from_cookie(header[:-3] + "xxx", self.SECRET) is None
+
+    def test_absent_cookie_and_missing_secret_are_rejected(self) -> None:
+        good = _starlette_session_cookie({"id": "sess-42"}, self.SECRET)
+        assert auth._session_id_from_cookie("othercookie=x", self.SECRET) is None
+        assert auth._session_id_from_cookie(good, "") is None
+        assert auth._session_id_from_cookie(good, None) is None
+
+
+class TestAttachRule:
+    """`_may_attach` is the socket's version of the page gate: a real session, or
+    the login page reaching its own client so a logged-out visitor can log in."""
+
+    def test_authenticated_session_may_attach_to_anything(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.setattr(auth, "_session_is_authenticated", lambda environ: True)
+        # No need to even name a client: a logged-in session is allowed on its own.
+        assert auth._may_attach({}, "any-client-id") is True
+
+    def test_unauthenticated_may_attach_only_to_an_unrestricted_page(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.setattr(auth, "_session_is_authenticated", lambda environ: False)
+        # Stand in for nicegui's Client.instances: a login-page client and a
+        # protected-page client, looked up by id.
+        login = types.SimpleNamespace(page=types.SimpleNamespace(path="/login"))
+        secret = types.SimpleNamespace(page=types.SimpleNamespace(path="/secret"))
+        instances = {"login-cid": login, "secret-cid": secret}
+        monkeypatch.setattr(
+            auth, "_targets_unrestricted_page",
+            lambda cid: instances.get(cid) is login,
+        )
+        assert auth._may_attach({}, "login-cid") is True
+        assert auth._may_attach({}, "secret-cid") is False
+        assert auth._may_attach({}, None) is False

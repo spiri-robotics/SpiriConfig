@@ -21,11 +21,16 @@ not grant it.
 
 from __future__ import annotations
 
+import base64
 import grp
+import http.cookies
+import json
 import os
 import pwd
+import urllib.parse
 from dataclasses import dataclass
 
+import itsdangerous
 from loguru import logger
 from nicegui import app, ui
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
@@ -167,6 +172,177 @@ class AuthMiddleware(BaseHTTPMiddleware):
         return await call_next(request)
 
 
+# --- WebSocket session guard -------------------------------------------------
+#
+# AuthMiddleware above is an HTTP middleware, and HTTP middleware never sees the
+# WebSocket. NiceGUI runs the whole UI over a socket.io connection (mounted at
+# /_nicegui_ws/, which the "/_nicegui" allowance above lets straight through), and
+# its own socket handlers authorise every frame by a single check: does this
+# client_id name a live server-side client? (nicegui.nicegui._on_handshake,
+# _on_event). They never look at the session cookie. So a *page render* is gated,
+# but the socket that then drives that page is not -- and a client_id is not a
+# secret: it rides in the WebSocket URL's query string, so it lands in proxy
+# access logs, Referer headers and page source. Anyone who learns one can attach
+# to, and act on, someone else's authenticated session without ever logging in.
+#
+# This binds the socket back to the session the HTTP gate already checked, in two
+# checkpoints that mirror NiceGUI's own two phases:
+#
+#   attach  (connect, handshake): may this socket bind to this client_id at all?
+#           Only if its session cookie is authenticated -- or the target is the
+#           login page, whose socket has to work while logged out or no one could
+#           ever log in.
+#   action  (event, javascript_response, ack, log): a socket may only speak for a
+#           client_id whose room it actually joined. This is what stops a logged-
+#           out socket that legitimately attached to the login page from turning
+#           around and emitting events for a victim's client_id.
+#
+# The handlers are wrapped, not replaced: each wrapper decides yes/no and delegates
+# the real work down to NiceGUI's original. A checkpoint whose original handler has
+# gone missing fails closed (deny), which is the safe direction if NiceGUI's socket
+# API shifts under us.
+
+#: The socket message handlers gated by room membership. Attach (connect,
+#: handshake) is handled separately because it is what *grants* membership.
+_GUARDED_SOCKET_EVENTS = ("event", "javascript_response", "ack", "log")
+
+#: Matches Starlette's SessionMiddleware default, which NiceGUI does not override.
+_SESSION_MAX_AGE = 14 * 24 * 60 * 60
+
+
+def _session_id_from_cookie(cookie_header: str, secret: str | None) -> str | None:
+    """The session id inside a signed Starlette session cookie, or ``None``.
+
+    Mirrors ``starlette.middleware.sessions.SessionMiddleware`` exactly: a
+    ``TimestampSigner`` over the storage secret, wrapping ``base64(JSON)``. Every
+    way this can fail -- no cookie, wrong signature, expired, malformed -- collapses
+    to ``None``, i.e. "not a session we issued", which every caller reads as "not
+    authenticated". Fail closed.
+    """
+    if not secret:
+        return None
+    jar = http.cookies.SimpleCookie()
+    try:
+        jar.load(cookie_header)
+    except http.cookies.CookieError:
+        return None
+    morsel = jar.get("session")
+    if morsel is None:
+        return None
+    signer = itsdangerous.TimestampSigner(str(secret))
+    try:
+        raw = signer.unsign(morsel.value, max_age=_SESSION_MAX_AGE)
+        session = json.loads(base64.b64decode(raw))
+    except (itsdangerous.BadSignature, ValueError):
+        return None
+    session_id = session.get("id")
+    return session_id if isinstance(session_id, str) else None
+
+
+def _session_is_authenticated(environ: dict) -> bool:
+    """Whether the socket's session cookie names a logged-in user.
+
+    The ``authenticated`` flag is not in the cookie -- the cookie carries only a
+    session id, and the flag lives in NiceGUI's server-side per-user storage keyed
+    by that id (see :func:`login_page`, which writes ``app.storage.user``). So this
+    verifies the cookie, then reads the flag out of that store by id -- the one
+    lookup NiceGUI has no public API for, hence ``_users``.
+    """
+    from nicegui import core, storage
+
+    session_id = _session_id_from_cookie(
+        environ.get("HTTP_COOKIE", ""), storage.Storage.secret
+    )
+    if session_id is None:
+        return False
+    user = core.app.storage._users.get(session_id)  # noqa: SLF001 - no read-by-id API
+    return bool(user is not None and user.get("authenticated"))
+
+
+def _targets_unrestricted_page(client_id: str | None) -> bool:
+    """Whether ``client_id`` is a client that was rendered for an unrestricted page.
+
+    The login page runs over the socket like every other page, so a logged-out
+    visitor's socket must be allowed to reach *its own* login client -- and nothing
+    else. Any client whose route is not in :data:`unrestricted_page_routes` belongs
+    to a page the HTTP gate would have redirected, so its socket needs a real login.
+    """
+    from nicegui import Client
+
+    if not client_id:
+        return False
+    client = Client.instances.get(client_id)
+    return client is not None and client.page.path in unrestricted_page_routes
+
+
+def _may_attach(environ: dict, client_id: str | None) -> bool:
+    """The attach rule: a real session, or the login page reaching itself."""
+    return _session_is_authenticated(environ) or _targets_unrestricted_page(client_id)
+
+
+def _query_client_id(environ: dict) -> str | None:
+    """The ``client_id`` a connecting socket names in its URL, or ``None``."""
+    values = urllib.parse.parse_qs(environ.get("QUERY_STRING", "")).get("client_id")
+    return values[0] if values else None
+
+
+def install_websocket_guard() -> None:
+    """Enforce the login gate on the WebSocket, not only on page renders.
+
+    Call once with auth on, after NiceGUI has registered its own socket handlers
+    (any time after ``from nicegui import ui``) and before ``ui.run``. With auth
+    off there is no session to bind to, so it must not run.
+    """
+    import socketio
+    from nicegui import core
+
+    sio = core.sio
+    handlers = sio.handlers.get("/", {})
+    original_connect = handlers.get("connect")
+    original_handshake = handlers.get("handshake")
+
+    async def guarded_connect(sid: str, environ: dict, auth=None):
+        if not _may_attach(environ, _query_client_id(environ)):
+            log.warning(
+                "refused unauthenticated socket connect from {}",
+                environ.get("REMOTE_ADDR", "?"),
+            )
+            raise socketio.exceptions.ConnectionRefusedError("authentication required")
+        if original_connect is None:
+            raise socketio.exceptions.ConnectionRefusedError("socket handler unavailable")
+        return await original_connect(sid, environ, auth)
+
+    async def guarded_handshake(sid: str, data: dict) -> bool:
+        client_id = data.get("client_id") if isinstance(data, dict) else None
+        if not _may_attach(sio.get_environ(sid) or {}, client_id):
+            log.warning("refused unauthenticated socket handshake for client {}", client_id)
+            return False
+        return bool(original_handshake) and await original_handshake(sid, data)
+
+    def guard_action(original):
+        def guarded(sid: str, msg, *args):
+            client_id = msg.get("client_id") if isinstance(msg, dict) else None
+            # A socket only joins a room by attaching to that client_id, and attach
+            # is gated above; so room membership is proof of an authorised attach.
+            if client_id is None or client_id not in sio.rooms(sid):
+                log.warning(
+                    "dropped socket {!r} for client {} from a socket not attached to it",
+                    getattr(original, "__name__", "?"),
+                    client_id,
+                )
+                return None
+            return original(sid, msg, *args)
+
+        return guarded
+
+    sio.on("connect", guarded_connect)
+    sio.on("handshake", guarded_handshake)
+    for event in _GUARDED_SOCKET_EVENTS:
+        original = handlers.get(event)
+        if original is not None:
+            sio.on(event, guard_action(original))
+
+
 def logout() -> None:
     """Drop the session and return to the login page."""
     username = app.storage.user.get("username")
@@ -239,6 +415,7 @@ __all__ = [
     "AuthResult",
     "authenticate",
     "header_account",
+    "install_websocket_guard",
     "is_root",
     "login_page",
     "logout",
