@@ -15,25 +15,40 @@ No database, no registry, no bespoke on-disk format. If SpiriConfig vanished
 tomorrow, everything it manages would keep working -- and you would already know
 the commands to manage it.
 
-## Quickstart
+## Installation
 
-From a fresh checkout, with nothing to configure and nothing touched outside this
-directory:
+Every service SpiriConfig manages runs in a container; SpiriConfig itself cannot,
+because the process that starts those containers on boot has to live on the host.
+So it installs itself as a systemd service. You need
+[uv](https://docs.astral.sh/uv/) on the machine, then:
 
 ```console
-$ uv sync
-$ ./scripts/test-data.sh                        # a compose dir + an example app store
-$ uv run spiriconfig appstore sync
-$ uv run spiriconfig appstore install whoami
-$ uv run spiriconfig docker up whoami
-$ curl localhost:8080
-Hostname: 2d5bcd6f2629
-GET / HTTP/1.1
+$ uvx spiriconfig install
 ```
 
-`test_data/` is gitignored and disposable, and the default settings point at it --
-so trying SpiriConfig out cannot start managing the containers on your real
-machine. On a real machine, point it somewhere real:
+That pulls the latest release from PyPI, writes a systemd unit and an environment
+file, and enables and starts the service -- the web UI comes up on
+http://localhost:8080 and returns on every boot. Add `--show` to print every
+command it will run before it runs anything.
+
+Run it as root for a system-wide service, or as a normal user for a
+single-operator `systemctl --user` one; that choice *is* the security model, not
+a preference. Update in place with `spiriconfig update`. See
+[Installing SpiriConfig](docs/install.md) for the full walkthrough.
+
+To track the latest development instead of a release, install from git -- the
+positional argument is anything uv accepts:
+
+```console
+$ spiriconfig install git+https://github.com/spiri-robotics/SpiriConfig.git
+```
+
+A git-branch install pins to a commit, so `spiriconfig update --reinstall`
+refetches the branch when it moves.
+
+## Usage
+
+Point it at your compose directory and start the web UI:
 
 ```console
 $ export SPIRICONFIG_DOCKER_COMPOSE_DIR=/srv/compose
@@ -52,7 +67,7 @@ From the shell:
 ```console
 $ spiriconfig docker list
 whoami   running
-nextcloud  stopped
+grafana  stopped
 
 $ spiriconfig docker up whoami
 $ spiriconfig docker logs whoami -f
@@ -98,8 +113,29 @@ Install the package and it appears in the CLI and the web UI. See
 
 ## Development
 
+Work from a checkout with [uv](https://docs.astral.sh/uv/):
+
 ```console
 $ uv sync
+```
+
+You can drive the whole flow without touching your real machine. `test_data/` is
+gitignored and disposable, and the default settings point at it, so trying
+SpiriConfig out cannot start managing the containers on your box:
+
+```console
+$ ./scripts/test-data.sh                        # a compose dir + an example app store
+$ uv run spiriconfig appstore sync
+$ uv run spiriconfig appstore install whoami
+$ uv run spiriconfig docker up whoami
+$ curl localhost:8080
+Hostname: 2d5bcd6f2629
+GET / HTTP/1.1
+```
+
+Run the tests and build the docs:
+
+```console
 $ uv run pytest                                   # 92 tests
 $ uv run sphinx-build -b html docs docs/_build    # docs
 ```
