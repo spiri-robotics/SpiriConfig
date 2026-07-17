@@ -82,11 +82,18 @@ def install(
     auth: Annotated[
         str, typer.Option(help="Login gate: 'pam' (the default) or 'none'.")
     ] = "pam",
-    host: Annotated[str, typer.Option(help="Address to bind.")] = "127.0.0.1",
-    port: Annotated[int, typer.Option(help="Port to bind.")] = 8080,
+    host: Annotated[
+        str,
+        typer.Option(
+            help="Address to bind. Defaults to all interfaces, so the installed "
+            "service is reachable; off-loopback requires a login (auth != 'none'). "
+            "Pass 127.0.0.1 to keep it on this host.",
+        ),
+    ] = "0.0.0.0",
+    port: Annotated[int, typer.Option(help="Port to bind.")] = 8337,
     auth_group: Annotated[
         str, typer.Option(help="Group whose members may log in, when run as root.")
-    ] = "wheel",
+    ] = "sudo",
     editable: Annotated[
         bool, typer.Option("--editable", "-e", help="Install the source in editable mode.")
     ] = False,

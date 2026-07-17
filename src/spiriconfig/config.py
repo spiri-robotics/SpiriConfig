@@ -34,7 +34,7 @@ class Settings(BaseSettings):
     UI should be reachable from elsewhere.
     """
 
-    port: int = 8080
+    port: int = 8337
     """Port the web UI binds to. ``SPIRICONFIG_PORT``."""
 
     log_level: str = "INFO"
@@ -115,13 +115,13 @@ class Settings(BaseSettings):
     ``spiriconfig``. Only consulted when :attr:`auth` is ``pam``.
     """
 
-    auth_group: str = "wheel"
+    auth_group: str = "sudo"
     """Group whose members may log in, *when SpiriConfig runs as root*. ``SPIRICONFIG_AUTH_GROUP``.
 
     Running as root, PAM can verify any account's password, so we would otherwise
     let every system user (``nobody``, service accounts, ...) into the admin UI.
-    Membership of this group is the gate. ``wheel`` on Arch/RHEL, ``sudo`` on Debian
-    -- set it to match the box.
+    Membership of this group is the gate. ``sudo`` on Debian/Ubuntu (the default),
+    ``wheel`` on Arch/RHEL -- set it to match the box.
 
     Ignored when SpiriConfig does not run as root: PAM can then only verify the one
     account the process runs as, so there is nothing to gate. See

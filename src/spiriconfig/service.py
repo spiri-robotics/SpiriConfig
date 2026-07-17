@@ -47,7 +47,7 @@ UNIT_FILENAME = f"{SERVICE_NAME}.service"
 PYPI_SOURCE = SERVICE_NAME
 
 DEFAULT_HOST = "127.0.0.1"
-DEFAULT_PORT = 8080
+DEFAULT_PORT = 8337
 
 
 class ServiceError(Exception):
@@ -140,7 +140,7 @@ class ServiceConfig:
     storage_secret: str
     auth: str = "pam"
     auth_service: str = "login"
-    auth_group: str = "wheel"
+    auth_group: str = "sudo"
     host: str = DEFAULT_HOST
     port: int = DEFAULT_PORT
 

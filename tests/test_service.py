@@ -77,7 +77,7 @@ class TestServiceConfigEnv:
         env = config.env()
         assert env["SPIRICONFIG_AUTH"] == "pam"
         assert env["SPIRICONFIG_AUTH_SERVICE"] == "login"
-        assert env["SPIRICONFIG_AUTH_GROUP"] == "wheel"
+        assert env["SPIRICONFIG_AUTH_GROUP"] == "sudo"
 
     def test_none_drops_the_auth_variables(self) -> None:
         env = ServiceConfig(
@@ -91,7 +91,7 @@ class TestServiceConfigEnv:
         env = config.env()
         assert env["SPIRICONFIG_DOCKER_COMPOSE_DIR"] == "/srv/compose"
         assert env["SPIRICONFIG_HOST"] == "127.0.0.1"
-        assert env["SPIRICONFIG_PORT"] == "8080"
+        assert env["SPIRICONFIG_PORT"] == "8337"
 
     def test_render_is_sorted_and_secret_free_of_quoting(
         self, config: ServiceConfig
