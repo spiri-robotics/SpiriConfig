@@ -218,6 +218,11 @@ def render_unit_file(scope: Scope, exec_path: Path) -> str:
         f"ExecStart={exec_path} serve",
         "Restart=on-failure",
         "RestartSec=2",
+        # Gives us $STATE_DIRECTORY -- /var/lib/spiriconfig (system) or
+        # ~/.local/state/spiriconfig (user) -- created and owned by systemd. The
+        # self-signed TLS cert lives there, so it has to outlast a restart and be
+        # writable without us guessing a path. See spiriconfig.tls.state_dir.
+        "StateDirectory=spiriconfig",
     ]
 
     install = ["", "[Install]", f"WantedBy={scope.wanted_by}", ""]

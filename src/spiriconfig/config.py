@@ -62,6 +62,37 @@ class Settings(BaseSettings):
     because the cookie they were keyed on can no longer be verified.
     """
 
+    tls: Literal["auto", "off"] = "auto"
+    """Whether the web UI serves HTTPS, and how. ``SPIRICONFIG_TLS``.
+
+    ``auto`` (the default) serves a **self-signed** cert whenever the UI is bound off
+    loopback and no cert is provided, so an exposed appliance is never sending the PAM
+    password over plain HTTP. That stops a passive eavesdropper; it does *not* stop an
+    active MITM (the browser warns, the operator clicks through) -- for that, provide a
+    cert the browser can validate via :attr:`tls_cert`/:attr:`tls_key`. A loopback dev
+    session stays on plain HTTP, where a cert warning is pure friction.
+
+    ``off`` serves plain HTTP regardless: the escape hatch for a deployment whose own
+    reverse proxy terminates TLS in front of us, where encrypting again is wasted work.
+    See :mod:`spiriconfig.tls`.
+    """
+
+    tls_cert: str | None = None
+    """Path to a TLS certificate to serve. ``SPIRICONFIG_TLS_CERT``.
+
+    Set this and :attr:`tls_key` together to serve a cert of your own instead of a
+    generated self-signed one. This is the only path that resists an active MITM: a
+    per-device cert from a CA the fleet trusts is one the browser *validates*, so an
+    attacker's substitute is rejected rather than clicked through. HSTS is enabled only
+    on this path, never for self-signed.
+    """
+
+    tls_key: str | None = None
+    """Path to the private key for :attr:`tls_cert`. ``SPIRICONFIG_TLS_KEY``.
+
+    Required with :attr:`tls_cert`; one without the other is ignored with a warning.
+    """
+
     auth: Literal["none", "pam"] = "none"
     """Whether the web UI requires a login, and how. ``SPIRICONFIG_AUTH``.
 

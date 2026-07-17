@@ -21,6 +21,9 @@ variables always win.
 | `SPIRICONFIG_AUTH` | `none` | `none` or `pam`. `pam` puts a login in front of every page. See [Authentication](#authentication). |
 | `SPIRICONFIG_AUTH_SERVICE` | `login` | PAM service (a file under `/etc/pam.d/`) to authenticate against. |
 | `SPIRICONFIG_AUTH_GROUP` | `wheel` | Group whose members may log in, *when SpiriConfig runs as root*. `sudo` on Debian. |
+| `SPIRICONFIG_TLS` | `auto` | `auto` or `off`. `auto` serves a self-signed cert when exposed off loopback; `off` stays plain HTTP. See [Transport (TLS)](#transport-tls). |
+| `SPIRICONFIG_TLS_CERT` | *(none)* | Path to a TLS cert to serve instead of a generated one. Set with `SPIRICONFIG_TLS_KEY`. |
+| `SPIRICONFIG_TLS_KEY` | *(none)* | Path to the private key for `SPIRICONFIG_TLS_CERT`. |
 
 ## Authentication
 
@@ -53,6 +56,35 @@ logged in, everyone drives the same process with the same access — anyone you 
 in can do anything the UI can. Per-user permissions are not part of the model. See
 [design](design.md).
 :::
+
+## Transport (TLS)
+
+With `auth=pam` the login sends a real host password, so it must not travel over
+plain HTTP. These are appliances with no reverse proxy in front, so the TLS lives
+here: bind a non-loopback address and, by default (`SPIRICONFIG_TLS=auto`),
+SpiriConfig generates a **self-signed** cert and serves HTTPS. The cert is written
+once to the service's state directory (`/var/lib/spiriconfig/tls` as a system
+service, `~/.local/state/spiriconfig/tls` as a user one) and reused across
+restarts, so the browser warning is a one-time approval, not a per-boot one. A
+loopback checkout stays on plain HTTP, where a cert warning would be pure friction.
+
+Be clear about what self-signed buys. It encrypts the wire, so a **passive**
+eavesdropper on the LAN cannot read the password or the session cookie. It does
+**not** stop an **active** man-in-the-middle: the browser warns, the operator
+clicks through, and an attacker presenting *their own* self-signed cert is clicked
+through just the same. Self-signed is encryption, not identity.
+
+For a deployment that must resist an active attacker, give SpiriConfig a cert the
+browser can *validate* — a per-device cert from a CA your fleet trusts — with
+`SPIRICONFIG_TLS_CERT` and `SPIRICONFIG_TLS_KEY`. That is the only path where a
+substitute cert is rejected instead of clicked through, and the only one where
+`Strict-Transport-Security` is sent (HSTS on a self-signed origin would forbid the
+very click-through the operator needs and lock them out).
+
+Set `SPIRICONFIG_TLS=off` only when something in front already terminates TLS —
+a reverse proxy — so SpiriConfig should not encrypt a second time. On a
+non-loopback bind with `pam` and `tls=off`, `spiriconfig serve` warns that
+passwords are going out in the clear.
 
 ## Docker plugin
 

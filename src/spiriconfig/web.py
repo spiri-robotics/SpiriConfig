@@ -15,8 +15,11 @@ import secrets
 
 from loguru import logger
 from nicegui import app, ui
+from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
+from starlette.requests import Request
+from starlette.responses import Response
 
-from spiriconfig import advanced, auth, theme
+from spiriconfig import advanced, auth, theme, tls
 from spiriconfig.config import Settings
 from spiriconfig.plugins import Plugin, discover
 
@@ -194,6 +197,27 @@ def _is_loopback(host: str) -> bool:
     return host in {"localhost", "::1"} or host.startswith("127.")
 
 
+class HstsMiddleware(BaseHTTPMiddleware):
+    """Add ``Strict-Transport-Security`` -- only ever mounted for a validated cert.
+
+    HSTS tells the browser to refuse this origin over anything but HTTPS, and to
+    allow *no* click-through on a cert error. That is exactly right for a cert the
+    browser can validate, and exactly wrong for a self-signed one: the operator has
+    to click through a self-signed cert, and HSTS is precisely the instruction that
+    forbids it -- so this is mounted only on the provided-cert path (see
+    :func:`spiriconfig.tls.resolve`).
+    """
+
+    async def dispatch(
+        self, request: Request, call_next: RequestResponseEndpoint
+    ) -> Response:
+        response = await call_next(request)
+        response.headers["Strict-Transport-Security"] = (
+            "max-age=63072000; includeSubDomains"
+        )
+        return response
+
+
 def serve(config: Settings, plugins: list[Plugin] | None = None) -> None:
     """Build the UI and block, serving it."""
     found = discover() if plugins is None else plugins
@@ -206,6 +230,16 @@ def serve(config: Settings, plugins: list[Plugin] | None = None) -> None:
     for plugin in found:
         app.on_startup(plugin.on_startup)
 
+    # Decide TLS before anything is mounted: it sets the scheme we log, whether the
+    # session cookie may carry Secure, and whether HSTS is safe to send.
+    tls_plan = tls.resolve(
+        mode=config.tls,
+        cert=config.tls_cert,
+        key=config.tls_key,
+        is_loopback=_is_loopback(config.host),
+    )
+    tls.ensure_selfsigned(tls_plan, config.host)
+
     if config.auth == "pam":
         # Order matters only in that both happen before ui.run starts the server:
         # the login route has to exist to be reachable, and the middleware has to
@@ -213,9 +247,27 @@ def serve(config: Settings, plugins: list[Plugin] | None = None) -> None:
         auth.login_page(config)
         app.add_middleware(auth.AuthMiddleware)
         logger.info("PAM login enabled (service {!r})", config.auth_service)
+        if tls_plan.generate:
+            # The whole reason TLS defaults on: with PAM the login sends a real host
+            # password, and a self-signed cert keeps a passive sniffer off it. Say
+            # what it does not do, so no one mistakes it for MITM protection.
+            logger.info(
+                "serving a self-signed cert: this encrypts against eavesdroppers "
+                "but not an active MITM. For that, set SPIRICONFIG_TLS_CERT/_KEY to "
+                "a cert the browser trusts"
+            )
+        elif not tls_plan.enabled and not _is_loopback(config.host):
+            logger.warning(
+                "PAM login is sending passwords over plain HTTP on {} (SPIRICONFIG_TLS"
+                "=off): anyone on the network can read them. Terminate TLS in a proxy "
+                "in front, or drop SPIRICONFIG_TLS=off to serve a self-signed cert",
+                config.host,
+            )
     elif not _is_loopback(config.host):
         # The one genuinely dangerous default: reachable off-box, no login. Docker
-        # socket access is root-equivalent, so this is handing the machine out.
+        # socket access is root-equivalent, so this is handing the machine out. TLS
+        # does not change this -- an encrypted channel to an unauthenticated admin
+        # UI is still an unauthenticated admin UI.
         logger.warning(
             "web UI on {} has no authentication (SPIRICONFIG_AUTH=none) and is "
             "reachable off this host; anyone who can connect has full control. "
@@ -223,7 +275,26 @@ def serve(config: Settings, plugins: list[Plugin] | None = None) -> None:
             config.host,
         )
 
-    app.on_startup(lambda: logger.info("web UI on http://{}:{}", config.host, config.port))
+    # HSTS is added last so it is the outermost middleware, stamping *every*
+    # response -- including the redirect to /login that the auth middleware returns
+    # before any inner middleware runs. Only the provided-cert path sets hsts.
+    if tls_plan.hsts:
+        app.add_middleware(HstsMiddleware)
+
+    # Extra kwargs flow through NiceGUI to uvicorn (the ssl_* pair) and to the
+    # session cookie (https_only -> the Secure flag, which is only honest to set
+    # once the cookie actually travels over TLS).
+    run_kwargs: dict[str, object] = {}
+    if tls_plan.enabled:
+        run_kwargs["ssl_certfile"] = str(tls_plan.certfile)
+        run_kwargs["ssl_keyfile"] = str(tls_plan.keyfile)
+        run_kwargs["session_middleware_kwargs"] = {"https_only": True}
+
+    app.on_startup(
+        lambda: logger.info(
+            "web UI on {}://{}:{}", tls_plan.scheme, config.host, config.port
+        )
+    )
     ui.run(
         host=config.host,
         port=config.port,
@@ -236,4 +307,5 @@ def serve(config: Settings, plugins: list[Plugin] | None = None) -> None:
         # tints with translucency rather than naming a fixed light grey.
         dark=None,
         storage_secret=_storage_secret(config),
+        **run_kwargs,
     )
