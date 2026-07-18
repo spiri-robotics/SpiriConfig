@@ -4,6 +4,8 @@ Global settings used by all apps? Only one I can really think of is hostname/rob
 
 Haven't tested mobile respnsiveness. Probably not a problem.
 
+System overview page, thermal sensors, if all the programs it needs are installed. Global disk space, memory, cpu.
+
 
 Way to clean out old docker data, see how much space is being used/waster, general disk management.
 

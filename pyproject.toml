@@ -11,6 +11,11 @@ dependencies = [
     "pydantic-settings>=2.14.2",
     # Pure-Python (ctypes over libpam), so it cross-compiles onto the Yocto/Debian
     # drone images with no C build step. Backs the optional PAM login (SPIRICONFIG_AUTH).
+    "psutil>=6.0.0",
+    # Backs the system-overview plugin: host CPU, memory, disk, and thermal sensors.
+    # A C extension, unlike our other deps -- but the numbers it reads (per-core
+    # times, /proc/meminfo, sysfs thermal zones) would otherwise be a pile of
+    # platform-specific parsing, and prebuilt wheels cover the targets we ship on.
     "pyyaml>=6.0.3",
     "typer>=0.26.8",
 ]
@@ -26,6 +31,7 @@ docker = "spiriconfig_docker:DockerPlugin"
 appstore = "spiriconfig_appstore:AppStorePlugin"
 terminal = "spiriconfig_terminal:TerminalPlugin"
 users = "spiriconfig_users:UsersPlugin"
+system = "spiriconfig_system:SystemPlugin"
 
 [build-system]
 requires = ["hatchling"]
@@ -38,6 +44,7 @@ packages = [
     "src/spiriconfig_appstore",
     "src/spiriconfig_terminal",
     "src/spiriconfig_users",
+    "src/spiriconfig_system",
 ]
 
 [tool.pytest.ini_options]
