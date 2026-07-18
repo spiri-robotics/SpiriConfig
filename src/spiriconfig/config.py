@@ -40,6 +40,16 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
     """Minimum log level. ``SPIRICONFIG_LOG_LEVEL``."""
 
+    plugin_discovery_interval: float = 5.0
+    """Seconds between rescans for proxied (container) plugins. ``SPIRICONFIG_PLUGIN_DISCOVERY_INTERVAL``.
+
+    Out-of-process plugins are discovered from docker labels (see
+    :mod:`spiriconfig.discovery`); this is how often that view is refreshed, so an app
+    installed or stopped while SpiriConfig runs appears or disappears on its own. Set
+    to ``0`` to scan once at startup and never again -- for an appliance whose plugin
+    set is fixed at boot, where the repeated ``docker`` calls buy nothing.
+    """
+
     log_file: str | None = None
     """Optional file to log to, in addition to stderr. ``SPIRICONFIG_LOG_FILE``."""
 

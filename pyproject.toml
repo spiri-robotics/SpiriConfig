@@ -7,6 +7,12 @@ requires-python = ">=3.13"
 dependencies = [
     "loguru>=0.7.3",
     "nicegui>=3.14.0",
+    # The reverse proxy that fronts out-of-process (container) plugins: httpx forwards
+    # HTTP, websockets carries the socket.io upgrade a live NiceGUI UI rides on. Both
+    # already arrive under nicegui/uvicorn, but the proxy imports them directly, so it
+    # names them rather than leaning on a transitive pin. See spiriconfig.proxy.
+    "httpx>=0.27",
+    "websockets>=13",
     "pamela>=1.2.0",
     "pydantic-settings>=2.14.2",
     # Pure-Python (ctypes over libpam), so it cross-compiles onto the Yocto/Debian

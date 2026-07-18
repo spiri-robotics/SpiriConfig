@@ -11,15 +11,16 @@ chrome of its own into the main area.
 
 from __future__ import annotations
 
+import os
 import secrets
 
 from loguru import logger
-from nicegui import app, ui
+from nicegui import app, background_tasks, ui
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.requests import Request
 from starlette.responses import Response
 
-from spiriconfig import advanced, auth, theme, tls
+from spiriconfig import advanced, auth, proxy, theme, tls
 from spiriconfig.config import Settings
 from spiriconfig.plugins import Plugin, discover
 
@@ -44,6 +45,52 @@ def _nav_item(plugin: Plugin, current: str | None) -> None:
         advanced.mark(item)
 
 
+def _proxy_nav_item(target: proxy.Target, current: str | None) -> None:
+    """A proxied plugin's sidebar entry, styled to match an in-process one."""
+    item = ui.item(on_click=lambda: ui.navigate.to(f"{proxy.APP_PREFIX}/{target.name}"))
+    item.props("clickable v-ripple")
+    if target.name == current:
+        item.props("active active-class=text-primary")
+    with item:
+        with ui.item_section().props("avatar"):
+            ui.icon(target.icon)
+        with ui.item_section():
+            ui.item_label(target.title)
+
+
+def _proxy_page(name: str, found: list[Plugin], sub: str) -> None:
+    """Render a proxied plugin at ``/app/<name>/<sub>``: the shell, then its iframe.
+
+    Looks the target up live rather than being bound to one, because discovery adds
+    and drops targets as containers come and go and there is exactly one route serving
+    all of them. A name with no live target -- a plugin whose container is stopped, or
+    a stale link -- gets an honest card instead of a blank frame.
+
+    The iframe points at ``/plugin/<name>/<sub>``: the same sub-path this page was
+    reached at, so a reload rebuilds the identical frame and deep links survive. The
+    content slot is stripped of its padding and gap so the plugin owns the whole area.
+    """
+    target = proxy.get(name)
+    _layout(found, current=name)
+    if target is None:
+        with ui.card().classes("w-full"):
+            ui.label(f"{name} is not available").classes("text-lg font-bold")
+            ui.label(
+                "No running plugin is registered under this name. If it is an app, "
+                "check that its container is up."
+            ).classes("text-sm text-gray-500")
+        return
+    # Fill the main area with the iframe. The height has to be handed down the whole
+    # chain by flex: NiceGUI's content box asks for height:100%, but Quasar's page only
+    # sets a min-height, and a percentage height against a min-height-only parent
+    # collapses -- which is why the frame came out 150px tall until the page itself was
+    # made a flex column for the content to grow into.
+    ui.query(".q-page").classes("column no-wrap")
+    ui.query(".nicegui-content").classes(replace="w-full grow p-0 gap-0 no-wrap")
+    src = f"{proxy.MOUNT}/{name}/{sub}"
+    ui.element("iframe").props(f'src="{src}"').classes("w-full grow").style("border: 0")
+
+
 def _sidebar(plugins: list[Plugin], current: str | None) -> ui.left_drawer:
     """The nav, and the advanced-mode toggle beneath it.
 
@@ -57,6 +104,11 @@ def _sidebar(plugins: list[Plugin], current: str | None) -> ui.left_drawer:
             for plugin in plugins:
                 if plugin.has_page:
                     _nav_item(plugin, current)
+            # Proxied plugins (out-of-process containers) sit in the same nav as the
+            # in-process ones: from the sidebar's side they are just a name, an icon,
+            # and a URL, which is the whole point of the transport.
+            for target in proxy.targets():
+                _proxy_nav_item(target, current)
 
         with ui.column().classes("w-full gap-0"):
             ui.separator()
@@ -167,6 +219,27 @@ def build(plugins: list[Plugin] | None = None) -> None:
         if plugin.has_page:
             _register(plugin, found)
 
+    _register_proxy_pages(found)
+
+
+def _register_proxy_pages(found: list[Plugin]) -> None:
+    """Register the one route that serves every proxied plugin's shell page.
+
+    A single parametric route rather than one per target, because discovery adds and
+    removes targets while we run and pages cannot be registered after the server
+    starts: the route matches ``/app/<name>`` for any name and resolves the target at
+    render time. Two shapes -- the bare entry the sidebar links to, and the
+    ``{sub:path}`` depth where ``shell.js`` parks the address bar -- so a reload or a
+    shared link at any depth lands on a page that rebuilds the frame there. ``found`` is
+    bound now rather than defaulted, for the FastAPI-signature reason
+    :func:`_register` gives.
+    """
+
+    @ui.page(f"{proxy.APP_PREFIX}/{{name}}")
+    @ui.page(f"{proxy.APP_PREFIX}/{{name}}/{{sub:path}}")
+    def _proxied(name: str, sub: str = "") -> None:
+        _proxy_page(name, found, sub)
+
 
 def _storage_secret(config: Settings) -> str:
     """The secret signing the cookie that per-person settings are keyed on.
@@ -218,9 +291,46 @@ class HstsMiddleware(BaseHTTPMiddleware):
         return response
 
 
+def _register_proxy_dev_target() -> None:
+    """Register a hand-set proxy target from ``SPIRICONFIG_PROXY_DEMO``, if set.
+
+    A dev convenience for driving the proxy against an upstream you run yourself
+    (``scripts/demo_target.py``), on a machine with no plugin containers to discover.
+    Off unless the env var is set, and merged alongside discovered targets rather than
+    replacing them -- see :func:`spiriconfig.proxy.register`.
+    """
+    upstream = os.environ.get("SPIRICONFIG_PROXY_DEMO")
+    if upstream:
+        proxy.register("demo", upstream, title="Demo", icon="web")
+
+
+def _start_discovery(config: Settings) -> None:
+    """Kick off plugin discovery: one scan now, then a rescan loop.
+
+    The first scan is synchronous and before the server starts, so the sidebar is
+    right on the very first page load rather than popping targets in a beat later. The
+    loop then keeps it live, so an app installed while we run appears without a restart.
+    Interval 0 turns the loop off (the one scan still runs), for a deployment whose
+    plugin set never changes after boot.
+    """
+    from spiriconfig import discovery
+
+    proxy.set_discovered(discovery.scan())
+    interval = config.plugin_discovery_interval
+    if interval > 0:
+        app.on_startup(
+            lambda: background_tasks.create(
+                discovery.run_forever(interval=interval), name="plugin-discovery"
+            )
+        )
+
+
 def serve(config: Settings, plugins: list[Plugin] | None = None) -> None:
     """Build the UI and block, serving it."""
     found = discover() if plugins is None else plugins
+    _register_proxy_dev_target()
+    proxy.install()
+    _start_discovery(config)
     build(found)
 
     # Per-process startup, distinct from per-page render: a plugin may want to do

@@ -1350,6 +1350,7 @@ name = "spiriconfig"
 version = "0.2.0"
 source = { editable = "." }
 dependencies = [
+    { name = "httpx" },
     { name = "loguru" },
     { name = "nicegui" },
     { name = "pamela" },
@@ -1357,6 +1358,7 @@ dependencies = [
     { name = "pydantic-settings" },
     { name = "pyyaml" },
     { name = "typer" },
+    { name = "websockets" },
 ]
 
 [package.dev-dependencies]
@@ -1370,6 +1372,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "httpx", specifier = ">=0.27" },
     { name = "loguru", specifier = ">=0.7.3" },
     { name = "nicegui", specifier = ">=3.14.0" },
     { name = "pamela", specifier = ">=1.2.0" },
@@ -1377,6 +1380,7 @@ requires-dist = [
     { name = "pydantic-settings", specifier = ">=2.14.2" },
     { name = "pyyaml", specifier = ">=6.0.3" },
     { name = "typer", specifier = ">=0.26.8" },
+    { name = "websockets", specifier = ">=13" },
 ]
 
 [package.metadata.requires-dev]
