@@ -1,0 +1,38 @@
+# The app-store compose file for ESC Config.
+#
+# Drop this directory into a Spiri app store (one directory per app) and
+# SpiriConfig renders the x-spiri-settings block below as a settings form. The
+# `x-` keys are compose extension fields, which compose ignores by spec, so this
+# file also runs unchanged under a plain `docker compose up -d` on a machine that
+# has never heard of SpiriConfig.
+#
+# There is one service per scaffolded example; each runs the same image with a
+# different `command`. scripts/release.py keeps x-spiri-config-version and every
+# image tag equal to the version in pyproject.toml -- do not edit it here by hand.
+x-spiri-config-version: "0.1.0"
+
+# Each entry names an env var an example reads, and the widget SpiriConfig should
+# offer for it. See docs/configuration.md for the full field list.
+x-spiri-settings:
+  - env: ESC_CONFIG_GREETING
+    widget: input
+    label: Greeting
+    help: The message the app shows.
+    default: "Hello from ESC Config"
+
+services:
+  # A NiceGUI web app. The spiriconfig.plugin.* labels are what SpiriConfig reads
+  # (from `docker ps`) to discover it and frame it in its shell -- see
+  # nicegui_app.py. It publishes no host port: SpiriConfig reaches it on the
+  # docker network, at the port the label names.
+  nicegui:
+    image: ghcr.io/spiri/esc-config:0.1.0
+    restart: unless-stopped
+    command: ["esc-config", "nicegui"]
+    labels:
+      spiriconfig.plugin.name: "esc-config"
+      spiriconfig.plugin.port: "8080"
+      spiriconfig.plugin.title: "ESC Config"
+      spiriconfig.plugin.icon: "web"
+    environment:
+      ESC_CONFIG_GREETING: "${ESC_CONFIG_GREETING:-Hello from ESC Config}"

@@ -1,0 +1,10 @@
+# Keep the build context small and the image reproducible: everything the build
+# needs comes from pyproject.toml, uv.lock, and src/.
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.git/
+docs/_build/
+.env

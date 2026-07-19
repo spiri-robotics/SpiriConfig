@@ -1,0 +1,17 @@
+# This file is maintained by Copier; do not edit it by hand.
+# `copier update` reads it to know what to re-render.
+_commit: 1730c8d
+_src_path: /home/traverseda/Code/spiri/spiri-app-template
+app_description: Configure a drone's ESCs.
+author_email: ''
+author_name: ''
+env_prefix: ESC_CONFIG_
+examples:
+- nicegui
+github_owner: spiri
+package_name: esc_config
+project_name: ESC Config
+project_slug: esc-config
+python_version: '3.13'
+version: 0.1.0
+

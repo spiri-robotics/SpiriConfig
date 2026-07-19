@@ -77,7 +77,10 @@ def install(
     ] = "spiriconfig",
     compose_dir: Annotated[
         Path | None,
-        typer.Option(help="Where the docker plugin looks for apps. [system: /srv/compose]"),
+        typer.Option(
+            help="Where the docker plugin looks for apps. "
+            "[system: /srv/compose, user: ~/spiri-apps]"
+        ),
     ] = None,
     auth: Annotated[
         str, typer.Option(help="Login gate: 'pam' (the default) or 'none'.")
@@ -116,7 +119,7 @@ def install(
     scope = service.Scope.detect()
     config = service.ServiceConfig(
         compose_dir=compose_dir
-        or (Path("/srv/compose") if scope.system else Path.home() / "compose"),
+        or (Path("/srv/compose") if scope.system else Path.home() / "spiri-apps"),
         storage_secret=secrets.token_urlsafe(32),
         auth=auth,
         auth_group=auth_group,

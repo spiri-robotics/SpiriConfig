@@ -1,0 +1,18 @@
+# Local development override. Instead of pulling the published image, build it
+# from this checkout, mount the source over the baked-in copy, and re-run the app
+# whenever a file changes (watchfiles) so a save restarts it.
+#
+#   docker compose -f compose.yaml -f compose.dev.yaml up --build
+#
+# The `build` stage of the Dockerfile is reused here because it still has uv and
+# the dev dependencies; the runtime stage deliberately does not. One override per
+# service, matching the examples in compose.yaml.
+services:
+  nicegui:
+    build:
+      context: .
+      target: build
+    image: esc-config:dev
+    command: ["uv", "run", "watchfiles", "esc-config nicegui", "src"]
+    volumes:
+      - ./src:/app/src:ro

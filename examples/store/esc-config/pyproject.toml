@@ -1,0 +1,41 @@
+[project]
+name = "esc-config"
+version = "0.1.0"
+description = "Configure a drone's ESCs."
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    # The same settings library SpiriConfig uses: env vars in, typed config out,
+    # which is exactly the shape of an x-spiri-settings form.
+    "pydantic-settings>=2.5",
+    # The web framework the nicegui example serves with. It brings its own
+    # uvicorn/httpx; SpiriConfig proxies the HTTP and websocket it speaks.
+    "nicegui>=2.0",
+]
+
+[project.scripts]
+esc-config = "esc_config.__main__:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/esc_config"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py313"
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    # watchfiles powers the reload loop in compose.dev.yaml.
+    "watchfiles>=0.24",
+    "ruff>=0.6",
+    "sphinx>=8",
+    "sphinx-rtd-theme>=3",
+    "myst-parser>=4",
+]

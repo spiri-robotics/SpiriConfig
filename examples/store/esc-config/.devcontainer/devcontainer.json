@@ -1,0 +1,15 @@
+{
+  "name": "ESC Config (dev)",
+  "// build.target": "Reuse the Dockerfile's build stage -- it already has uv and the dev deps.",
+  "build": {
+    "dockerfile": "../Dockerfile",
+    "target": "build"
+  },
+  "remoteUser": "root",
+  "postCreateCommand": "uv sync --all-groups",
+  "customizations": {
+    "vscode": {
+      "extensions": ["charliermarsh.ruff", "ms-python.python"]
+    }
+  }
+}

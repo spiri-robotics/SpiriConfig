@@ -739,7 +739,9 @@ class TestTheExampleStore:
         import yaml
 
         apps = [d for d in examples.iterdir() if d.is_dir() and d.name != "docs"]
-        assert {d.name for d in apps} == {"whoami", "traefik", "nextcloud", "grafana"}
+        assert {d.name for d in apps} == {
+            "whoami", "traefik", "nextcloud", "grafana", "esc-config",
+        }
 
         for app_dir in apps:
             compose = app_dir / "compose.yaml"

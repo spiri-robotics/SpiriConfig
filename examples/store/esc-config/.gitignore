@@ -1,0 +1,12 @@
+# Python / uv
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+
+# Sphinx
+docs/_build/
+
+# Env files hold configured secrets -- they belong on the machine, not in git.
+.env
