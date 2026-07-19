@@ -24,6 +24,7 @@ from spiriconfig_docker.stacks import (
     create,
     discover,
     find_compose_file,
+    find_dev_override,
     get,
 )
 
@@ -89,6 +90,26 @@ class TestDiscovery:
         assert found is not None
         assert found.name == "compose.yaml"
 
+    def test_records_a_dev_override_when_present(self, compose_dir: Path) -> None:
+        (compose_dir / "hello" / "compose.dev.yaml").write_text("services: {}\n")
+        settings = DockerSettings(compose_dir=compose_dir)
+        (stack,) = discover(settings)
+        assert stack.dev_override is not None
+        assert stack.dev_override.name == "compose.dev.yaml"
+
+    def test_dev_override_is_none_without_one(self, settings: DockerSettings) -> None:
+        assert discover(settings)[0].dev_override is None
+
+    def test_a_lone_dev_override_is_not_a_stack(self, compose_dir: Path) -> None:
+        """An override needs a base file to layer on; on its own it is not a stack."""
+        orphan = compose_dir / "orphan"
+        orphan.mkdir()
+        (orphan / "compose.dev.yaml").write_text("services: {}\n")
+        settings = DockerSettings(compose_dir=compose_dir)
+        assert "orphan" not in [s.name for s in discover(settings)]
+        assert find_dev_override(orphan) is not None  # the file is there
+        assert find_compose_file(orphan) is None  # but there is no base to run
+
 
 class TestGet:
     def test_returns_the_named_project(self, settings: DockerSettings) -> None:
@@ -118,6 +139,28 @@ class TestCommands:
             "docker", "compose", "-p", "hello", "-f", "compose.yaml", "up", "-d",
         ]
         assert command.cwd == stack.path
+
+    def test_up_dev_layers_the_override_as_a_second_file(
+        self, compose_dir: Path
+    ) -> None:
+        (compose_dir / "hello" / "compose.dev.yaml").write_text("services: {}\n")
+        stack = get(DockerSettings(compose_dir=compose_dir), "hello")
+        assert list(stack.up(dev=True).argv) == [
+            "docker", "compose", "-p", "hello",
+            "-f", "compose.yaml", "-f", "compose.dev.yaml", "up", "-d",
+        ]
+
+    def test_up_dev_is_a_noop_when_there_is_no_override(
+        self, settings: DockerSettings
+    ) -> None:
+        """`--dev` on a stack that ships none behaves exactly like a plain up."""
+        stack = get(settings, "hello")
+        assert list(stack.up(dev=True).argv) == list(stack.up().argv)
+
+    def test_up_without_dev_never_names_the_override(self, compose_dir: Path) -> None:
+        (compose_dir / "hello" / "compose.dev.yaml").write_text("services: {}\n")
+        stack = get(DockerSettings(compose_dir=compose_dir), "hello")
+        assert "compose.dev.yaml" not in stack.up().argv
 
     def test_down(self, settings: DockerSettings) -> None:
         assert list(get(settings, "hello").down().argv)[-1] == "down"

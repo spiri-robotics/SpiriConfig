@@ -663,6 +663,20 @@ def _stack_card(
             # `spiriconfig docker exec <stack> <service>` -- because hiding a button
             # is decluttering, not a permission.
             with advanced.only():
+                # Advanced-only because running the development variant -- build
+                # from source, live-reload -- is a developer's move, not something
+                # an ordinary user came here for. Shown only for an app that ships
+                # a compose.dev.yaml (like a Settings button over an empty form, a
+                # dev button with nothing to override would be worse than none). The
+                # capability itself is on the CLI for everyone:
+                # `spiriconfig docker up <stack> --dev`.
+                if stack.dev_override is not None:
+                    ui.button(
+                        "Up (dev)", icon="construction",
+                        on_click=lambda: act(stack.up(dev=True), "up (dev)"),
+                    ).props("flat").tooltip(
+                        "Start with this app's compose.dev.yaml override layered on"
+                    )
                 ui.button("Exec", icon="terminal", on_click=exec_).props(
                     "flat"
                 ).tooltip("Run a command in one of this app's containers")

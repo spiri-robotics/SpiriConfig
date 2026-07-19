@@ -44,6 +44,13 @@ ShowOption = Annotated[
     bool,
     typer.Option("--show", help="Print the docker command instead of running it."),
 ]
+DevOption = Annotated[
+    bool,
+    typer.Option(
+        "--dev",
+        help="Layer the app's compose.dev.yaml override on top, if it has one.",
+    ),
+]
 StackArg = Annotated[str, typer.Argument(help="Name of the compose project.")]
 
 
@@ -148,9 +155,13 @@ def create(
 
 
 @app.command()
-def up(stack: StackArg, show: ShowOption = False) -> None:
-    """Start a compose project in the background."""
-    _execute_streaming(_stack(stack).up(), show=show)
+def up(stack: StackArg, show: ShowOption = False, dev: DevOption = False) -> None:
+    """Start a compose project in the background.
+
+    With `--dev`, layer the app's `compose.dev.yaml` override on top of its base
+    compose file, if it ships one -- the app author's development variant.
+    """
+    _execute_streaming(_stack(stack).up(dev=dev), show=show)
 
 
 @app.command()

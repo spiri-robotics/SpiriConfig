@@ -86,6 +86,20 @@ class TestShow:
         assert "docker compose" in printed
         assert printed.endswith("up -d")
 
+    def test_dev_shows_the_override_layered_on(self, compose_dir: Path) -> None:
+        (compose_dir / "hello" / "compose.dev.yaml").write_text("services: {}\n")
+        result = runner.invoke(docker_app, ["up", "hello", "--dev", "--show"])
+        assert result.exit_code == 0
+        printed = result.stdout.strip()
+        assert "-f compose.yaml -f compose.dev.yaml" in printed
+
+    def test_dev_on_a_stack_without_an_override_is_a_plain_up(
+        self, compose_dir: Path
+    ) -> None:
+        plain = runner.invoke(docker_app, ["up", "hello", "--show"]).stdout.strip()
+        dev = runner.invoke(docker_app, ["up", "hello", "--dev", "--show"]).stdout.strip()
+        assert dev == plain
+
     @docker_required
     def test_show_does_not_actually_run_anything(
         self, compose_dir: Path, monkeypatch: pytest.MonkeyPatch

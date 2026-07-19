@@ -36,6 +36,18 @@ COMPOSE_FILENAMES = (
     "docker-compose.yml",
 )
 
+#: Dev-override compose files, one per base name. These are *overrides* layered on
+#: top of the base file (``docker compose -f compose.yaml -f compose.dev.yaml``),
+#: not standalone stacks -- exactly what the app template's ``compose.dev.yaml`` is
+#: written to be: build from source, mount it, live-reload. Optional, and only ever
+#: reached in advanced mode; a stack without one simply cannot be brought up in dev.
+DEV_OVERRIDE_FILENAMES = (
+    "compose.dev.yaml",
+    "compose.dev.yml",
+    "docker-compose.dev.yaml",
+    "docker-compose.dev.yml",
+)
+
 #: What a freshly created compose file starts as, when the user gives us no text of
 #: their own. Deliberately a working stack and not an empty file: ``docker compose
 #: config`` rejects a file with no services, so a blank template would fail the very
@@ -124,6 +136,13 @@ class Stack:
 
     settings: DockerSettings
 
+    dev_override: Path | None = None
+    """A dev-override compose file to layer on :attr:`compose_file` in dev mode.
+
+    ``None`` for the common case of a stack that ships no such file. See
+    :data:`DEV_OVERRIDE_FILENAMES` and :meth:`up`.
+    """
+
     # -- command construction -------------------------------------------------
     #
     # Note the shape of every command: we cd into the project directory and name
@@ -132,23 +151,34 @@ class Stack:
     # that directory by hand -- if these disagreed, the UI would be managing a
     # parallel set of containers and the user would never find them.
 
-    def _compose(self, *args: str) -> Command:
+    def _compose(self, *args: str, dev: bool = False) -> Command:
+        files = ["-f", self.compose_file.name]
+        # A dev override is a second `-f`, layered on top -- the same
+        # `-f base -f override` docker compose merges by hand. Silently a no-op
+        # when the stack ships no override, so a caller need not check first.
+        if dev and self.dev_override is not None:
+            files += ["-f", self.dev_override.name]
         return Command(
             argv=[
                 self.settings.docker_bin,
                 "compose",
                 "-p",
                 self.name,
-                "-f",
-                self.compose_file.name,
+                *files,
                 *args,
             ],
             cwd=self.path,
         )
 
-    def up(self) -> Command:
-        """Create and start the stack, in the background."""
-        return self._compose("up", "-d")
+    def up(self, *, dev: bool = False) -> Command:
+        """Create and start the stack, in the background.
+
+        With ``dev=True`` and a dev-override file present, layer it on top of the
+        base compose (``-f compose.yaml -f compose.dev.yaml``) so the stack runs the
+        app author's development variant -- build from source, mount it, live-reload.
+        Without an override the flag does nothing, so a plain stack still comes up.
+        """
+        return self._compose("up", "-d", dev=dev)
 
     def down(self) -> Command:
         """Stop and remove the stack's containers."""
@@ -547,6 +577,20 @@ def find_compose_file(directory: Path) -> Path | None:
     return None
 
 
+def find_dev_override(directory: Path) -> Path | None:
+    """Return the dev-override compose file in ``directory``, or None if there is none.
+
+    The optional counterpart to :func:`find_compose_file`: a file dev mode layers on
+    top of the base compose. Its presence alone does not make a directory a stack --
+    :func:`discover` still needs a base file to find one at all.
+    """
+    for name in DEV_OVERRIDE_FILENAMES:
+        candidate = directory / name
+        if candidate.is_file():
+            return candidate
+    return None
+
+
 def discover(settings: DockerSettings) -> list[Stack]:
     """Find every compose project in the configured directory, sorted by name.
 
@@ -572,6 +616,7 @@ def discover(settings: DockerSettings) -> list[Stack]:
                 path=child,
                 compose_file=compose_file,
                 settings=settings,
+                dev_override=find_dev_override(child),
             )
         )
     return stacks
@@ -663,6 +708,7 @@ def create(settings: DockerSettings, name: str, text: str = NEW_COMPOSE_TEMPLATE
 __all__ = [
     "COMPOSE_FILENAMES",
     "DEFAULT_EXEC_COMMAND",
+    "DEV_OVERRIDE_FILENAMES",
     "NEW_COMPOSE_TEMPLATE",
     "Stack",
     "StackError",
@@ -670,5 +716,6 @@ __all__ = [
     "create",
     "discover",
     "find_compose_file",
+    "find_dev_override",
     "get",
 ]
