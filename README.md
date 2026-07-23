@@ -62,6 +62,12 @@ $ mkdir -p /srv/compose/whoami
 $ $EDITOR /srv/compose/whoami/compose.yaml
 ```
 
+A non-root install defaults its compose directory to `~/spiri-apps`, so dropping
+your own in-development project there -- a directory with a `compose.yaml` -- is
+all it takes to get started; SpiriConfig picks it up as a stack, no install step.
+Add a `compose.dev.yaml` alongside it to build from source and get the dev-mode
+"Up (dev)" path.
+
 From the shell:
 
 ```console
@@ -91,7 +97,7 @@ list; the one you need is:
 
 | Variable | Default | Meaning |
 | --- | --- | --- |
-| `SPIRICONFIG_DOCKER_COMPOSE_DIR` | `test_data/compose` | One subdirectory per compose project. Set it to `/srv/compose` on a real machine. |
+| `SPIRICONFIG_DOCKER_COMPOSE_DIR` | `test_data/compose` | One subdirectory per compose project. On a real machine it defaults to `/srv/compose` (root install) or `~/spiri-apps` (user install). |
 
 The defaults are relative on purpose: running out of a checkout should not start
 managing the containers on your actual box. See [configuration](docs/configuration.md).

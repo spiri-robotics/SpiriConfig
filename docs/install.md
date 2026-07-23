@@ -80,7 +80,7 @@ The install questions all have flags, with sensible defaults:
 | `--port` | `8080` | Port to bind. |
 | `--auth` | `pam` | Login gate: `pam` or `none`. |
 | `--auth-group` | `wheel` | Group whose members may log in, when run as root. |
-| `--compose-dir` | `/srv/compose` (root), `~/compose` (user) | Where the docker plugin looks for apps. |
+| `--compose-dir` | `/srv/compose` (root), `~/spiri-apps` (user) | Where the docker plugin looks for apps. |
 | `--editable`, `-e` | off | Install the source in editable mode (for developing the installer). |
 
 The first positional argument is what to install, and it is anything uv accepts:
