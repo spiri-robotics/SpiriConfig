@@ -14,10 +14,11 @@
 # SpiriConfig's defaults already point here (see spiriconfig_docker.config and
 # spiriconfig_appstore.config), so after running this:
 #
-#   uv run spiriconfig appstore sync
+#   uv run spiriconfig appstore check
 #   uv run spiriconfig appstore install whoami
 #   uv run spiriconfig docker up whoami
-#   curl localhost:8080
+#   uv run spiriconfig serve &
+#   curl localhost:8337/plugin/whoami/
 set -eu
 
 root=$(git rev-parse --show-toplevel)
@@ -46,9 +47,10 @@ git -C test_data/example-store \
 echo "Built test_data/:"
 echo "  test_data/example-store   the app store ($(git -C test_data/example-store rev-parse --short HEAD))"
 echo "  test_data/compose         empty; installed apps are symlinked in here"
-echo "  test_data/stores          empty; 'appstore sync' clones the store into it"
+echo "  test_data/stores          empty; 'appstore check' clones the store into it"
 echo
 echo "Next:"
-echo "  uv run spiriconfig appstore sync"
+echo "  uv run spiriconfig appstore check"
 echo "  uv run spiriconfig appstore install whoami"
-echo "  uv run spiriconfig docker up whoami && curl localhost:8080"
+echo "  uv run spiriconfig docker up whoami"
+echo "  uv run spiriconfig serve & curl localhost:8337/plugin/whoami/"

@@ -10,11 +10,15 @@ SpiriConfig's default settings point at the result, so a fresh checkout can do:
 
 ```console
 $ ./scripts/test-data.sh
-$ uv run spiriconfig appstore sync
+$ uv run spiriconfig appstore check
 $ uv run spiriconfig appstore install whoami
 $ uv run spiriconfig docker up whoami
-$ curl localhost:8080
+$ uv run spiriconfig serve &
+$ curl localhost:8337/plugin/whoami/
 ```
+
+whoami publishes no port of its own; the `spiriconfig.plugin.*` labels on it are
+what make the line above work, the same way any out-of-process plugin is reached.
 
 `docs/` below is here on purpose: a top-level directory with no compose file in
 it is not an app, and must be ignored rather than crashed on.

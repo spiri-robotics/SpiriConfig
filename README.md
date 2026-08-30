@@ -131,13 +131,18 @@ SpiriConfig out cannot start managing the containers on your box:
 
 ```console
 $ ./scripts/test-data.sh                        # a compose dir + an example app store
-$ uv run spiriconfig appstore sync
+$ uv run spiriconfig appstore check
 $ uv run spiriconfig appstore install whoami
 $ uv run spiriconfig docker up whoami
-$ curl localhost:8080
+$ uv run spiriconfig serve &
+$ curl localhost:8337/plugin/whoami/
 Hostname: 2d5bcd6f2629
 GET / HTTP/1.1
 ```
+
+whoami publishes no port of its own -- the reverse proxy above is the only way
+in, same as any other plugin (see `spiriconfig.plugin.*` labels in
+`examples/store/whoami/compose.yaml`).
 
 Run the tests and build the docs:
 
