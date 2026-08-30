@@ -8,7 +8,7 @@ Press **Up** on a stack in the web UI and SpiriConfig runs this, showing you the
 line as it goes, with a button to copy it:
 
 ```console
-$ cd /srv/compose/whoami && docker compose -p whoami -f compose.yaml up -d
+cd /srv/compose/whoami && docker compose -p whoami -f compose.yaml up -d
 ```
 
 No database, no registry, no bespoke on-disk format. If SpiriConfig vanished
@@ -23,7 +23,7 @@ So it installs itself as a systemd service. You need
 [uv](https://docs.astral.sh/uv/) on the machine, then:
 
 ```console
-$ uvx spiriconfig install
+uvx spiriconfig install
 ```
 
 That pulls the latest release from PyPI, writes a systemd unit and an environment
@@ -40,7 +40,7 @@ To track the latest development instead of a release, install from git -- the
 positional argument is anything uv accepts:
 
 ```console
-$ spiriconfig install git+https://github.com/spiri-robotics/SpiriConfig.git
+spiriconfig install git+https://github.com/spiri-robotics/SpiriConfig.git
 ```
 
 A git-branch install pins to a commit, so `spiriconfig update --reinstall`
@@ -51,15 +51,15 @@ refetches the branch when it moves.
 Point it at your compose directory and start the web UI:
 
 ```console
-$ export SPIRICONFIG_DOCKER_COMPOSE_DIR=/srv/compose
-$ spiriconfig serve            # web UI on http://localhost:8080
+export SPIRICONFIG_DOCKER_COMPOSE_DIR=/srv/compose
+spiriconfig serve            # web UI on http://localhost:8080
 ```
 
 Adding a service is making a directory. No CLI required -- that is the point:
 
 ```console
-$ mkdir -p /srv/compose/whoami
-$ $EDITOR /srv/compose/whoami/compose.yaml
+sudo mkdir -p /srv/compose/whoami
+sudo $EDITOR /srv/compose/whoami/compose.yaml
 ```
 
 A non-root install defaults its compose directory to `~/spiri-apps`, so dropping
@@ -71,18 +71,18 @@ Add a `compose.dev.yaml` alongside it to build from source and get the dev-mode
 From the shell:
 
 ```console
-$ spiriconfig docker list
+spiriconfig docker list
 whoami   running
 grafana  stopped
 
-$ spiriconfig docker up whoami
-$ spiriconfig docker logs whoami -f
+spiriconfig docker up whoami
+spiriconfig docker logs whoami -f
 ```
 
 Not sure what a command will do? Ask, without running it:
 
 ```console
-$ spiriconfig docker up whoami --show
+spiriconfig docker up whoami --show
 cd /srv/compose/whoami && docker compose -p whoami -f compose.yaml up -d
 ```
 
@@ -122,7 +122,7 @@ Install the package and it appears in the CLI and the web UI. See
 Work from a checkout with [uv](https://docs.astral.sh/uv/):
 
 ```console
-$ uv sync
+uv sync
 ```
 
 You can drive the whole flow without touching your real machine. `test_data/` is
@@ -130,12 +130,12 @@ gitignored and disposable, and the default settings point at it, so trying
 SpiriConfig out cannot start managing the containers on your box:
 
 ```console
-$ ./scripts/test-data.sh                        # a compose dir + an example app store
-$ uv run spiriconfig appstore check
-$ uv run spiriconfig appstore install whoami
-$ uv run spiriconfig docker up whoami
-$ uv run spiriconfig serve &
-$ curl localhost:8337/plugin/whoami/
+./scripts/test-data.sh                        # a compose dir + an example app store
+uv run spiriconfig appstore check
+uv run spiriconfig appstore install whoami
+uv run spiriconfig docker up whoami
+uv run spiriconfig serve &
+curl localhost:8337/plugin/whoami/
 Hostname: 2d5bcd6f2629
 GET / HTTP/1.1
 ```
@@ -147,8 +147,8 @@ in, same as any other plugin (see `spiriconfig.plugin.*` labels in
 Run the tests and build the docs:
 
 ```console
-$ uv run pytest                                   # 92 tests
-$ uv run sphinx-build -b html docs docs/_build    # docs
+uv run pytest                                   # 92 tests
+uv run sphinx-build -b html docs docs/_build    # docs
 ```
 
 Tests that need a docker daemon are skipped when there is not one, so the suite
