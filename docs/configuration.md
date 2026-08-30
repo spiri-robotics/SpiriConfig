@@ -18,7 +18,7 @@ variables always win.
 | `SPIRICONFIG_LOG_FILE` | *(none)* | Also log to this file, rotated at 10 MB. |
 | `SPIRICONFIG_ADVANCED` | `false` | Default for [advanced mode](advanced.md), for someone who has not chosen. |
 | `SPIRICONFIG_STORAGE_SECRET` | *(generated)* | Signs the cookie per-person settings are keyed on. Set it, or those settings reset on every restart. |
-| `SPIRICONFIG_AUTH` | `none` | `none` or `pam`. `pam` puts a login in front of every page. See [Authentication](#authentication). |
+| `SPIRICONFIG_AUTH` | `pam` | `none` or `pam`. `pam` puts a login in front of every page. See [Authentication](#authentication). |
 | `SPIRICONFIG_AUTH_SERVICE` | `login` | PAM service (a file under `/etc/pam.d/`) to authenticate against. |
 | `SPIRICONFIG_AUTH_GROUP` | `wheel` | Group whose members may log in, *when SpiriConfig runs as root*. `sudo` on Debian. |
 | `SPIRICONFIG_TLS` | `auto` | `auto` or `off`. `auto` serves a self-signed cert when exposed off loopback; `off` stays plain HTTP. See [Transport (TLS)](#transport-tls). |
@@ -27,11 +27,11 @@ variables always win.
 
 ## Authentication
 
-By default the web UI has no login: on loopback, in a checkout, that is the point.
-Set `SPIRICONFIG_AUTH=pam` and every page requires a password, checked against the
-host's PAM stack — the same accounts that can `ssh` in or `sudo`, no separate user
-list of ours. Turn it on for any deployment the UI can be reached from off-box;
-`spiriconfig serve` warns if you bind a non-loopback address and leave it off.
+By default every page requires a login, checked against the host's PAM stack — the
+same accounts that can `ssh` in or `sudo`, no separate user list of ours. Set
+`SPIRICONFIG_AUTH=none` to drop that gate, which only makes sense on loopback in a
+checkout with no other users on the box; `spiriconfig serve` warns if you bind a
+non-loopback address and turn it off.
 
 Who can log in depends on whether SpiriConfig runs as root, because only root can
 verify another account's password:

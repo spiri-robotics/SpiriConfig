@@ -103,17 +103,16 @@ class Settings(BaseSettings):
     Required with :attr:`tls_cert`; one without the other is ignored with a warning.
     """
 
-    auth: Literal["none", "pam"] = "none"
+    auth: Literal["none", "pam"] = "pam"
     """Whether the web UI requires a login, and how. ``SPIRICONFIG_AUTH``.
 
-    ``none`` (the default) serves the UI to anyone who can reach the port, which is
-    right for a checkout on loopback and wrong the moment the UI is exposed. ``pam``
-    puts a login in front of every page, authenticating against the host's PAM stack
-    -- see :mod:`spiriconfig.auth`. A deployment that reaches the network turns this
-    on; nothing about a developer's loopback session changes until they do.
+    ``pam`` (the default) puts a login in front of every page, authenticating
+    against the host's PAM stack -- see :mod:`spiriconfig.auth`. ``none`` serves the
+    UI to anyone who can reach the port, which is only appropriate for a checkout on
+    loopback with no other users on the box.
 
-    Off by default on purpose, the same reason the compose dir defaults somewhere
-    harmless: running out of a checkout should not suddenly demand a password.
+    On by default: a login gate is the right default even for a single-operator box,
+    and a developer who wants a passwordless loopback session can opt out explicitly.
     """
 
     auth_service: str = "login"
