@@ -24,5 +24,8 @@ docs/_build/
 # NiceGUI's on-disk storage for the running dev server.
 .nicegui/
 
+# Local per-checkout config overrides (see docs/configuration.md).
+.env
+
 # aider local tooling state
 .aider*
