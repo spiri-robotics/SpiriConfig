@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
+import html
 from dataclasses import dataclass
 
 import httpx
@@ -38,7 +39,7 @@ from loguru import logger
 from nicegui import app
 from starlette.background import BackgroundTask
 from starlette.requests import Request
-from starlette.responses import PlainTextResponse, Response, StreamingResponse
+from starlette.responses import HTMLResponse, PlainTextResponse, Response, StreamingResponse
 from starlette.routing import Route, WebSocketRoute
 from starlette.websockets import WebSocket, WebSocketDisconnect, WebSocketState
 
@@ -108,6 +109,27 @@ _client = httpx.AsyncClient(
     follow_redirects=False,
     timeout=httpx.Timeout(30.0, read=None),
 )
+
+#: A bare ``text/plain`` response (traefik/whoami, most debug/echo containers) has no
+#: colours of its own, so the browser's built-in plaintext viewer picks them -- and on
+#: Linux, Firefox harmonises that viewer with the system theme, forcing a dark
+#: background without reliably flipping the (UA-default black) text to match, so a
+#: dark GTK theme reads as black-on-black. Wrapping it ourselves with an explicit
+#: ``color-scheme`` sidesteps the browser default entirely, matching Chromium's
+#: always-legible rendering everywhere.
+_TEXT_PLAIN_TEMPLATE = """\
+<!doctype html>
+<meta charset="utf-8">
+<style>
+  :root {{ color-scheme: dark light; }}
+  body {{
+    margin: 0; padding: 1rem; background: #1e1e1e; color: #d4d4d4;
+    font: 13px/1.4 ui-monospace, Menlo, Consolas, monospace;
+  }}
+  pre {{ margin: 0; white-space: pre-wrap; word-break: break-word; }}
+</style>
+<pre>{body}</pre>
+"""
 
 
 def register_target(
@@ -183,6 +205,20 @@ async def _http(request: Request) -> Response:
         log.warning("proxy {!r}: upstream request failed: {}", name, exc)
         return PlainTextResponse(
             f"proxy target {name!r} is unreachable", status_code=502
+        )
+
+    # A bare text/plain document is meant for a human looking at the iframe, not an
+    # API consumer of the proxy -- give it colours rather than pass the browser
+    # default's inconsistency straight through. Buffered rather than streamed since
+    # this content is display-sized (a debug dump), not a download.
+    content_type = upstream_resp.headers.get("content-type", "")
+    if content_type.split(";", 1)[0].strip().lower() == "text/plain":
+        await upstream_resp.aread()
+        text = upstream_resp.text
+        await upstream_resp.aclose()
+        return HTMLResponse(
+            _TEXT_PLAIN_TEMPLATE.format(body=html.escape(text)),
+            status_code=upstream_resp.status_code,
         )
 
     # Rebuild the response headers, dropping the hop-by-hop set but keeping the
