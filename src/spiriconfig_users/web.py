@@ -260,7 +260,7 @@ async def _groups_dialog(settings: UsersSettings, user: User, on_done) -> None:
                         if group_name == primary:
                             chip.props("icon=star").tooltip("Primary group")
                         else:
-                            chip.set_property("removable", True)
+                            chip.props("removable")
                             chip.on(
                                 "remove",
                                 lambda _, g=group_name: act(

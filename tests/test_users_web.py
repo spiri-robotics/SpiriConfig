@@ -59,3 +59,22 @@ async def test_add_user_button_is_present(user: User, monkeypatch) -> None:
     web.build([_UsersPage()])
     await user.open("/users")
     await user.should_see("Add user")
+
+
+async def test_groups_dialog_opens_and_lists_memberships(
+    user: User, monkeypatch
+) -> None:
+    """Opening the groups dialog must not blow up on a removable chip.
+
+    Regression test: the dialog used to build a supplementary-group chip with
+    ``chip.set_property("removable", True)``, a method NiceGUI's ``Chip`` does not
+    have. The exception aborted the dialog mid-render, so it never opened at all.
+    """
+    _stub_getent(monkeypatch)
+    web.build([_UsersPage()])
+    await user.open("/users")
+    await user.should_see("alice")
+    user.find("Groups").click()
+    await user.should_see("alice — groups")
+    await user.should_see("sudo")
+    await user.should_see("docker")
