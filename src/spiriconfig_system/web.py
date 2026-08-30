@@ -166,9 +166,7 @@ def _temperature_card(temps: list[system.Temperature]) -> None:
                     "grid-template-columns: 1fr auto"
                 ):
                     for temp in group:
-                        text = (
-                            "text-red-600 font-bold" if temp.alarming else "text-gray-700"
-                        )
+                        text = "text-red-600 font-bold" if temp.alarming else ""
                         ui.label(temp.name).classes(f"text-sm {text}")
                         limit = temp.high if temp.high is not None else temp.critical
                         suffix = f"  (limit {limit:.0f}°C)" if limit is not None else ""
