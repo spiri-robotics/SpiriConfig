@@ -24,6 +24,15 @@ from spiriconfig import advanced, auth, proxy, theme, tls
 from spiriconfig.config import Settings
 from spiriconfig.plugins import Plugin, discover
 
+FAVICON = """\
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+<circle cx="13.7" cy="13.7" r="12.5" fill="#fac529"/>
+<circle cx="86.3" cy="13.7" r="12.5" fill="#dd5935"/>
+<circle cx="13.7" cy="86.3" r="12.5" fill="#9edfec"/>
+<circle cx="86.3" cy="86.3" r="12.5" fill="#899ca3"/>
+</svg>
+"""
+
 
 def _nav_item(plugin: Plugin, current: str | None) -> None:
     """One plugin's entry in the sidebar.
@@ -413,7 +422,7 @@ def serve(config: Settings, plugins: list[Plugin] | None = None) -> None:
         host=config.host,
         port=config.port,
         title="SpiriConfig",
-        favicon="🐳",
+        favicon=FAVICON,
         show=False,
         reload=False,
         # None, not False: follow the operating system's light/dark setting. Any
