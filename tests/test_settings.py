@@ -209,8 +209,7 @@ class TestDeclaring:
         return settings.declared(compose)
 
     def test_an_app_with_no_settings_is_not_an_error(self, tmp_path: Path) -> None:
-        """Which is most apps. `whoami` has nothing to configure and should not
-        have to say so."""
+        """Which is most apps: nothing to configure, and no need to say so."""
         assert self._fields(tmp_path, "services:\n  a:\n    image: alpine\n") == []
 
     def test_reads_a_field(self, tmp_path: Path) -> None:
