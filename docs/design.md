@@ -322,6 +322,35 @@ A broken plugin is logged and skipped, never fatal. The failure mode of a
 half-written plugin should be "my plugin is missing and the log says why", not
 "I can no longer administer this machine".
 
+(a-plugin-can-also-be-a-container-and-is-not-sandboxed)=
+
+### A plugin can also be a container, and is not sandboxed
+
+An entry-point plugin shares our interpreter, and therefore our resolved
+dependency set: it cannot pick its own nicegui or pydantic, cannot be written in
+anything but Python, and we cannot bump a shared dependency without a chance of
+breaking every third-party plugin that exists. Containers dissolve that -- a
+plugin ships its own image with its own closure, and the only thing shared is a
+wire contract (see [Out-of-process plugins](plugins.md#out-of-process-plugins)
+for the contract itself).
+
+The design choice worth stating plainly: this is not a sandbox, and is not
+trying to be one. **You are assumed to have root on machines you own.** A
+plugin, in-process or containerized, is trusted code the operator chose to
+install, not a hostile guest we are defending against. So a container plugin
+may bind-mount `/var/run/docker.sock`, `/etc`, or anything else it needs -- that
+is not a hole in the design, it is the design -- and the reverse proxy that
+surfaces it forwards cookies and inherits whatever auth the shell has in front
+of it rather than enforcing a boundary of its own.
+
+We considered and rejected a capability API (a plugin POSTs us a `Command`
+description and we run it) and a sandboxing `iframe` origin. Both only make
+sense as a security boundary, and a boundary we half-mean -- one that stops a
+careless plugin but not a malicious one holding root anyway -- is worse than
+none, because an operator will lean on it. Same-origin, full trust, and a
+proxy that is plumbing rather than a gate is the simpler design that matches
+what we can actually promise.
+
 ## Things we deliberately do not do
 
 **An "enabled" state.** An earlier design had nginx-style

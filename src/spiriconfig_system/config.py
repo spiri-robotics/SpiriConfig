@@ -24,12 +24,19 @@ class Tool(BaseModel):
 
 #: The tools SpiriConfig itself leans on. ``docker`` and ``docker compose`` are
 #: how every managed service is started; ``git`` is how the app store fetches and
-#: updates its repos. A deployment that needs more (netplan, a modem tool) adds
+#: updates its repos and how provisioning repos are built and signed; ``skopeo``
+#: is what provisioning's ``apps/images/`` copies container images with, and
+#: ``git-lfs`` is how those images' blobs are kept out of a provisioning repo's
+#: ordinary git history (see :mod:`spiriconfig_appstore.images`) -- both listed
+#: here so a deployment missing one finds out from the overview, not from a
+#: failed bundle. A deployment that needs more (netplan, a modem tool) adds
 #: them with the env override rather than editing this list.
 _DEFAULT_TOOLS = [
     Tool(name="docker", probe=["docker", "--version"]),
     Tool(name="docker compose", probe=["docker", "compose", "version"]),
     Tool(name="git", probe=["git", "--version"]),
+    Tool(name="skopeo", probe=["skopeo", "--version"]),
+    Tool(name="git-lfs", probe=["git", "lfs", "version"]),
 ]
 
 

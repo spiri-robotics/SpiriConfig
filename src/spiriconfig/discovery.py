@@ -1,7 +1,7 @@
 """Find proxied plugins by asking docker what is running.
 
 A plugin, out of process, is a compose app with labels on it (see
-``NOTES-out-of-process-plugins.md``): a container that serves HTTP and declares
+:doc:`docs/plugins` for the contract): a container that serves HTTP and declares
 itself with ``spiriconfig.plugin.*`` labels. There is no plugin registry of ours to
 keep in sync -- the source of truth is ``docker ps``, exactly as it is for the app
 store's stacks. Install a plugin app and its container appears here; stop it and it
@@ -17,7 +17,7 @@ runs is one a user could run themselves:
 The upstream address is the container's own IP on its docker network, at the port
 the label names. SpiriConfig runs on the host, which can reach a container by that
 IP directly -- so a plugin author publishes no host port and picks no number that
-could collide, matching the "no port per plugin" decision the notes settled on.
+could collide.
 """
 
 from __future__ import annotations

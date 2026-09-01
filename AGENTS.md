@@ -20,8 +20,7 @@ Dev loop from a checkout: run `./scripts/test-data.sh`, then `uv run spiriconfig
 
 - `src/spiriconfig/` — core: CLI, `Command`/`run`/`stream`/`stream_pty`, NiceGUI shell, config, PAM auth, TLS, reverse proxy, plugin discovery.
 - `src/spiriconfig_{docker,appstore,terminal,users,system}/` — one package per plugin, all first-class citizens. A plugin = subclass of `spiriconfig.plugins.Plugin` registered under the `spiriconfig.plugins` entry point group (`pyproject.toml`). Installing the package is what registers it; nothing special about the bundled ones.
-- `docs/` — Sphinx/MyST. `docs/design.md` explains why the code looks like this; read it before changing the core.
-- `NOTES-out-of-process-plugins.md` — scratch notes (explicitly undecided) on proxying container plugins; not documentation.
+- `docs/` — Sphinx/MyST. `docs/design.md` explains why the code looks like this; read it before changing the core. `docs/plugins.md` covers both plugin kinds: in-process (entry points) and out-of-process (container, discovered by docker label).
 
 ## Rules that differ from defaults
 

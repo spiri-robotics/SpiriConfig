@@ -71,6 +71,8 @@ advanced
 docker
 appstore
 plugins
+provisioning
+provision-bundle-spec
 design
 api
 ```

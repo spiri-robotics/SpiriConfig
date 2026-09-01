@@ -156,3 +156,97 @@ that raises while rendering is caught and shown as an error on its own page.
 
 You still have to write a working plugin. But a half-written one will not lock
 you out of the machine while you do.
+
+(out-of-process-plugins)=
+## Out-of-process plugins
+
+Everything above assumes a plugin shares our Python interpreter. It doesn't
+have to: a plugin can also be a container that serves HTTP, written in any
+language, with its own dependencies entirely separate from ours. SpiriConfig
+discovers it and proxies it into the shell the same way it does everything
+else -- by reading docker.
+
+### Declare yourself with labels
+
+No code changes turn a container into a plugin, just labels on an existing
+compose service:
+
+```yaml
+services:
+  ui:
+    image: ghcr.io/you/spiriconfig-tailscale
+    labels:
+      spiriconfig.plugin.name: tailscale
+      spiriconfig.plugin.title: Tailscale
+      spiriconfig.plugin.icon: vpn_lock
+      spiriconfig.plugin.port: "8080"
+```
+
+`name` and `port` are required; `title` defaults to `name` and `icon` to a
+generic web icon. SpiriConfig finds it with
+`docker ps --filter label=spiriconfig.plugin.name` -- the same command you
+could run yourself -- and rescans on a loop, so installing, starting, or
+stopping the container is all it takes. There is no separate registration
+step and nothing of ours to keep in sync.
+
+See `examples/store/whoami/compose.yaml` for a working, minimal one.
+
+### Installed like any other app
+
+A plugin container is a compose app with labels on it, so it is installed,
+updated, and removed exactly like any other [app store](appstore.md) entry.
+There is no separate plugin install path to learn.
+
+### Reached through us, not a published port
+
+No host port is published. SpiriConfig reaches the container on its own
+docker network IP and reverse-proxies it at `/plugin/<name>/...`, same origin
+as the shell -- so it inherits the login gate, cookies, and the theme for
+free, and nobody allocates or firewalls a port per plugin. Both plain HTTP and
+WebSocket traffic are proxied, so a live UI (NiceGUI's socket.io, for
+instance) works over it.
+
+The shell frames the plugin at `/app/<name>` in an iframe, listed in the same
+sidebar as every in-process plugin. A name whose container isn't running gets
+an honest "not available" card instead of a blank frame.
+
+### Working behind a prefix
+
+The proxy sets `X-Forwarded-Prefix: /plugin/<name>` on every request. A
+framework that honours it emits correct URLs with no idea it's behind a proxy
+-- NiceGUI does, thoroughly, and needs no code changes to port. A plugin
+author's most likely first bug is one that doesn't: a hardcoded absolute path
+(`/static/…`, `ui.link(target="/routes")`) escapes the prefix, where a
+relative one (`routes`, `./routes`) stays inside it.
+
+### One script tag, for deep links
+
+```html
+<script src="/plugin-sdk/shell.js"></script>
+```
+
+Include it and the shell's address bar tracks your page as the user navigates
+inside the iframe, so a deep link, a reload, and the back button all behave.
+It works via same-origin `history.replaceState` -- no handshake or
+cooperation needed beyond the tag. It's optional: skip it and the plugin still
+works, its URL in the address bar just doesn't move.
+
+### The CLI face
+
+A container plugin doesn't register a `spiriconfig <name> ...` subcommand --
+its entrypoint is its CLI:
+
+```console
+$ docker exec spiriconfig-tailscale tailscale status
+```
+
+A command a human could run without SpiriConfig at all, the same bar every
+in-process plugin's `cli()` is held to.
+
+### Trust model
+
+A plugin container is trusted code the operator chose to install, not a
+sandboxed guest -- it may mount `/var/run/docker.sock`, `/etc`, or anything
+else it needs, and the reverse proxy is plumbing, not a security boundary. See
+[Plugins are not sandboxed](design.md#a-plugin-can-also-be-a-container-and-is-not-sandboxed)
+for the reasoning.

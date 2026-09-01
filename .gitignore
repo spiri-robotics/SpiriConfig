@@ -24,6 +24,10 @@ docs/_build/
 # NiceGUI's on-disk storage for the running dev server.
 .nicegui/
 
+# spiriconfig_provision's default profiles/apply working dirs -- disposable,
+# same reasoning as /test_data/ above.
+/var/
+
 # Local per-checkout config overrides (see docs/configuration.md).
 .env
 

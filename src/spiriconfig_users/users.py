@@ -31,6 +31,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
+from pathlib import Path
 
 from loguru import logger
 
@@ -297,6 +298,69 @@ def password_stdin(name: str, password: str) -> str:
     return f"{name}:{password}\n"
 
 
+def hash_password(settings: UsersSettings) -> Command:
+    """Build the ``mkpasswd`` line that hashes a password for provisioning.
+
+    Reads the plaintext on stdin and prints a ``/etc/shadow``-compatible
+    hash on stdout -- the shape ``password.hash`` files in a provisioning
+    repo store, and what :func:`set_password_hashed` later applies with
+    ``chpasswd -e``. The password itself never touches argv or a log, the
+    same discipline :func:`set_password` already follows; pass it as
+    :func:`~spiriconfig.commands.run`'s ``input``, not paired with a name
+    the way :func:`password_stdin` is -- ``mkpasswd`` hashes, it does not
+    set anything, so there is no account to name yet.
+
+    The by-hand equivalent is ``mkpasswd --method=yescrypt``, typed at a
+    prompt so the password never appears on a command line either.
+
+    ``--method`` and its value **must** be one argv element
+    (``--method=yescrypt``), not two (``--method``, ``yescrypt``) --
+    whois's ``mkpasswd`` parses the space-separated form as ``--method``
+    with no value followed by a stray positional argument, silently prints
+    its "Available methods" list to stdout instead of a hash, and still
+    exits 0. A real, reproduced bug, not a hypothetical one -- see
+    :func:`validate_password_hash`, which exists because exit code alone
+    didn't catch it.
+    """
+    return Command(
+        argv=[
+            settings.mkpasswd_bin,
+            f"--method={settings.password_hash_method}",
+            "--stdin",
+        ]
+    )
+
+
+def validate_password_hash(hashed: str) -> str:
+    """Return ``hashed`` stripped, or raise :class:`UserError` if it
+    doesn't look like a ``/etc/shadow``-style hash.
+
+    :func:`hash_password` exiting 0 is not proof its stdout is a hash --
+    see that function's docstring for the exact, real way it can print
+    something else entirely while still succeeding. Every hash
+    ``mkpasswd`` can produce starts with ``$``; nothing else it could
+    print by mistake does, so this is a cheap, real check rather than
+    trusting the exit code alone.
+    """
+    hashed = hashed.strip()
+    if not hashed.startswith("$"):
+        raise UserError(
+            "mkpasswd did not produce a password hash -- got "
+            f"{hashed.splitlines()[0] if hashed else '(empty output)'!r} "
+            "instead. Check that mkpasswd is installed and working."
+        )
+    return hashed
+
+
+def set_password_hashed(settings: UsersSettings, name: str) -> Command:
+    """Build the ``chpasswd -e`` line for setting ``name``'s password from an
+    *already-hashed* value -- what a provisioning repo's ``password.hash``
+    holds, as opposed to :func:`set_password`'s plaintext. Pair with
+    :func:`password_stdin`, passing the hash where it takes a password.
+    """
+    return Command(argv=[settings.chpasswd_bin, "-e"])
+
+
 def add_to_group(settings: UsersSettings, name: str, group: str) -> Command:
     """Build the ``gpasswd --add`` line adding ``name`` to ``group``.
 
@@ -313,19 +377,146 @@ def remove_from_group(settings: UsersSettings, name: str, group: str) -> Command
     return Command(argv=[settings.gpasswd_bin, "--delete", name, group])
 
 
+#: First token of a line ``ssh-keygen`` or an OpenSSH client would produce --
+#: enough to catch a pasted passphrase or a stray comment, not an exhaustive
+#: parse of every option OpenSSH's ``authorized_keys`` format allows.
+_SSH_KEY_TYPES = frozenset({
+    "ssh-ed25519",
+    "ssh-rsa",
+    "ssh-dss",
+    "ecdsa-sha2-nistp256",
+    "ecdsa-sha2-nistp384",
+    "ecdsa-sha2-nistp521",
+    "sk-ssh-ed25519@openssh.com",
+    "sk-ecdsa-sha2-nistp256@openssh.com",
+})
+
+
+def ssh_dir(user: User) -> Path:
+    """``user``'s ``.ssh`` directory, where ``authorized_keys`` lives."""
+    return Path(user.home) / ".ssh"
+
+
+def authorized_keys_path(user: User) -> Path:
+    """``user``'s ``authorized_keys`` file."""
+    return ssh_dir(user) / "authorized_keys"
+
+
+def list_ssh_keys(user: User) -> list[str]:
+    """The public keys in ``user``'s ``authorized_keys``, one per line.
+
+    Blank lines and comments are dropped. A read, so it happens immediately
+    rather than building a :class:`Command` -- same stance :func:`_shells`
+    takes on ``/etc/shells``, and the same reasoning ``users.py``'s module
+    docstring gives for ``getent``: there's nothing to show or undo about
+    looking at a file. A missing file (no ``.ssh`` yet, or none of this
+    plugin's business to have created it) is an empty list, not an error.
+    """
+    try:
+        text = authorized_keys_path(user).read_text()
+    except OSError:
+        return []
+    return [
+        line.strip()
+        for line in text.splitlines()
+        if line.strip() and not line.startswith("#")
+    ]
+
+
+def validate_ssh_key(key: str) -> str:
+    """Return ``key`` stripped, or raise :class:`UserError` if it doesn't
+    look like one OpenSSH public key line.
+
+    Checked here for the same reason :func:`validate_name` checks a
+    username before building a command: a bad paste should fail with a
+    sentence, not a stray line in ``authorized_keys`` that ``sshd`` silently
+    ignores.
+    """
+    key = key.strip()
+    if not key:
+        raise UserError("a public key is required.")
+    if len(key.splitlines()) > 1:
+        raise UserError("paste one public key at a time.")
+    if key.split(" ", 1)[0] not in _SSH_KEY_TYPES:
+        raise UserError(
+            "doesn't look like an OpenSSH public key -- expected it to start "
+            "with ssh-ed25519, ssh-rsa, ecdsa-sha2-..., or similar."
+        )
+    return key
+
+
+def ensure_ssh_dir(settings: UsersSettings, user: User) -> Command:
+    """Build the ``install`` line creating ``user``'s ``.ssh`` directory at
+    mode 700, owned by them -- what ``sshd`` requires before it will trust
+    anything inside. Only ever meant to be run when the directory doesn't
+    already exist; ``install`` on one that does is harmless but pointless.
+    """
+    return Command(
+        argv=[
+            settings.install_bin, "-d", "-m", "700",
+            "-o", user.name, "-g", str(user.gid),
+            str(ssh_dir(user)),
+        ]
+    )
+
+
+def ensure_authorized_keys(settings: UsersSettings, user: User) -> Command:
+    """Build the ``install`` line creating an empty ``authorized_keys`` at
+    mode 600, owned by ``user`` -- ``sshd`` refuses a key file writable by
+    anyone else. Copies from ``/dev/null`` rather than touching an existing
+    file in place, so this must only be called when the file is missing --
+    calling it on one that already has keys in it would wipe them.
+    """
+    return Command(
+        argv=[
+            settings.install_bin, "-m", "600",
+            "-o", user.name, "-g", str(user.gid),
+            "/dev/null", str(authorized_keys_path(user)),
+        ]
+    )
+
+
+def add_ssh_key(settings: UsersSettings, user: User) -> Command:
+    """Build the ``tee -a`` line appending a key to ``user``'s
+    ``authorized_keys``. The key itself is not in the command -- it travels
+    on stdin, the same channel :func:`set_password` uses for a plaintext
+    password, so a multi-line paste never has to survive being an argv
+    element.
+    """
+    return Command(argv=[settings.tee_bin, "-a", str(authorized_keys_path(user))])
+
+
+def replace_ssh_keys(settings: UsersSettings, user: User) -> Command:
+    """Build the bare ``tee`` line overwriting ``user``'s ``authorized_keys``
+    with whatever is given on stdin. There is no ``gpasswd --delete``
+    equivalent for one key in a text file, so removing one is done by
+    rewriting the file with everything but that line.
+    """
+    return Command(argv=[settings.tee_bin, str(authorized_keys_path(user))])
+
+
 __all__ = [
     "Group",
     "User",
     "UserError",
+    "add_ssh_key",
     "add_to_group",
+    "authorized_keys_path",
     "create",
     "delete",
+    "ensure_authorized_keys",
+    "ensure_ssh_dir",
     "get",
     "groups_for",
     "list_groups",
+    "list_ssh_keys",
     "list_users",
     "password_stdin",
     "remove_from_group",
+    "replace_ssh_keys",
     "set_password",
+    "ssh_dir",
     "validate_name",
+    "validate_password_hash",
+    "validate_ssh_key",
 ]

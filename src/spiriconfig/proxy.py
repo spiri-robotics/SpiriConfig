@@ -1,11 +1,11 @@
 """Reverse-proxy a container's web UI under a path prefix.
 
-This is the transport for out-of-process plugins (see
-``NOTES-out-of-process-plugins.md``): a plugin is a container that serves HTTP on
-some port, and we surface it inside the shell by proxying it at a path on *us*
-rather than a port on the box. Same origin is the whole point -- cookies, the PAM
-gate, and ``window.parent`` all work only because the plugin lives at a path under
-the origin the browser already trusts.
+This is the transport for out-of-process plugins (see :doc:`docs/plugins` for the
+contract): a plugin is a container that serves HTTP on some port, and we surface
+it inside the shell by proxying it at a path on *us* rather than a port on the
+box. Same origin is the whole point -- cookies, the PAM gate, and
+``window.parent`` all work only because the plugin lives at a path under the
+origin the browser already trusts.
 
 A target registered as ``name`` -> ``http://host:port`` is served at
 ``/plugin/<name>/...``. The upstream sees the request at its own root, with the

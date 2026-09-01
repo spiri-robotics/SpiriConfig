@@ -14,11 +14,16 @@ job, not a developer's -- unlike the terminal next to it, which is.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import typer
 
 from spiriconfig.plugins import Plugin
 
 from spiriconfig_users.cli import app as cli_app
+
+if TYPE_CHECKING:
+    from spiriconfig_provision.contract import ApplyStep, Change, StagedRepo
 
 
 class UsersPlugin(Plugin):
@@ -29,6 +34,11 @@ class UsersPlugin(Plugin):
     description = "Add, remove, and manage system login accounts."
     icon = "manage_accounts"
 
+    # See spiriconfig_users.provision and docs/provisioning.md: this plugin's
+    # contribution to the provisioning plugin, kept in its own module so
+    # `spiriconfig users list` never pays to import anything about it.
+    provision_resource = "users"
+
     def cli(self) -> typer.Typer:
         return cli_app
 
@@ -38,6 +48,26 @@ class UsersPlugin(Plugin):
         from spiriconfig_users import web
 
         web.page()
+
+    def provision_patch_block(self, repo: StagedRepo) -> None:
+        from spiriconfig_users.provision import render_patch_block
+
+        render_patch_block(repo)
+
+    def provision_baseline_block(self, repo: StagedRepo) -> None:
+        from spiriconfig_users.provision import render_baseline_block
+
+        render_baseline_block(repo)
+
+    def provision_describe(self, repo: StagedRepo, path: str) -> Change | None:
+        from spiriconfig_users.provision import describe
+
+        return describe(repo, path)
+
+    def provision_apply(self, repo: StagedRepo) -> list[ApplyStep]:
+        from spiriconfig_users.provision import apply
+
+        return apply(repo)
 
 
 __all__ = ["UsersPlugin"]

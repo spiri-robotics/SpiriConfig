@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import os
 import secrets
+import socket
 
 from loguru import logger
 from nicegui import app, background_tasks, ui
@@ -32,6 +33,10 @@ FAVICON = """\
 <circle cx="86.3" cy="86.3" r="12.5" fill="#899ca3"/>
 </svg>
 """
+
+# Leads with the hostname, not the product name: with several robots open in
+# neighbouring tabs, the machine you're on is the thing worth seeing at a glance.
+PAGE_TITLE = f"{socket.gethostname()} - SpiriConfig"
 
 
 def _nav_item(plugin: Plugin, current: str | None) -> None:
@@ -143,7 +148,7 @@ def _layout(plugins: list[Plugin], current: str | None = None) -> None:
             "flat round dense color=white"
         ).mark("sidebar-toggle").tooltip("Show or hide the sidebar")
         with ui.link(target="/").classes("no-underline text-white"):
-            ui.label("SpiriConfig").classes("text-xl font-bold")
+            ui.label(PAGE_TITLE).classes("text-xl font-bold")
 
         # Draws nothing unless someone is logged in, so it is safe with auth off:
         # a session that never authenticated carries no username to show.
@@ -421,7 +426,7 @@ def serve(config: Settings, plugins: list[Plugin] | None = None) -> None:
     ui.run(
         host=config.host,
         port=config.port,
-        title="SpiriConfig",
+        title=PAGE_TITLE,
         favicon=FAVICON,
         show=False,
         reload=False,

@@ -4,12 +4,16 @@ Plugin-based configuration and container management, built around one rule:
 
 > **Anything SpiriConfig can do, you must be able to do without it.**
 
+![The Apps page, listing a running "whoami" stack with Up, Down, Restart, Pull, and Logs actions](docs/images/apps.png)
+
 Press **Up** on a stack in the web UI and SpiriConfig runs this, showing you the
 line as it goes, with a button to copy it:
 
 ```console
 cd /srv/compose/whoami && docker compose -p whoami -f compose.yaml up -d
 ```
+
+![The Up dialog for the whoami stack, showing the exact docker compose command line with a copy button, followed by streamed output](docs/images/up-command.png)
 
 No database, no registry, no bespoke on-disk format. If SpiriConfig vanished
 tomorrow, everything it manages would keep working -- and you would already know
@@ -54,6 +58,8 @@ Point it at your compose directory and start the web UI:
 export SPIRICONFIG_DOCKER_COMPOSE_DIR=/srv/compose
 spiriconfig serve            # web UI on http://localhost:8080
 ```
+
+![The SpiriConfig home page, listing the App Store, Apps, Overview, and Users plugins](docs/images/dashboard.png)
 
 Adding a service is making a directory. No CLI required -- that is the point:
 

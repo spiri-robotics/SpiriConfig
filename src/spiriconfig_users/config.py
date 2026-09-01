@@ -43,6 +43,33 @@ class UsersSettings(BaseSettings):
     chpasswd_bin: str = "chpasswd"
     gpasswd_bin: str = "gpasswd"
 
+    install_bin: str = "install"
+    """Creates ``~/.ssh`` and ``~/.ssh/authorized_keys`` with the right owner
+    and mode when they don't already exist -- see
+    :func:`spiriconfig_users.users.ensure_ssh_dir`/``ensure_authorized_keys``.
+    Only ever asked to create, never to overwrite an existing file, so it's
+    safe to call even when a previous run already did the work."""
+
+    tee_bin: str = "tee"
+    """Writes SSH public keys into an account's ``authorized_keys``, content
+    on stdin -- ``tee -a`` to append, bare ``tee`` to replace the whole file.
+    The same "secret/content never on the command line" discipline
+    :attr:`chpasswd_bin` already follows, though a public key isn't a secret;
+    it's just the natural way to hand a multi-line value to a command."""
+
+    mkpasswd_bin: str = "mkpasswd"
+    """Hashes a password for provisioning's ``password.hash`` files -- see
+    :func:`spiriconfig_users.users.hash_password`. From the ``whois``
+    package on Debian and derivatives; not needed for anything else this
+    plugin does, since the live password-set path (:func:`~spiriconfig_users.users.set_password`)
+    hands ``chpasswd`` a plaintext password directly."""
+
+    password_hash_method: str = "yescrypt"
+    """``mkpasswd --method``. Yescrypt is glibc's current default
+    ``/etc/shadow`` hash on Debian 11+ and most modern distributions --
+    matching that default means a hash generated here needs no special
+    handling on the device that later applies it."""
+
     command_timeout: float = 30.0
     """Seconds before a user command is considered hung. ``SPIRICONFIG_USERS_COMMAND_TIMEOUT``."""
 

@@ -12,11 +12,16 @@ git's, on a working tree the user can ``cd`` into and drive by hand. See
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import typer
 
 from spiriconfig.plugins import Plugin
 
 from spiriconfig_appstore.cli import app as cli_app
+
+if TYPE_CHECKING:
+    from spiriconfig_provision.contract import ApplyStep, Change, StagedRepo
 
 
 class AppStorePlugin(Plugin):
@@ -26,6 +31,12 @@ class AppStorePlugin(Plugin):
     title = "App Store"
     description = "Install apps from a git-hosted app store."
     icon = "storefront"
+
+    # See spiriconfig_appstore.provision and docs/provisioning.md: this
+    # plugin's contribution to the provisioning plugin, kept in its own
+    # module so `spiriconfig appstore list` never pays to import anything
+    # about it.
+    provision_resource = "apps"
 
     def cli(self) -> typer.Typer:
         return cli_app
@@ -37,6 +48,26 @@ class AppStorePlugin(Plugin):
         from spiriconfig_appstore import web
 
         web.page()
+
+    def provision_patch_block(self, repo: StagedRepo) -> None:
+        from spiriconfig_appstore.provision import render_patch_block
+
+        render_patch_block(repo)
+
+    def provision_baseline_block(self, repo: StagedRepo) -> None:
+        from spiriconfig_appstore.provision import render_baseline_block
+
+        render_baseline_block(repo)
+
+    def provision_describe(self, repo: StagedRepo, path: str) -> Change | None:
+        from spiriconfig_appstore.provision import describe
+
+        return describe(repo, path)
+
+    def provision_apply(self, repo: StagedRepo) -> list[ApplyStep]:
+        from spiriconfig_appstore.provision import apply
+
+        return apply(repo)
 
     async def on_startup(self) -> None:
         # Fetch every cloned store once, so the "update available" markers are

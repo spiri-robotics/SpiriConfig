@@ -418,6 +418,42 @@ def find_sidecar(directory: Path) -> Path | None:
     return None
 
 
+def check_values(fields: list[Field], values: dict[str, str]) -> dict[str, str]:
+    """Validate ``values`` against ``fields``, and drop anything undeclared.
+
+    Free-standing so a caller writing somewhere other than a live stack's
+    ``.env`` -- ``spiriconfig_appstore.provision``'s reuse of this for a
+    provisioning repo's ``apps/<mode>/<name>/env`` is the reason it exists
+    -- gets the same validation :meth:`StackSettings.save` does, without
+    needing a :class:`~spiriconfig_docker.stacks.Stack` to hang it off of.
+
+    Undeclared keys are dropped rather than rejected: the caller is a form
+    built from the schema, so a key not in it is a bug in the caller, not
+    the user's -- and writing it into a ``.env`` would be the worst way to
+    find out.
+    """
+    checked: dict[str, str] = {}
+    for item in fields:
+        if item.env not in values:
+            continue
+        value = values[item.env]
+
+        if item.required and not value:
+            raise SettingsError(f"{item.title} ({item.env}) is required")
+        if value and item.pattern and not re.search(item.pattern, value):
+            raise SettingsError(
+                f"{item.title} ({item.env}) must match {item.pattern!r}, "
+                f"and {value!r} does not"
+            )
+        if value and item.widget in CHOICE_WIDGETS and value not in item.options:
+            raise SettingsError(
+                f"{item.title} ({item.env}) must be one of "
+                f"{', '.join(item.options)}, not {value!r}"
+            )
+        checked[item.env] = value
+    return checked
+
+
 @dataclass(frozen=True, slots=True)
 class StackSettings:
     """A stack's declared form, bound to the ``.env`` it reads and writes."""
@@ -487,26 +523,7 @@ class StackSettings:
         out. Values are checked here, on the way to the file, rather than only in
         the widgets, so that the CLI gets the same guarantees the web UI does.
         """
-        checked: dict[str, str] = {}
-        for item in self.fields:
-            if item.env not in values:
-                continue
-            value = values[item.env]
-
-            if item.required and not value:
-                raise SettingsError(f"{item.title} ({item.env}) is required")
-            if value and item.pattern and not re.search(item.pattern, value):
-                raise SettingsError(
-                    f"{item.title} ({item.env}) must match {item.pattern!r}, "
-                    f"and {value!r} does not"
-                )
-            if value and item.widget in CHOICE_WIDGETS and value not in item.options:
-                raise SettingsError(
-                    f"{item.title} ({item.env}) must be one of "
-                    f"{', '.join(item.options)}, not {value!r}"
-                )
-            checked[item.env] = value
-        return checked
+        return check_values(self.fields, values)
 
     def save(self, values: dict[str, str]) -> None:
         """Write the values to the ``.env``, refusing to leave a broken one behind.
@@ -622,6 +639,7 @@ __all__ = [
     "Field",
     "SettingsError",
     "StackSettings",
+    "check_values",
     "declared",
     "find_sidecar",
     "for_stack",

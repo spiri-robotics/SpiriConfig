@@ -54,6 +54,12 @@ class AppStoreSettings(BaseSettings):
     git_bin: str = "git"
     """The git executable. ``SPIRICONFIG_APPSTORE_GIT_BIN``."""
 
+    skopeo_bin: str = "skopeo"
+    """The skopeo executable, for bundling container images into a
+    provisioning repo. ``SPIRICONFIG_APPSTORE_SKOPEO_BIN``. See
+    :mod:`spiriconfig_appstore.images`.
+    """
+
     command_timeout: float = 300.0
     """Seconds before a git command is considered hung."""
 

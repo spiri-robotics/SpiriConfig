@@ -8,7 +8,7 @@ label-discovery exists. Run it, point SpiriConfig at it, and click around:
     $ SPIRICONFIG_PROXY_DEMO=http://127.0.0.1:9002 uv run spiriconfig serve
 
 Then open the SpiriConfig UI, click "Demo" in the sidebar, and exercise the two
-things the spike exists to test (see NOTES-out-of-process-plugins.md):
+things the spike exists to test (see docs/plugins.md for the settled contract):
 
 * **subpath correctness** -- this app has no idea it is behind /plugin/demo. Every
   URL below is root-absolute or relative; they only resolve because NiceGUI reads
@@ -18,15 +18,15 @@ things the spike exists to test (see NOTES-out-of-process-plugins.md):
   pages deep, watch the address bar track, then reload and hit Back.
 
 It deliberately mixes navigation styles: ui.navigate.to (goes through the JS that
-honours the prefix) and ui.link (writes href straight to the DOM -- the known gap
-the notes flag at link.py:29, and the reason ./relative targets are used here).
+honours the prefix) and ui.link (writes href straight to the DOM -- a known gap in
+NiceGUI's link.py:29, and the reason ./relative targets are used here).
 """
 
 from __future__ import annotations
 
 from nicegui import ui
 
-# The whole contract a proxied plugin signs up to (point 3 in the notes): one tag,
+# The whole contract a proxied plugin signs up to (see docs/plugins.md): one tag,
 # served by the shell at a fixed URL, giving deep-link/history sync for free. Absolute
 # path on purpose -- it is a shell URL, not a plugin one, so it must not be prefixed.
 ui.add_head_html('<script src="/plugin-sdk/shell.js"></script>', shared=True)

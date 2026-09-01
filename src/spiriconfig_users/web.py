@@ -298,6 +298,83 @@ async def _groups_dialog(settings: UsersSettings, user: User, on_done) -> None:
     dialog.open()
 
 
+async def _ssh_keys_dialog(settings: UsersSettings, user: User, on_done) -> None:
+    """Manage one account's ``authorized_keys``, one command at a time.
+
+    Same shape as :func:`_groups_dialog`: a row per key with a remove
+    button, and a box to paste another -- add and remove each run their own
+    command the moment they're pressed, no batched "Save". There's no
+    ``gpasswd`` equivalent for a line in a text file, so add uses ``tee -a``
+    and remove rewrites the whole file with everything but that line (see
+    :func:`~spiriconfig_users.users.add_ssh_key`/``replace_ssh_keys``).
+    """
+    with ui.dialog() as dialog, ui.card().classes("w-full max-w-2xl"):
+        ui.label(f"{user.name} — SSH keys").classes("text-lg font-bold")
+        body = ui.column().classes("w-full gap-2")
+
+        def render() -> None:
+            body.clear()
+            keys = users.list_ssh_keys(user)
+            with body:
+                if not keys:
+                    ui.label("No keys on file.").classes("text-sm text-gray-500")
+                for key in keys:
+                    with ui.row().classes("w-full items-center gap-2"):
+                        ui.label(key).classes(
+                            "font-mono text-xs grow break-all"
+                        ).tooltip(key)
+                        ui.button(
+                            icon="close",
+                            on_click=lambda k=key: remove(k),
+                        ).props("flat dense round")
+
+        new_key = (
+            ui.textarea("New public key")
+            .classes("w-full")
+            .props("outlined")
+            .mark("new-ssh-key")
+        )
+
+        async def add() -> None:
+            try:
+                key = users.validate_ssh_key(new_key.value)
+            except UserError as exc:
+                ui.notify(str(exc), type="negative")
+                return
+            if not users.ssh_dir(user).is_dir():
+                if not (await _run(users.ensure_ssh_dir(settings, user))).ok:
+                    return
+            if not users.authorized_keys_path(user).is_file():
+                if not (await _run(users.ensure_authorized_keys(settings, user))).ok:
+                    return
+            if not (
+                await _run(users.add_ssh_key(settings, user), input=key + "\n")
+            ).ok:
+                return
+            new_key.value = ""
+            render()
+            on_done()
+
+        async def remove(key: str) -> None:
+            remaining = [k for k in users.list_ssh_keys(user) if k != key]
+            content = "".join(f"{k}\n" for k in remaining)
+            if (
+                await _run(users.replace_ssh_keys(settings, user), input=content)
+            ).ok:
+                render()
+                on_done()
+
+        render()
+
+        with ui.row().classes("w-full justify-end gap-2"):
+            ui.button("Close", on_click=dialog.close).props("flat")
+            ui.button("Add key", icon="add", on_click=add).props(
+                "color=primary"
+            ).mark("add-ssh-key")
+
+    dialog.open()
+
+
 async def _delete_dialog(settings: UsersSettings, user: User, on_done) -> None:
     """Confirm deleting an account, and whether to take its home directory with it.
 
@@ -360,6 +437,12 @@ def _user_card(
                 "Groups", icon="group",
                 on_click=lambda: _groups_dialog(settings, user, refresh),
             ).props("flat")
+            advanced.mark(
+                ui.button(
+                    "SSH keys", icon="key",
+                    on_click=lambda: _ssh_keys_dialog(settings, user, refresh),
+                ).props("flat")
+            )
             ui.button(
                 "Delete", icon="delete",
                 on_click=lambda: _delete_dialog(settings, user, refresh),

@@ -34,6 +34,13 @@ group_app = typer.Typer(
 )
 app.add_typer(group_app)
 
+key_app = typer.Typer(
+    name="key",
+    help="Manage a user's SSH authorized_keys.",
+    no_args_is_help=True,
+)
+app.add_typer(key_app)
+
 ShowOption = Annotated[
     bool,
     typer.Option("--show", help="Print the command instead of running it."),
@@ -206,6 +213,75 @@ def group_remove(
 ) -> None:
     """Remove a user from a group."""
     _execute(users.remove_from_group(_settings(), user, group), show=show)
+
+
+@key_app.command("list")
+def key_list(name: NameArg) -> None:
+    """List the public keys in an account's authorized_keys."""
+    try:
+        user = users.get(_settings(), name)
+    except UserError as exc:
+        raise _fail(str(exc)) from exc
+    keys = users.list_ssh_keys(user)
+    if not keys:
+        typer.echo("No keys on file.")
+        return
+    for key in keys:
+        typer.echo(key)
+
+
+@key_app.command("add")
+def key_add(
+    name: NameArg,
+    key: Annotated[str, typer.Argument(help="The public key line to add.")],
+    show: ShowOption = False,
+) -> None:
+    """Add a public key to an account, creating ``~/.ssh``/``authorized_keys``
+    first if they don't already exist.
+
+    Each step only runs if the live system actually needs it -- ``--show``
+    prints exactly the commands this invocation would run, no more.
+    """
+    settings = _settings()
+    try:
+        user = users.get(settings, name)
+        key = users.validate_ssh_key(key)
+    except UserError as exc:
+        raise _fail(str(exc)) from exc
+    if not users.ssh_dir(user).is_dir():
+        _execute(users.ensure_ssh_dir(settings, user), show=show)
+    if not users.authorized_keys_path(user).is_file():
+        _execute(users.ensure_authorized_keys(settings, user), show=show)
+    _execute(users.add_ssh_key(settings, user), show=show, input=key + "\n")
+    if not show:
+        typer.echo(f"Added a key for {name}.")
+
+
+@key_app.command("remove")
+def key_remove(
+    name: NameArg,
+    key: Annotated[str, typer.Argument(help="The exact public key line to remove.")],
+    show: ShowOption = False,
+) -> None:
+    """Remove one public key from an account's authorized_keys.
+
+    There's no ``gpasswd --delete`` equivalent for one line in a text file,
+    so this rewrites the whole file with everything else already in it.
+    """
+    settings = _settings()
+    try:
+        user = users.get(settings, name)
+    except UserError as exc:
+        raise _fail(str(exc)) from exc
+    command = users.replace_ssh_keys(settings, user)
+    if show:
+        typer.echo(str(command))
+        typer.echo("# then send the remaining keys, one per line, on its stdin")
+        return
+    remaining = [k for k in users.list_ssh_keys(user) if k != key.strip()]
+    content = "".join(f"{k}\n" for k in remaining)
+    _execute(command, show=False, input=content)
+    typer.echo(f"Updated authorized_keys for {name}.")
 
 
 __all__ = ["app"]

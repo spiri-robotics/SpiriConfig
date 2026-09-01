@@ -214,3 +214,106 @@ class TestCommands:
         assert str(users.remove_from_group(settings, "alice", "docker")) == (
             "gpasswd --delete alice docker"
         )
+
+    def test_hash_password_command_holds_no_secret(
+        self, settings: UsersSettings
+    ) -> None:
+        command = users.hash_password(settings)
+        assert str(command) == "mkpasswd --method=yescrypt --stdin"
+
+    def test_hash_password_joins_method_and_value_in_one_argv_element(
+        self, settings: UsersSettings
+    ) -> None:
+        """Regression: whois's mkpasswd parses `--method yescrypt` (two
+        argv elements) as `--method` with no value plus a stray positional
+        argument -- it prints its "Available methods" list to stdout
+        instead of a hash, and still exits 0. Reproduced against the real
+        `mkpasswd` binary, not a guess -- `--method=yescrypt` (one element)
+        is the only form that actually hashes anything."""
+        command = users.hash_password(settings)
+        assert "--method" not in command.argv
+        assert f"--method={settings.password_hash_method}" in command.argv
+
+    def test_set_password_hashed_command_holds_no_secret(
+        self, settings: UsersSettings
+    ) -> None:
+        """Same shape as set_password, but chpasswd -e: it expects an
+        already-hashed value, not a plaintext one."""
+        command = users.set_password_hashed(settings, "alice")
+        assert str(command) == "chpasswd -e"
+        assert "alice" not in str(command)
+
+
+class TestValidatePasswordHash:
+    def test_accepts_a_real_hash(self) -> None:
+        hashed = "$y$j9T$8jBqWag4XrTf1iRjLbZgT0$Tb8veZhwuCqpCqY5V3DDzwTx.dIAQY/kABah9bpWbl8"
+        assert users.validate_password_hash(hashed + "\n") == hashed
+
+    def test_rejects_mkpasswds_available_methods_listing(self) -> None:
+        """Regression: this is the literal, real output `mkpasswd
+        --method yescrypt --stdin` (the old, broken two-argv-element form)
+        prints on stdout while still exiting 0 -- see
+        `test_hash_password_joins_method_and_value_in_one_argv_element`.
+        `Result.check()` alone would have let this land in
+        `password.hash` uncaught."""
+        with pytest.raises(UserError):
+            users.validate_password_hash("Available methods:\nyescrypt\tYescrypt\n")
+
+    def test_rejects_empty_output(self) -> None:
+        with pytest.raises(UserError):
+            users.validate_password_hash("")
+
+
+def _user(home: str) -> User:
+    return User(name="alice", uid=1000, gid=1000, gecos="", home=home, shell="/bin/bash")
+
+
+class TestSshKeys:
+    def test_list_ssh_keys_reads_authorized_keys(self, tmp_path) -> None:
+        user = _user(str(tmp_path))
+        ssh_dir = tmp_path / ".ssh"
+        ssh_dir.mkdir()
+        (ssh_dir / "authorized_keys").write_text(
+            "# a comment\n\nssh-ed25519 AAAAtest alice@laptop\n"
+        )
+        assert users.list_ssh_keys(user) == ["ssh-ed25519 AAAAtest alice@laptop"]
+
+    def test_list_ssh_keys_missing_file_is_empty(self, tmp_path) -> None:
+        assert users.list_ssh_keys(_user(str(tmp_path))) == []
+
+    def test_validate_ssh_key_accepts_a_real_looking_key(self) -> None:
+        key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAtest alice@laptop"
+        assert users.validate_ssh_key(key) == key
+
+    def test_validate_ssh_key_strips_whitespace(self) -> None:
+        assert users.validate_ssh_key("  ssh-rsa AAAA  \n") == "ssh-rsa AAAA"
+
+    @pytest.mark.parametrize("key", ["", "   ", "not-a-key AAAA", "hunter2"])
+    def test_validate_ssh_key_rejects_bad_input(self, key: str) -> None:
+        with pytest.raises(UserError):
+            users.validate_ssh_key(key)
+
+    def test_validate_ssh_key_rejects_multiple_lines(self) -> None:
+        with pytest.raises(UserError):
+            users.validate_ssh_key("ssh-ed25519 AAAA\nssh-ed25519 BBBB")
+
+    def test_ensure_ssh_dir_command(self, settings: UsersSettings) -> None:
+        command = users.ensure_ssh_dir(settings, _user("/home/alice"))
+        assert str(command) == "install -d -m 700 -o alice -g 1000 /home/alice/.ssh"
+
+    def test_ensure_authorized_keys_command(self, settings: UsersSettings) -> None:
+        command = users.ensure_authorized_keys(settings, _user("/home/alice"))
+        assert str(command) == (
+            "install -m 600 -o alice -g 1000 /dev/null "
+            "/home/alice/.ssh/authorized_keys"
+        )
+
+    def test_add_ssh_key_command_holds_the_key_on_stdin_not_argv(
+        self, settings: UsersSettings
+    ) -> None:
+        command = users.add_ssh_key(settings, _user("/home/alice"))
+        assert str(command) == "tee -a /home/alice/.ssh/authorized_keys"
+
+    def test_replace_ssh_keys_command(self, settings: UsersSettings) -> None:
+        command = users.replace_ssh_keys(settings, _user("/home/alice"))
+        assert str(command) == "tee /home/alice/.ssh/authorized_keys"
