@@ -696,6 +696,81 @@ class TestTheWidgetRegistry:
         assert widgets._from_bool(False) == "false"
 
 
+class TestTheVideoDeviceWidget:
+    """`/dev/video*` is not a list an app author could write down -- it depends on
+    what is plugged into the machine the form happens to render on -- so this
+    widget builds its options from the filesystem instead of from `field.options`.
+    """
+
+    def _fake_device(
+        self, dev_dir: Path, sysfs_dir: Path, node: str, name: str | None
+    ) -> None:
+        (dev_dir / node).touch()
+        if name is not None:
+            sysfs_node = sysfs_dir / node
+            sysfs_node.mkdir()
+            (sysfs_node / "name").write_text(f"{name}\n")
+
+    def test_lists_devices_by_their_sysfs_name(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        dev_dir, sysfs_dir = tmp_path / "dev", tmp_path / "sysfs"
+        dev_dir.mkdir()
+        sysfs_dir.mkdir()
+        self._fake_device(dev_dir, sysfs_dir, "video0", "HD Pro Webcam C920")
+        self._fake_device(dev_dir, sysfs_dir, "video1", "HD Pro Webcam C920")
+
+        monkeypatch.setattr(widgets, "_V4L_SYSFS", sysfs_dir)
+        monkeypatch.setattr(widgets, "_DEV_DIR", dev_dir)
+
+        devices = widgets._video_devices()
+        assert devices[str(dev_dir / "video0")] == f"HD Pro Webcam C920 ({dev_dir / 'video0'})"
+        assert devices[str(dev_dir / "video1")] == f"HD Pro Webcam C920 ({dev_dir / 'video1'})"
+
+    def test_a_device_with_no_sysfs_name_is_listed_under_its_node(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        dev_dir, sysfs_dir = tmp_path / "dev", tmp_path / "sysfs"
+        dev_dir.mkdir()
+        sysfs_dir.mkdir()
+        self._fake_device(dev_dir, sysfs_dir, "video0", None)
+
+        monkeypatch.setattr(widgets, "_V4L_SYSFS", sysfs_dir)
+        monkeypatch.setattr(widgets, "_DEV_DIR", dev_dir)
+
+        devices = widgets._video_devices()
+        assert devices[str(dev_dir / "video0")] == f"video0 ({dev_dir / 'video0'})"
+
+    def test_sorts_numerically_not_alphabetically(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        dev_dir, sysfs_dir = tmp_path / "dev", tmp_path / "sysfs"
+        dev_dir.mkdir()
+        sysfs_dir.mkdir()
+        for node in ("video10", "video2"):
+            self._fake_device(dev_dir, sysfs_dir, node, node)
+
+        monkeypatch.setattr(widgets, "_V4L_SYSFS", sysfs_dir)
+        monkeypatch.setattr(widgets, "_DEV_DIR", dev_dir)
+
+        assert list(widgets._video_devices()) == [
+            str(dev_dir / "video2"),
+            str(dev_dir / "video10"),
+        ]
+
+    def test_video_device_needs_no_declared_options(self, tmp_path: Path) -> None:
+        """Unlike `select`, there is nothing an app author could write down here."""
+        compose = tmp_path / "compose.yaml"
+        compose.write_text(
+            "x-spiri-settings:\n"
+            "  - env: CAMERA\n    widget: video_device\n"
+            "services:\n  a:\n    image: alpine\n"
+        )
+        fields = settings.declared(compose)
+        assert fields[0].widget == "video_device"
+        assert fields[0].options == []
+
+
 class TestBrokenSettingsDoNotTakeThePageDown:
     def test_has_settings_is_false_for_a_broken_declaration(
         self, compose_dir: Path

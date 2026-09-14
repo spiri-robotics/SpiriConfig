@@ -133,11 +133,20 @@ WIDGETS = frozenset(
         "radio",
         "toggle",
         "color",
+        "video_device",
     }
 )
 
 #: Widgets that are a choice between fixed options, and so require ``options:``.
 CHOICE_WIDGETS = frozenset({"select", "radio", "toggle"})
+
+#: Widgets that are a choice between options nobody declares, because the
+#: machine they run on decides. ``video_device`` fills its own dropdown from
+#: whatever ``/dev/video*`` exists at render time, so unlike :data:`CHOICE_WIDGETS`
+#: it takes no ``options:`` and there is nothing fixed to validate a saved value
+#: against here -- an app author has no list to write down, and a device present
+#: on save may be gone by the time the ``.env`` is read again.
+DISCOVERED_WIDGETS = frozenset({"video_device"})
 
 log = logger.bind(plugin="docker")
 
@@ -615,6 +624,7 @@ def get(stack_settings: StackSettings, key: str) -> Field:
 
 __all__ = [
     "CHOICE_WIDGETS",
+    "DISCOVERED_WIDGETS",
     "ENV_FILENAME",
     "SETTINGS_KEY",
     "SIDECAR_FILENAMES",

@@ -29,6 +29,7 @@ from __future__ import annotations
 import re
 from collections.abc import Callable
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
 from nicegui import ui
@@ -36,6 +37,17 @@ from nicegui import ui
 from spiriconfig import advanced
 
 from spiriconfig_docker.settings import Field
+
+#: Where video capture nodes show up. A module-level constant, rather than the
+#: literal inline, so a test can point it at a fake ``/dev`` instead of needing
+#: an actual camera.
+_DEV_DIR = Path("/dev")
+
+#: Where the kernel names a ``/dev/videoN`` node, if it names it at all.
+#:
+#: Read rather than run: this is a file the v4l2 driver already writes, so there
+#: is no tool to shell out to and nothing to parse out of a command's prose.
+_V4L_SYSFS = Path("/sys/class/video4linux")
 
 #: Text a ``.env`` might hold for a boolean widget. Anything else is false.
 #:
@@ -196,6 +208,50 @@ def _select(field: Field, value: Any) -> Any:
     )
 
 
+def _video_devices() -> dict[str, str]:
+    """Every ``/dev/videoN`` on this machine, mapped to a label naming it.
+
+    The label comes from ``/sys/class/video4linux/videoN/name``, which the kernel
+    writes for every capture device -- a webcam shows up as something like ``HD
+    Pro Webcam C920`` rather than the bare node a human cannot tell apart from a
+    second one. A node without that file, or with one that fails to read, still
+    gets listed under its own name rather than being dropped -- a form that hides
+    a camera because of a sysfs hiccup is worse than one that shows it unnamed.
+
+    Sorted numerically (``video2`` before ``video10``) rather than as text, which
+    would put ``video10`` first.
+    """
+    devices: dict[str, str] = {}
+    for path in sorted(
+        _DEV_DIR.glob("video*"),
+        key=lambda p: int(re.sub(r"\D", "", p.name) or 0),
+    ):
+        try:
+            name = (_V4L_SYSFS / path.name / "name").read_text().strip()
+        except OSError:
+            name = path.name
+        devices[str(path)] = f"{name} ({path})"
+    return devices
+
+
+def _video_device(field: Field, value: Any) -> Any:
+    """A dropdown of the video capture devices present right now.
+
+    Unlike :func:`_select`, the options are not ``field.options`` -- an app
+    author cannot know which ``/dev/videoN`` a user's machine will have, so
+    there is nothing for them to declare. The value already in the ``.env`` is
+    always offered too, even if the device behind it is gone: a form that
+    quietly dropped an unplugged camera's setting would make a save look like it
+    forgot it, instead of leaving that choice to the person who saves the form.
+    """
+    devices = _video_devices()
+    if value and value not in devices:
+        devices = {value: f"{value} (not currently present)", **devices}
+    return _common(
+        field, ui.select(options=devices, label=field.title, value=value or None)
+    )
+
+
 def _radio(field: Field, value: Any) -> Any:
     with ui.column().classes("gap-0"):
         ui.label(field.title).classes("text-sm")
@@ -241,6 +297,7 @@ REGISTRY: dict[str, Widget] = {
     "radio": Widget(_radio, _to_text, _from_text),
     "toggle": Widget(_toggle, _to_text, _from_text),
     "color": Widget(_color, _to_text, _from_text),
+    "video_device": Widget(_video_device, _to_text, _from_text),
 }
 
 
