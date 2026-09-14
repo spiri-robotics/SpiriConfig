@@ -29,3 +29,6 @@ docs/_build/
 
 # aider local tooling state
 .aider*
+
+# Local scratch/provisioning data from manual runs.
+/var/
