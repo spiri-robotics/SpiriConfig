@@ -234,21 +234,42 @@ def _video_devices() -> dict[str, str]:
     return devices
 
 
-def _video_device(field: Field, value: Any) -> Any:
-    """A dropdown of the video capture devices present right now.
+def _video_device_options(field: Field, value: Any) -> dict[str, str]:
+    """Every option the video device dropdown offers, in the order it offers them.
 
-    Unlike :func:`_select`, the options are not ``field.options`` -- an app
-    author cannot know which ``/dev/videoN`` a user's machine will have, so
-    there is nothing for them to declare. The value already in the ``.env`` is
-    always offered too, even if the device behind it is gone: a form that
-    quietly dropped an unplugged camera's setting would make a save look like it
-    forgot it, instead of leaving that choice to the person who saves the form.
+    Three sources, layered: the cameras :func:`_video_devices` finds plugged in
+    right now; then ``field.options``, an app author's declared list of URLs
+    (an RTSP stream, an IP camera) that no filesystem scan would ever find; then
+    the ``.env``'s current value, if it is neither, so a save is never seen to
+    have silently forgotten it -- a device unplugged, or a URL an author has
+    since dropped from ``options:``, still shows up rather than vanishing.
     """
     devices = _video_devices()
+    for url in field.options:
+        devices.setdefault(url, url)
     if value and value not in devices:
         devices = {value: f"{value} (not currently present)", **devices}
+    return devices
+
+
+def _video_device(field: Field, value: Any) -> Any:
+    """A dropdown of video sources: cameras found on this machine, URLs an app
+    author declared in ``options:``, or one typed in by hand.
+
+    ``with_input`` and ``new_value_mode="add-unique"`` are what let the third
+    kind exist -- neither a camera nor a declared URL is something every app can
+    anticipate, so the box also accepts whatever text is typed into it, the same
+    way :func:`_input` would.
+    """
     return _common(
-        field, ui.select(options=devices, label=field.title, value=value or None)
+        field,
+        ui.select(
+            options=_video_device_options(field, value),
+            label=field.title,
+            value=value or None,
+            with_input=True,
+            new_value_mode="add-unique",
+        ),
     )
 
 

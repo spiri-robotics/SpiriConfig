@@ -140,12 +140,13 @@ WIDGETS = frozenset(
 #: Widgets that are a choice between fixed options, and so require ``options:``.
 CHOICE_WIDGETS = frozenset({"select", "radio", "toggle"})
 
-#: Widgets that are a choice between options nobody declares, because the
-#: machine they run on decides. ``video_device`` fills its own dropdown from
-#: whatever ``/dev/video*`` exists at render time, so unlike :data:`CHOICE_WIDGETS`
-#: it takes no ``options:`` and there is nothing fixed to validate a saved value
-#: against here -- an app author has no list to write down, and a device present
-#: on save may be gone by the time the ``.env`` is read again.
+#: Widgets whose options are never only what is declared. ``video_device`` fills
+#: its dropdown with whatever ``/dev/video*`` exists at render time, adds any
+#: URLs an author declares in ``options:`` on top, and accepts a value typed in
+#: by hand besides -- so unlike :data:`CHOICE_WIDGETS`, ``options:`` is optional
+#: here, and there is no fixed list to validate a saved value against: a camera
+#: present on save may be gone by the time the ``.env`` is read again, and a
+#: typed-in URL was never on any list to begin with.
 DISCOVERED_WIDGETS = frozenset({"video_device"})
 
 log = logger.bind(plugin="docker")

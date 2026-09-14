@@ -13,6 +13,8 @@ import subprocess
 from pathlib import Path
 
 import pytest
+from nicegui import ui
+from nicegui.testing import User
 
 from spiriconfig_docker import env, settings, widgets
 from spiriconfig_docker.config import DockerSettings
@@ -699,7 +701,8 @@ class TestTheWidgetRegistry:
 class TestTheVideoDeviceWidget:
     """`/dev/video*` is not a list an app author could write down -- it depends on
     what is plugged into the machine the form happens to render on -- so this
-    widget builds its options from the filesystem instead of from `field.options`.
+    widget builds its options from the filesystem, layers any URLs an author
+    declares in `options:` on top, and still accepts a value typed in by hand.
     """
 
     def _fake_device(
@@ -759,7 +762,8 @@ class TestTheVideoDeviceWidget:
         ]
 
     def test_video_device_needs_no_declared_options(self, tmp_path: Path) -> None:
-        """Unlike `select`, there is nothing an app author could write down here."""
+        """Unlike `select`, an author is not required to write anything down here --
+        the filesystem scan is enough on its own."""
         compose = tmp_path / "compose.yaml"
         compose.write_text(
             "x-spiri-settings:\n"
@@ -769,6 +773,57 @@ class TestTheVideoDeviceWidget:
         fields = settings.declared(compose)
         assert fields[0].widget == "video_device"
         assert fields[0].options == []
+
+    def test_declared_options_are_offered_alongside_detected_cameras(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """`options:` is where an author writes down the URLs a filesystem scan
+        would never find -- an RTSP stream, an IP camera on the LAN."""
+        dev_dir, sysfs_dir = tmp_path / "dev", tmp_path / "sysfs"
+        dev_dir.mkdir()
+        sysfs_dir.mkdir()
+        self._fake_device(dev_dir, sysfs_dir, "video0", "Webcam")
+        monkeypatch.setattr(widgets, "_V4L_SYSFS", sysfs_dir)
+        monkeypatch.setattr(widgets, "_DEV_DIR", dev_dir)
+
+        field = Field(
+            env="CAMERA",
+            widget="video_device",
+            options=["rtsp://cam.local/stream"],
+        )
+        options = widgets._video_device_options(field, "")
+        assert list(options) == [str(dev_dir / "video0"), "rtsp://cam.local/stream"]
+
+    def test_a_saved_value_absent_from_either_source_is_still_offered(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """A camera unplugged since the last save, or a URL an author has since
+        dropped from `options:`, must not look like the save forgot it."""
+        dev_dir, sysfs_dir = tmp_path / "dev", tmp_path / "sysfs"
+        dev_dir.mkdir()
+        sysfs_dir.mkdir()
+        monkeypatch.setattr(widgets, "_V4L_SYSFS", sysfs_dir)
+        monkeypatch.setattr(widgets, "_DEV_DIR", dev_dir)
+
+        field = Field(env="CAMERA", widget="video_device", options=[])
+        options = widgets._video_device_options(field, "rtsp://gone.local/stream")
+        assert options == {
+            "rtsp://gone.local/stream": "rtsp://gone.local/stream (not currently present)"
+        }
+
+    async def test_the_dropdown_accepts_a_hand_typed_value(self, user: User) -> None:
+        """A URL that is neither a detected camera nor a declared option is still
+        a legitimate answer -- the box has to take free text, the same as `input`."""
+        field = Field(env="CAMERA", widget="video_device")
+
+        @ui.page("/video-device")
+        def page() -> None:
+            widgets._video_device(field, "")
+
+        await user.open("/video-device")
+        element = user.find(ui.select).elements.pop()
+        assert element.props["use-input"] is True
+        assert element.props["new-value-mode"] == "add-unique"
 
 
 class TestBrokenSettingsDoNotTakeThePageDown:
