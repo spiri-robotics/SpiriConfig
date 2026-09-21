@@ -177,25 +177,17 @@ default -- see {class}`~spiriconfig_docker.settings.Field` for the full set
 ### Widgets
 
 `widget:` is a direct name, not a type the form guesses a control from -- see the
-module docstring in `spiriconfig_docker/widgets.py` for why. This table is the
-complete list; the registry it is generated from
-({data}`spiriconfig_docker.widgets.REGISTRY`) is the source of truth, and a test
-(`test_docker_web.py`) fails if the two drift apart.
+module docstring in `spiriconfig_docker/widgets.py` for why. The table below is
+generated at build time straight from
+{data}`spiriconfig_docker.widgets.REGISTRY` -- one row per widget, each one's
+"Renders" cell pulled from that widget's own builder docstring -- by the
+`widget-table` directive in `docs/_ext/widget_table.py`. A widget added to the
+registry with no docstring fails the docs build rather than landing on the page
+as a blank row, and one added and never wired into this table is not possible:
+there is no second list to fall out of sync with.
 
-| `widget:` | Renders | Needs `options:` |
-| --- | --- | --- |
-| `input` | A single-line text box. The default if `widget:` is omitted. | |
-| `password` | A text box with the value masked, and a toggle to reveal it. | |
-| `textarea` | A multi-line text box. | |
-| `number` | A number box. Respects `min:`, `max:`, `step:`. | |
-| `slider` | A slider with a label and a live readout of its current value. Defaults to 0-100 if `min:`/`max:` are omitted. | |
-| `switch` | An on/off switch. | |
-| `checkbox` | A checkbox. | |
-| `select` | A dropdown, fixed to `options:`. | Yes |
-| `radio` | Radio buttons, fixed to `options:`. | Yes |
-| `toggle` | A button group, fixed to `options:`. | Yes |
-| `color` | A color picker. | |
-| `video_device` | A dropdown of video sources: `/dev/video*` nodes found on this machine, any URLs listed in `options:` (for an RTSP stream or IP camera no filesystem scan would find), and free text typed in by hand. | Optional |
+```{widget-table}
+```
 
 `select`, `radio`, and `toggle` are validated against their `options:` on save --
 a value that is not one of the choices is rejected. `video_device` is not: a

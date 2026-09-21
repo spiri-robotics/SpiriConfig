@@ -131,6 +131,7 @@ def _common(field: Field, element: Any) -> Any:
 
 
 def _input(field: Field, value: Any) -> Any:
+    """A single-line text box."""
     return _common(
         field,
         ui.input(label=field.title, value=value, placeholder=field.default or None),
@@ -138,6 +139,7 @@ def _input(field: Field, value: Any) -> Any:
 
 
 def _password(field: Field, value: Any) -> Any:
+    """A text box with the value masked, and a toggle to reveal it."""
     return _common(
         field,
         ui.input(
@@ -151,6 +153,7 @@ def _password(field: Field, value: Any) -> Any:
 
 
 def _textarea(field: Field, value: Any) -> Any:
+    """A multi-line text box."""
     return _common(
         field,
         ui.textarea(label=field.title, value=value, placeholder=field.default or None),
@@ -158,6 +161,7 @@ def _textarea(field: Field, value: Any) -> Any:
 
 
 def _number(field: Field, value: Any) -> Any:
+    """A number box. Respects `min`, `max`, `step`."""
     element = ui.number(
         label=field.title,
         value=value,
@@ -195,14 +199,17 @@ def _slider(field: Field, value: Any) -> Any:
 
 
 def _switch(field: Field, value: Any) -> Any:
+    """An on/off switch."""
     return ui.switch(field.title, value=value)
 
 
 def _checkbox(field: Field, value: Any) -> Any:
+    """A checkbox."""
     return ui.checkbox(field.title, value=value)
 
 
 def _select(field: Field, value: Any) -> Any:
+    """A dropdown, fixed to `options`."""
     return _common(
         field, ui.select(options=field.options, label=field.title, value=value)
     )
@@ -274,6 +281,7 @@ def _video_device(field: Field, value: Any) -> Any:
 
 
 def _radio(field: Field, value: Any) -> Any:
+    """Radio buttons, fixed to `options`."""
     with ui.column().classes("gap-0"):
         ui.label(field.title).classes("text-sm")
         element = ui.radio(options=field.options, value=value).props("inline")
@@ -281,6 +289,7 @@ def _radio(field: Field, value: Any) -> Any:
 
 
 def _toggle(field: Field, value: Any) -> Any:
+    """A button group, fixed to `options`."""
     with ui.column().classes("gap-0"):
         ui.label(field.title).classes("text-sm")
         element = ui.toggle(options=field.options, value=value)
@@ -288,6 +297,7 @@ def _toggle(field: Field, value: Any) -> Any:
 
 
 def _color(field: Field, value: Any) -> Any:
+    """A color picker."""
     return _common(field, ui.color_input(label=field.title, value=value))
 
 

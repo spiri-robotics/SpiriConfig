@@ -678,6 +678,16 @@ class TestTheWidgetRegistry:
         validation and then explodes at render time, in front of the user."""
         assert set(widgets.REGISTRY) == set(settings.WIDGETS)
 
+    def test_every_widget_has_a_docstring(self) -> None:
+        """The docs build's widget table is generated from each builder's
+        docstring (see docs/_ext/widget_table.py). A widget with none would not
+        fail this suite, only the docs build -- so it fails here too, where
+        whoever adds a widget is more likely to be looking."""
+        for name, widget in widgets.REGISTRY.items():
+            assert (widget.build.__doc__ or "").strip(), (
+                f"widget {name!r} has no docstring on its builder"
+            )
+
     def test_a_number_is_written_without_the_float_tail(self) -> None:
         """ui.number always yields a float, so a port comes back as 3000.0. Written
         out verbatim that gives `ports: "3000.0:3000"`, which docker rejects."""

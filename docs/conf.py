@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+sys.path.insert(0, str(Path(__file__).parent))
 
 project = "SpiriConfig"
 author = "Spiri"
@@ -18,6 +19,7 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.intersphinx",
     "myst_parser",
+    "_ext.widget_table",
 ]
 
 templates_path = ["_templates"]
