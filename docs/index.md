@@ -71,6 +71,7 @@ advanced
 docker
 appstore
 plugins
+container-plugins
 design
 api
 ```

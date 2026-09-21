@@ -1,7 +1,7 @@
 """Find proxied plugins by asking docker what is running.
 
 A plugin, out of process, is a compose app with labels on it (see
-``NOTES-out-of-process-plugins.md``): a container that serves HTTP and declares
+:doc:`/container-plugins`): a container that serves HTTP and declares
 itself with ``spiriconfig.plugin.*`` labels. There is no plugin registry of ours to
 keep in sync -- the source of truth is ``docker ps``, exactly as it is for the app
 store's stacks. Install a plugin app and its container appears here; stop it and it
