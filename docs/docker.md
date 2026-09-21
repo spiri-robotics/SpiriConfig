@@ -151,6 +151,63 @@ This is the one place SpiriConfig does something a plain editor does not, and it
 is still not a lock-in: the file on disk is an ordinary compose file, and `vim`
 remains a completely valid way to edit it.
 
+## Settings forms (`x-spiri-settings`)
+
+An app can declare a settings form for its own `.env` file, either inline in the
+compose file or in a sidecar next to it -- see
+{func}`~spiriconfig_docker.settings.declared` for exactly how the two are found
+and why declaring both is an error. Each item is one field:
+
+```yaml
+x-spiri-settings:
+  - env: GRAFANA_PORT          # the .env variable this field reads and writes
+    widget: number              # see the table below
+    label: HTTP port            # optional; defaults to a readable form of `env`
+    help: Shown under the widget.
+    default: "3000"
+    min: 1024
+    max: 65535
+    advanced: false              # see advanced.md
+```
+
+`env` is the only required key. Everything else, including `widget`, has a
+default -- see {class}`~spiriconfig_docker.settings.Field` for the full set
+(`options`, `min`, `max`, `step`, `required`, `pattern`, `advanced`).
+
+### Widgets
+
+`widget:` is a direct name, not a type the form guesses a control from -- see the
+module docstring in `spiriconfig_docker/widgets.py` for why. This table is the
+complete list; the registry it is generated from
+({data}`spiriconfig_docker.widgets.REGISTRY`) is the source of truth, and a test
+(`test_docker_web.py`) fails if the two drift apart.
+
+| `widget:` | Renders | Needs `options:` |
+| --- | --- | --- |
+| `input` | A single-line text box. The default if `widget:` is omitted. | |
+| `password` | A text box with the value masked, and a toggle to reveal it. | |
+| `textarea` | A multi-line text box. | |
+| `number` | A number box. Respects `min:`, `max:`, `step:`. | |
+| `slider` | A slider with a label and a live readout of its current value. Defaults to 0-100 if `min:`/`max:` are omitted. | |
+| `switch` | An on/off switch. | |
+| `checkbox` | A checkbox. | |
+| `select` | A dropdown, fixed to `options:`. | Yes |
+| `radio` | Radio buttons, fixed to `options:`. | Yes |
+| `toggle` | A button group, fixed to `options:`. | Yes |
+| `color` | A color picker. | |
+| `video_device` | A dropdown of video sources: `/dev/video*` nodes found on this machine, any URLs listed in `options:` (for an RTSP stream or IP camera no filesystem scan would find), and free text typed in by hand. | Optional |
+
+`select`, `radio`, and `toggle` are validated against their `options:` on save --
+a value that is not one of the choices is rejected. `video_device` is not: a
+camera present when the form was saved may be unplugged by the time the `.env`
+is read again, and a typed-in URL was never on any fixed list to begin with, so
+it is not treated as an error.
+
+An `advanced: true` field is hidden unless [advanced mode](advanced.md) is on --
+hidden, not removed: it is still read from the `.env`, still written back on
+save, and still shows up in `spiriconfig docker settings <name>` regardless of
+the switch.
+
 ## Using podman
 
 The plugin shells out to whatever `SPIRICONFIG_DOCKER_DOCKER_BIN` names, and only

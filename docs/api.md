@@ -54,6 +54,16 @@
    :members:
 ```
 
+```{eval-rst}
+.. automodule:: spiriconfig_docker.settings
+   :members:
+```
+
+```{eval-rst}
+.. automodule:: spiriconfig_docker.widgets
+   :members:
+```
+
 ## The app store plugin
 
 ```{eval-rst}
