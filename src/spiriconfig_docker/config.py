@@ -4,7 +4,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+from spiriconfig import paths
 
 
 class DockerSettings(BaseSettings):
@@ -16,7 +19,7 @@ class DockerSettings(BaseSettings):
         extra="ignore",
     )
 
-    compose_dir: Path = Path("test_data/compose")
+    compose_dir: Path = Field(default_factory=paths.compose_dir)
     """Directory holding one subdirectory per compose project.
 
     ``SPIRICONFIG_DOCKER_COMPOSE_DIR``. We only ever look one level deep, and we
@@ -26,12 +29,11 @@ class DockerSettings(BaseSettings):
     it just wrote does not validate; it touches only what it made, and nothing that
     was already here.
 
-    The default is *relative*, and deliberately so: running out of a checkout
-    should not reach for ``/srv/compose`` and start managing the containers on
-    the developer's actual machine. ``./scripts/test-data.sh`` builds the tree it
-    points at. A real deployment sets this to an absolute path -- ``/srv/compose``
-    is the conventional one -- which is what the packaging and the systemd unit
-    are for.
+    Defaults to ``/srv/compose`` as root and ``~/spiri-apps`` otherwise -- the
+    same answer ``spiriconfig install`` writes, so a bare ``spiriconfig serve`` and
+    the installed service agree (see :mod:`spiriconfig.paths`). A checkout points
+    this at ``test_data/compose`` through its ``.env``, which
+    ``./scripts/test-data.sh`` writes, so a developer's real apps are left alone.
     """
 
     docker_bin: str = "docker"

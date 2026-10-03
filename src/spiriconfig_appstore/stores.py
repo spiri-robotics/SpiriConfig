@@ -548,9 +548,9 @@ def check_plan(settings: AppStoreSettings) -> list[Command]:
 def _absolute(url: str) -> str:
     """Make a *local path* store absolute, and leave a real URL alone.
 
-    Both defaults in this package are relative (``test_data/...``), so that a
-    checkout never reaches for ``/srv/compose``. That is good for developers and
-    a trap for everything downstream: a relative path is only meaningful against
+    Paths can be relative -- a checkout's ``.env`` may well say ``test_data/...``,
+    and so may anyone's ``SPIRICONFIG_APPSTORE_STORES``. That is a trap for
+    everything downstream: a relative path is only meaningful against
     a working directory, and the two things we do with a store -- clone it, and
     symlink into it -- each resolve paths against a *different* directory than
     the one the user was standing in.

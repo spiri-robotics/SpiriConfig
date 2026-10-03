@@ -49,6 +49,58 @@ class TestRootCli:
         assert result.exit_code == 0
 
 
+class TestServeFlags:
+    """`spiriconfig serve [HOST][:PORT] [--no-login-required]`, without serving."""
+
+    @pytest.fixture
+    def served(self, monkeypatch: pytest.MonkeyPatch) -> list:
+        """Capture the settings serve would have run with, instead of blocking."""
+        from spiriconfig import web
+
+        calls: list = []
+        monkeypatch.setattr(web, "serve", calls.append)
+        # Pinned, so the checkout's own .env (which may turn auth off) is not
+        # what these tests end up checking.
+        monkeypatch.setenv("SPIRICONFIG_HOST", "127.0.0.1")
+        monkeypatch.setenv("SPIRICONFIG_PORT", "8337")
+        monkeypatch.setenv("SPIRICONFIG_AUTH", "pam")
+        return calls
+
+    @pytest.mark.parametrize(
+        ("bind", "host", "port"),
+        [
+            ("127.0.0.1:8338", "127.0.0.1", 8338),
+            ("0.0.0.0", "0.0.0.0", 8337),
+            (":8338", "127.0.0.1", 8338),
+            ("8338", "127.0.0.1", 8338),
+            ("[::1]:8338", "::1", 8338),
+            ("::1", "::1", 8337),
+            ("localhost:9000", "localhost", 9000),
+        ],
+    )
+    def test_bind(self, served: list, bind: str, host: str, port: int) -> None:
+        result = runner.invoke(root_app, ["serve", bind])
+        assert result.exit_code == 0, result.output
+        [config] = served
+        assert (config.host, config.port) == (host, port)
+
+    def test_no_argument_keeps_the_environment(self, served: list) -> None:
+        runner.invoke(root_app, ["serve"])
+        [config] = served
+        assert (config.host, config.port, config.auth) == ("127.0.0.1", 8337, "pam")
+
+    def test_no_login_required(self, served: list) -> None:
+        runner.invoke(root_app, ["serve", "--no-login-required"])
+        [config] = served
+        assert config.auth == "none"
+
+    @pytest.mark.parametrize("bind", ["host:port", "[::1", "[::1]8338"])
+    def test_a_bad_bind_is_refused(self, served: list, bind: str) -> None:
+        result = runner.invoke(root_app, ["serve", bind])
+        assert result.exit_code != 0
+        assert served == []
+
+
 class TestList:
     def test_lists_the_project(self) -> None:
         result = runner.invoke(docker_app, ["list"])

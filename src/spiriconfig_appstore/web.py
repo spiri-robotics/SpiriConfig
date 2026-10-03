@@ -27,7 +27,7 @@ from spiriconfig_appstore.credentials import (
     logins,
     store_credentials,
 )
-from spiriconfig_appstore.installs import Install, install_command, installed
+from spiriconfig_appstore.installs import Install, install_commands, installed
 from spiriconfig_appstore.stores import (
     App,
     Store,
@@ -313,7 +313,7 @@ def _app_card(
             if install is None:
                 async def do_install() -> None:
                     try:
-                        command = install_command(entry, compose_dir)
+                        commands = install_commands(entry, compose_dir)
                     except StoreError as exc:
                         ui.notify(str(exc), type="negative", multi_line=True, timeout=0)
                         return
@@ -331,7 +331,7 @@ def _app_card(
                         settings=docker_settings(),
                     )
                     await _run_in_dialog(
-                        f"Install {entry.name}", [command, stack.pull()]
+                        f"Install {entry.name}", [*commands, stack.pull()]
                     )
                     refresh()
 

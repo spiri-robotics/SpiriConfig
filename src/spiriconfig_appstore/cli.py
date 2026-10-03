@@ -28,7 +28,7 @@ from spiriconfig_appstore.credentials import (
 )
 from spiriconfig_appstore.installs import (
     Install,
-    install_command,
+    install_commands,
     installed,
     uninstall as find_install,
 )
@@ -68,8 +68,8 @@ def _fail(message: str) -> typer.Exit:
 def _compose_dir() -> Path:
     """The compose directory, absolute.
 
-    The default is relative (``test_data/compose``), and a symlink into a store
-    must be made with absolute paths or it dangles -- see
+    The setting may be relative (a checkout's ``test_data/compose``), and a
+    symlink into a store must be made with absolute paths or it dangles -- see
     :func:`spiriconfig_appstore.stores._absolute`. Resolving once, here, keeps
     that from being something every caller has to remember.
     """
@@ -510,11 +510,12 @@ def install(
     entry = _app(name)
     compose_dir = _compose_dir()
     try:
-        command = install_command(entry, compose_dir, as_)
+        commands = install_commands(entry, compose_dir, as_)
     except StoreError as exc:
         raise _fail(str(exc)) from exc
 
-    _execute(command, show=show)
+    for command in commands:
+        _execute(command, show=show)
     if not show:
         installed_as = as_ or entry.name
         typer.echo(f"Installed {entry.store.slug}/{entry.name} as {installed_as}.")

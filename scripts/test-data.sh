@@ -11,8 +11,10 @@
 # subdirectory of this repository is not one, so it gets copied out and
 # `git init`ed. It is disposable: delete test_data/ and run this again.
 #
-# SpiriConfig's defaults already point here (see spiriconfig_docker.config and
-# spiriconfig_appstore.config), so after running this:
+# SpiriConfig's defaults are the real install paths (/srv/compose as root,
+# ~/spiri-apps otherwise -- see spiriconfig.paths), so this also points the
+# checkout's .env (gitignored, read from the CWD) at test_data/. It only appends,
+# and only if the .env does not already set them. After running this:
 #
 #   uv run spiriconfig appstore check
 #   uv run spiriconfig appstore install whoami
@@ -23,6 +25,17 @@ set -eu
 
 root=$(git rev-parse --show-toplevel)
 cd "$root"
+
+if ! grep -qs '^SPIRICONFIG_DOCKER_COMPOSE_DIR=' .env; then
+    cat >> .env <<EOF
+# Added by scripts/test-data.sh: keep this checkout on test_data/, away from
+# the real install paths.
+SPIRICONFIG_DOCKER_COMPOSE_DIR=$root/test_data/compose
+SPIRICONFIG_APPSTORE_STORE_DIR=$root/test_data/stores
+SPIRICONFIG_APPSTORE_STORES=["$root/test_data/example-store"]
+EOF
+    echo "Pointed .env at test_data/."
+fi
 
 if [ -e test_data ] && [ "${1:-}" != "--force" ]; then
     echo "test_data/ already exists. Re-run with --force to rebuild it from scratch." >&2

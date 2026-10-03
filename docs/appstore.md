@@ -265,8 +265,8 @@ number is worse than none.
 
 | Setting | Default | What it is |
 | --- | --- | --- |
-| `SPIRICONFIG_APPSTORE_STORES` | `["test_data/example-store"]` | JSON list of git URLs (or local paths). |
-| `SPIRICONFIG_APPSTORE_STORE_DIR` | `test_data/stores` | Where clones live. |
+| `SPIRICONFIG_APPSTORE_STORES` | `[]` | JSON list of git URLs (or local paths) to offer before any is added. |
+| `SPIRICONFIG_APPSTORE_STORE_DIR` | `/var/lib/spiriconfig/stores` as root, `~/.local/share/spiriconfig/stores` otherwise | Where clones live. |
 | `SPIRICONFIG_APPSTORE_GIT_BIN` | `git` | The git executable. |
 | `SPIRICONFIG_APPSTORE_COMMAND_TIMEOUT` | `300.0` | Seconds before git is considered hung. |
 
@@ -274,10 +274,10 @@ The store directory is not a cache you can blow away casually: your edits to
 installed apps live there, as commits. It is a git repository, and you can `cd`
 into it and use it as one.
 
-The defaults are **relative**, and point into `test_data/`. That is so a checkout
-of this repository can be run without it reaching for `/var/lib` and `/srv` and
-managing the containers on your actual machine. A deployment sets absolute paths
--- see [configuration](configuration.md).
+A checkout of this repository points these at `test_data/` instead, through the
+`.env` that `scripts/test-data.sh` writes, so it does not reach for `/var/lib` and
+`/srv` and manage the containers on your actual machine -- see
+[configuration](configuration.md#where-things-live-by-default).
 
 ## Trying it, from a checkout
 
@@ -293,7 +293,8 @@ GET / HTTP/1.1
 ```
 
 `scripts/test-data.sh` copies `examples/store/` into `test_data/example-store` and
-`git init`s it, because a store has to be a git repo before it can be cloned. The
+`git init`s it, because a store has to be a git repo before it can be cloned, and
+points the checkout's `.env` at `test_data/`. The
 whole tree is gitignored and disposable: delete `test_data/` and run the script
 again.
 

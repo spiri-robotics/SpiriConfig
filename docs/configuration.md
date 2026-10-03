@@ -6,14 +6,22 @@ systemd unit, a shell, a `.env` file, or a container runtime can all configure
 it the same way.
 
 If a `.env` file exists in the working directory it is read, but real environment
-variables always win.
+variables always win. Flags to `spiriconfig serve` win over both:
+
+```console
+$ spiriconfig serve                         # $SPIRICONFIG_HOST:$SPIRICONFIG_PORT
+$ spiriconfig serve 127.0.0.1:8338          # HOST:PORT
+$ spiriconfig serve 0.0.0.0                 # HOST, configured port
+$ spiriconfig serve :8338                   # PORT, configured host ([::1]:8338 for IPv6)
+$ spiriconfig serve --no-login-required     # SPIRICONFIG_AUTH=none
+```
 
 ## Core
 
 | Variable | Default | Meaning |
 | --- | --- | --- |
 | `SPIRICONFIG_HOST` | `127.0.0.1` | Address the web UI binds to. Loopback by default; set `0.0.0.0` to expose it on the network. |
-| `SPIRICONFIG_PORT` | `8080` | Port the web UI binds to. |
+| `SPIRICONFIG_PORT` | `8337` | Port the web UI binds to. |
 | `SPIRICONFIG_LOG_LEVEL` | `INFO` | `DEBUG`, `INFO`, `WARNING`, `ERROR`. |
 | `SPIRICONFIG_LOG_FILE` | *(none)* | Also log to this file, rotated at 10 MB. |
 | `SPIRICONFIG_ADVANCED` | `false` | Default for [advanced mode](advanced.md), for someone who has not chosen. |
@@ -93,7 +101,7 @@ collides.
 
 | Variable | Default | Meaning |
 | --- | --- | --- |
-| `SPIRICONFIG_DOCKER_COMPOSE_DIR` | `test_data/compose` | Directory holding one subdirectory per compose project. |
+| `SPIRICONFIG_DOCKER_COMPOSE_DIR` | `/srv/compose` as root, `~/spiri-apps` otherwise | Directory holding one subdirectory per compose project. Installed apps are symlinks in here. |
 | `SPIRICONFIG_DOCKER_DOCKER_BIN` | `docker` | The docker executable. Set to `podman` to use podman. |
 | `SPIRICONFIG_DOCKER_COMMAND_TIMEOUT` | `300` | Seconds before a captured command is considered hung. |
 
@@ -101,24 +109,30 @@ collides.
 
 | Variable | Default | Meaning |
 | --- | --- | --- |
-| `SPIRICONFIG_APPSTORE_STORES` | `["test_data/example-store"]` | JSON list of git URLs, or local paths, of [app stores](appstore.md). |
-| `SPIRICONFIG_APPSTORE_STORE_DIR` | `test_data/stores` | Where store clones live. Not a cache: your edits to installed apps are commits in here. |
+| `SPIRICONFIG_APPSTORE_STORES` | `[]` | JSON list of git URLs, or local paths, of [app stores](appstore.md) to offer before any is added. |
+| `SPIRICONFIG_APPSTORE_STORE_DIR` | `/var/lib/spiriconfig/stores` as root, `~/.local/share/spiriconfig/stores` otherwise | Where store clones live. Not a cache: your edits to installed apps are commits in here. |
 | `SPIRICONFIG_APPSTORE_GIT_BIN` | `git` | The git executable. |
 | `SPIRICONFIG_APPSTORE_COMMAND_TIMEOUT` | `300` | Seconds before a git command is considered hung. |
 
-## Why the defaults are relative
+## Where things live by default
 
-`test_data/compose`, not `/srv/compose`. Running SpiriConfig out of a checkout
-should not silently start managing the containers on the developer's actual
-machine, and a default of `/srv/compose` would do exactly that the first time
-someone typed `uv run spiriconfig docker list` to see what it did.
+The path defaults depend only on who runs SpiriConfig, and are the same ones
+`spiriconfig install` writes into the service's environment file -- so
+`uvx spiriconfig serve` and the installed service, run as the same user, see the
+same apps:
 
-So the defaults point somewhere harmless and local, `./scripts/test-data.sh`
-builds that tree with an example app store in it, and the whole thing is
-gitignored and disposable.
+| | root | anyone else |
+| --- | --- | --- |
+| Installed apps (`SPIRICONFIG_DOCKER_COMPOSE_DIR`) | `/srv/compose` | `~/spiri-apps` |
+| Store clones (`SPIRICONFIG_APPSTORE_STORE_DIR`) | `/var/lib/spiriconfig/stores` | `$XDG_DATA_HOME/spiriconfig/stores` (`~/.local/share/...`) |
 
-**A deployment sets absolute paths.** That is what the systemd unit below is for,
-and `/srv/compose` and `/var/lib/spiriconfig/stores` are the conventional ones.
+The compose directory is created by the first app install if it does not exist.
+
+**A checkout overrides them.** Running out of a checkout should not start
+managing the containers on the developer's actual machine, so
+`./scripts/test-data.sh` builds a disposable `test_data/` tree with an example app
+store in it, and appends lines to the checkout's (gitignored) `.env` pointing all
+three app settings at it.
 
 ## What gets logged
 
@@ -147,8 +161,6 @@ After=docker.service
 Wants=docker.service
 
 [Service]
-# Absolute, every one. The defaults are relative for the benefit of a checkout,
-# which makes them meaningless to a service whose working directory is not one.
 Environment=SPIRICONFIG_DOCKER_COMPOSE_DIR=/srv/compose
 Environment=SPIRICONFIG_APPSTORE_STORE_DIR=/var/lib/spiriconfig/stores
 Environment=SPIRICONFIG_APPSTORE_STORES=["https://github.com/spiri/spiri-apps"]

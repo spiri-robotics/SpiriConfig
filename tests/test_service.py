@@ -27,7 +27,11 @@ def home(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
 
 @pytest.fixture
 def config() -> ServiceConfig:
-    return ServiceConfig(compose_dir=Path("/srv/compose"), storage_secret="s3cr3t")
+    return ServiceConfig(
+        compose_dir=Path("/srv/compose"),
+        store_dir=Path("/var/lib/spiriconfig/stores"),
+        storage_secret="s3cr3t",
+    )
 
 
 class TestScope:
@@ -81,7 +85,10 @@ class TestServiceConfigEnv:
 
     def test_none_drops_the_auth_variables(self) -> None:
         env = ServiceConfig(
-            compose_dir=Path("/srv/compose"), storage_secret="x", auth="none"
+            compose_dir=Path("/srv/compose"),
+            store_dir=Path("/var/lib/spiriconfig/stores"),
+            storage_secret="x",
+            auth="none",
         ).env()
         assert env["SPIRICONFIG_AUTH"] == "none"
         assert "SPIRICONFIG_AUTH_SERVICE" not in env
@@ -90,6 +97,7 @@ class TestServiceConfigEnv:
     def test_carries_the_compose_dir_and_bind(self, config: ServiceConfig) -> None:
         env = config.env()
         assert env["SPIRICONFIG_DOCKER_COMPOSE_DIR"] == "/srv/compose"
+        assert env["SPIRICONFIG_APPSTORE_STORE_DIR"] == "/var/lib/spiriconfig/stores"
         assert env["SPIRICONFIG_HOST"] == "127.0.0.1"
         assert env["SPIRICONFIG_PORT"] == "8337"
 
@@ -107,6 +115,7 @@ class TestExposureGuard:
     def test_refuses_none_off_box(self) -> None:
         config = ServiceConfig(
             compose_dir=Path("/srv/compose"),
+            store_dir=Path("/var/lib/spiriconfig/stores"),
             storage_secret="x",
             auth="none",
             host="0.0.0.0",
@@ -116,13 +125,17 @@ class TestExposureGuard:
 
     def test_allows_none_on_loopback(self) -> None:
         config = ServiceConfig(
-            compose_dir=Path("/srv/compose"), storage_secret="x", auth="none"
+            compose_dir=Path("/srv/compose"),
+            store_dir=Path("/var/lib/spiriconfig/stores"),
+            storage_secret="x",
+            auth="none",
         )
         service.check_exposure(config)  # does not raise
 
     def test_allows_auth_off_box(self) -> None:
         off_box = ServiceConfig(
             compose_dir=Path("/srv/compose"),
+            store_dir=Path("/var/lib/spiriconfig/stores"),
             storage_secret="x",
             auth="pam",
             host="0.0.0.0",

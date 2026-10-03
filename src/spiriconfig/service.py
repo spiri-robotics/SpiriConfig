@@ -37,6 +37,7 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
+from spiriconfig import paths
 from spiriconfig.commands import Command
 
 #: The systemd unit, the uv tool, and the PyPI distribution all share this name.
@@ -96,7 +97,7 @@ class Scope:
     @classmethod
     def detect(cls) -> Scope:
         """Root gets a system service; anyone else gets a user service."""
-        return cls(system=os.geteuid() == 0)
+        return cls(system=paths.system())
 
     @property
     def name(self) -> str:
@@ -137,6 +138,7 @@ class ServiceConfig:
     """
 
     compose_dir: Path
+    store_dir: Path
     storage_secret: str
     auth: str = "pam"
     auth_service: str = "login"
@@ -151,10 +153,12 @@ class ServiceConfig:
             "SPIRICONFIG_PORT": str(self.port),
             "SPIRICONFIG_AUTH": self.auth,
             "SPIRICONFIG_STORAGE_SECRET": self.storage_secret,
-            # The docker plugin's own setting: without it the service would default
-            # to the checkout's throwaway test_data dir. An installed service is the
-            # one place that default is exactly wrong, so install always names it.
+            # The plugins' own settings. Their defaults would land on the same
+            # paths (see spiriconfig.paths), but written out they are the first
+            # thing someone looking for "where are my apps?" finds, and the place
+            # to change it.
             "SPIRICONFIG_DOCKER_COMPOSE_DIR": str(self.compose_dir),
+            "SPIRICONFIG_APPSTORE_STORE_DIR": str(self.store_dir),
         }
         if self.auth == "pam":
             values["SPIRICONFIG_AUTH_SERVICE"] = self.auth_service

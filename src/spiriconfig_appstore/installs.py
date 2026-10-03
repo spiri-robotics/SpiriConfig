@@ -116,7 +116,8 @@ def _resolve(link: Path, settings: AppStoreSettings) -> Install | None:
 def installed(settings: AppStoreSettings, compose_dir: Path) -> list[Install]:
     """Every store-installed app in the compose directory, sorted by name."""
     if not compose_dir.is_dir():
-        log.warning("compose directory does not exist: {}", compose_dir)
+        # Normal on a fresh machine: the first install creates it.
+        log.debug("compose directory does not exist yet: {}", compose_dir)
         return []
     found = (_resolve(child, settings) for child in sorted(compose_dir.iterdir()))
     return [install for install in found if install is not None]
@@ -144,6 +145,26 @@ def install_command(app: App, compose_dir: Path, name: str | None = None) -> Com
         raise StoreError(f"compose directory does not exist: {compose_dir}")
 
     return app.install_command(compose_dir, name)
+
+
+def install_commands(
+    app: App, compose_dir: Path, name: str | None = None
+) -> list[Command]:
+    """:func:`install_command`, preceded by a ``mkdir -p`` if there is nowhere to link.
+
+    A fresh machine has no ``~/spiri-apps`` until something is put in it, and the
+    first app installed is that something -- the same way ``git clone`` makes the
+    store directory on the first add. The ``mkdir`` is a step of its own, not done
+    behind the scenes, so ``--show`` and the output dialog both list it.
+    """
+    if compose_dir.is_dir():
+        return [install_command(app, compose_dir, name)]
+    # Nothing can be in the way inside a directory that does not exist yet, so
+    # the clobber checks in install_command have nothing to look at.
+    return [
+        Command(argv=["mkdir", "-p", str(compose_dir)]),
+        app.install_command(compose_dir, name),
+    ]
 
 
 def uninstall(settings: AppStoreSettings, compose_dir: Path, name: str) -> Install:

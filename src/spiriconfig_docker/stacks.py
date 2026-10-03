@@ -599,7 +599,7 @@ def discover(settings: DockerSettings) -> list[Stack]:
     """
     root = settings.compose_dir
     if not root.is_dir():
-        log.warning("compose directory does not exist: {}", root)
+        log.debug("compose directory does not exist yet: {}", root)
         return []
 
     stacks = []

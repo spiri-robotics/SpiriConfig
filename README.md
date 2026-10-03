@@ -52,7 +52,7 @@ Point it at your compose directory and start the web UI:
 
 ```console
 export SPIRICONFIG_DOCKER_COMPOSE_DIR=/srv/compose
-spiriconfig serve            # web UI on http://localhost:8080
+spiriconfig serve            # web UI on http://localhost:8337
 ```
 
 Adding a service is making a directory. No CLI required -- that is the point:
@@ -97,10 +97,10 @@ list; the one you need is:
 
 | Variable | Default | Meaning |
 | --- | --- | --- |
-| `SPIRICONFIG_DOCKER_COMPOSE_DIR` | `test_data/compose` | One subdirectory per compose project. On a real machine it defaults to `/srv/compose` (root install) or `~/spiri-apps` (user install). |
+| `SPIRICONFIG_DOCKER_COMPOSE_DIR` | `/srv/compose` as root, `~/spiri-apps` otherwise | One subdirectory per compose project; installed apps are symlinks in here. |
 
-The defaults are relative on purpose: running out of a checkout should not start
-managing the containers on your actual box. See [configuration](docs/configuration.md).
+`spiriconfig serve [HOST][:PORT] [--no-login-required]` overrides the bind address
+and login for one run. See [configuration](docs/configuration.md).
 
 ## Plugins
 
@@ -126,8 +126,8 @@ uv sync
 ```
 
 You can drive the whole flow without touching your real machine. `test_data/` is
-gitignored and disposable, and the default settings point at it, so trying
-SpiriConfig out cannot start managing the containers on your box:
+gitignored and disposable, and the script points the checkout's `.env` at it, so
+trying SpiriConfig out cannot start managing the containers on your box:
 
 ```console
 ./scripts/test-data.sh                        # a compose dir + an example app store

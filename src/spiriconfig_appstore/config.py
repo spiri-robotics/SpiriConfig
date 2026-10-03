@@ -4,7 +4,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+from spiriconfig import paths
 
 
 class AppStoreSettings(BaseSettings):
@@ -16,7 +19,7 @@ class AppStoreSettings(BaseSettings):
         extra="ignore",
     )
 
-    stores: list[str] = ["test_data/example-store"]
+    stores: list[str] = []
     """*Seed* git URLs of app stores. ``SPIRICONFIG_APPSTORE_STORES``, a JSON list.
 
     An app store is an ordinary git repository with one top-level directory per
@@ -31,13 +34,14 @@ class AppStoreSettings(BaseSettings):
     in the UI deletes its checkout; a seed listed here then reappears as
     not-yet-cloned, because this list says what to offer, not what must exist.
 
-    The default is the example store this repository ships, built by
-    ``./scripts/test-data.sh``. A git URL and a local path are the same thing to
-    ``git clone``, which is why the example store is a perfectly ordinary store
-    and not a special case anywhere in the code.
+    Empty by default: there is no store every machine should be offered. A
+    checkout seeds the example store this repository ships, through the ``.env``
+    ``./scripts/test-data.sh`` writes. A git URL and a local path are the same
+    thing to ``git clone``, which is why the example store is a perfectly
+    ordinary store and not a special case anywhere in the code.
     """
 
-    store_dir: Path = Path("test_data/stores")
+    store_dir: Path = Field(default_factory=paths.store_dir)
     """Where store clones live. ``SPIRICONFIG_APPSTORE_STORE_DIR``.
 
     Not a cache: installed apps are symlinks *into* these clones, and a user's
@@ -45,10 +49,9 @@ class AppStoreSettings(BaseSettings):
     is the point -- it is what lets ``git diff`` answer "what did I change?" and
     ``git merge`` answer "what happens when the store moves on?".
 
-    Relative by default, for the reason
-    :attr:`~spiriconfig_docker.config.DockerSettings.compose_dir` is: a checkout
-    should stay inside its own directory. A deployment sets this to something
-    like ``/var/lib/spiriconfig/stores``.
+    Defaults to ``/var/lib/spiriconfig/stores`` as root and
+    ``~/.local/share/spiriconfig/stores`` otherwise (see :mod:`spiriconfig.paths`);
+    a checkout points it at ``test_data/stores`` through its ``.env``.
     """
 
     git_bin: str = "git"

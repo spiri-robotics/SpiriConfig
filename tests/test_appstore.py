@@ -23,7 +23,12 @@ from spiriconfig import preferences, web
 from spiriconfig.commands import run
 from spiriconfig.plugins import Plugin
 from spiriconfig_appstore.config import AppStoreSettings
-from spiriconfig_appstore.installs import install_command, installed, uninstall
+from spiriconfig_appstore.installs import (
+    install_command,
+    install_commands,
+    installed,
+    uninstall,
+)
 from spiriconfig_appstore.stores import (
     StoreError,
     check_plan,
@@ -220,6 +225,24 @@ class TestInstall:
         (compose_root / "whoami").mkdir()
         with pytest.raises(StoreError, match="not a symlink"):
             install_command(store.app("whoami"), compose_root)
+
+    def test_an_existing_compose_directory_needs_only_the_link(
+        self, store, compose_root: Path
+    ) -> None:
+        [command] = install_commands(store.app("whoami"), compose_root)
+        assert command.argv[:2] == ["ln", "-s"]
+
+    def test_the_first_install_makes_the_compose_directory(
+        self, store, tmp_path: Path
+    ) -> None:
+        """A fresh machine has no ~/spiri-apps until the first app lands in it."""
+        compose_root = tmp_path / "spiri-apps"
+        commands = install_commands(store.app("whoami"), compose_root)
+        assert [c.argv[0] for c in commands] == ["mkdir", "ln"]
+
+        for command in commands:
+            run(command).check()
+        assert (compose_root / "whoami" / "compose.yaml").read_text() == WHOAMI
 
 
 class TestInstalled:
@@ -518,7 +541,7 @@ class TestConflicts:
 
 
 class TestRelativePaths:
-    """The defaults are relative (``test_data/...``), so relative must work.
+    """A checkout's settings are relative (``test_data/...``), so relative must work.
 
     Relative paths are only meaningful against a working directory, and the two
     things an app store does -- clone, and symlink -- resolve them against a

@@ -35,13 +35,64 @@ def _mount(plugins: list[Plugin]) -> None:
         app.add_typer(sub, name=plugin.name, help=plugin.description or None)
 
 
+def _parse_bind(bind: str) -> tuple[str | None, int | None]:
+    """Split ``HOST``, ``HOST:PORT``, ``:PORT``, ``PORT`` or ``[V6]:PORT``.
+
+    Either half may be absent, meaning "keep the configured one". A bare IPv6
+    address (``::1``) is a host, since its colons cannot be told from a port's.
+    """
+    if bind.startswith("["):
+        host, sep, rest = bind[1:].partition("]")
+        if not sep or (rest and not rest.startswith(":")):
+            raise typer.BadParameter(f"not HOST[:PORT]: {bind!r}")
+        port = rest[1:]
+    elif bind.isdigit():
+        host, port = "", bind
+    elif bind.count(":") == 1:
+        host, _, port = bind.partition(":")
+    else:
+        host, port = bind, ""
+    if port and not port.isdigit():
+        raise typer.BadParameter(f"not a port: {port!r}")
+    return host or None, int(port) if port else None
+
+
 @app.command()
-def serve() -> None:
-    """Start the web UI."""
+def serve(
+    bind: Annotated[
+        str | None,
+        typer.Argument(
+            metavar="[HOST][:PORT]",
+            help="Address to serve on, e.g. 127.0.0.1:8338, 0.0.0.0, or :8338. "
+            "[default: $SPIRICONFIG_HOST:$SPIRICONFIG_PORT, else 127.0.0.1:8337]",
+        ),
+    ] = None,
+    no_login_required: Annotated[
+        bool,
+        typer.Option(
+            "--no-login-required",
+            help="Serve without the PAM login (SPIRICONFIG_AUTH=none). Only sane on "
+            "loopback; off it, anyone who can connect controls the machine.",
+        ),
+    ] = False,
+) -> None:
+    """Start the web UI.
+
+    Flags override the environment and `.env`, which override the defaults.
+    """
     from spiriconfig import web
 
     config = settings()
-    web.serve(config)
+    update: dict[str, object] = {}
+    if bind is not None:
+        host, port = _parse_bind(bind)
+        if host is not None:
+            update["host"] = host
+        if port is not None:
+            update["port"] = port
+    if no_login_required:
+        update["auth"] = "none"
+    web.serve(config.model_copy(update=update))
 
 
 @app.command("plugins")
@@ -82,6 +133,13 @@ def install(
             "[system: /srv/compose, user: ~/spiri-apps]"
         ),
     ] = None,
+    store_dir: Annotated[
+        Path | None,
+        typer.Option(
+            help="Where app store clones live. "
+            "[system: /var/lib/spiriconfig/stores, user: ~/.local/share/spiriconfig/stores]"
+        ),
+    ] = None,
     auth: Annotated[
         str, typer.Option(help="Login gate: 'pam' (the default) or 'none'.")
     ] = "pam",
@@ -114,12 +172,12 @@ def install(
     `--show` prints the exact `uv tool install`, the unit file, the env file, and
     the `systemctl` commands, so you can do the whole thing by hand instead.
     """
-    from spiriconfig import service
+    from spiriconfig import paths, service
 
     scope = service.Scope.detect()
     config = service.ServiceConfig(
-        compose_dir=compose_dir
-        or (Path("/srv/compose") if scope.system else Path.home() / "spiri-apps"),
+        compose_dir=compose_dir or paths.compose_dir(),
+        store_dir=store_dir or paths.store_dir(),
         storage_secret=secrets.token_urlsafe(32),
         auth=auth,
         auth_group=auth_group,

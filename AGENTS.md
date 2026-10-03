@@ -12,7 +12,7 @@ uv run sphinx-build -b html docs docs/_build
 ./scripts/test-data.sh           # build gitignored test_data/ (compose dir + example app store)
 ```
 
-Dev loop from a checkout: run `./scripts/test-data.sh`, then `uv run spiriconfig appstore check` / `appstore install whoami` / `docker up whoami`. Defaults point at `test_data/` so a checkout never touches `/srv/compose`. The `.env` file in the CWD is read but real env vars win.
+Dev loop from a checkout: run `./scripts/test-data.sh`, then `uv run spiriconfig appstore check` / `appstore install whoami` / `docker up whoami`. Path defaults are the real install paths (`spiriconfig/paths.py`: `/srv/compose` as root, `~/spiri-apps` otherwise); `test-data.sh` appends overrides to the checkout's `.env` pointing at `test_data/`, so a checkout never touches them. The `.env` file in the CWD is read but real env vars win.
 
 **Docs are stale**: README and docs/ say the web UI default port is 8080; the code default is `8337` (`SPIRICONFIG_PORT`, `src/spiriconfig/service.py:50`). Trust `src/spiriconfig/config.py` and `service.py` over prose. README's "92 tests" is outdated too.
 
