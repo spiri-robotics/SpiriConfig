@@ -194,7 +194,7 @@ class TestExecAndAttachAreDeveloperTools:
         await user.should_not_see("Exec")
         await user.should_not_see("Attach")
 
-        user.find("Advanced").click()
+        user.find("Developer mode").click()
 
         await user.should_see("Exec")
         await user.should_see("Attach")
@@ -209,7 +209,7 @@ class TestExecAndAttachAreDeveloperTools:
         await user.open("/docker")
         await user.should_see("hello")
 
-        user.find("Advanced").click()
+        user.find("Developer mode").click()
         user.find("Exec").click()
 
         await user.should_see("no running containers", retries=20)
@@ -229,7 +229,7 @@ class TestExecAndAttachAreDeveloperTools:
         await user.open("/docker")
         await user.should_see("hello")
 
-        user.find("Advanced").click()
+        user.find("Developer mode").click()
         user.find("Exec").click()
         await user.should_see("hello — exec", retries=20)
 
@@ -247,7 +247,7 @@ class TestExecAndAttachAreDeveloperTools:
         await user.open("/docker")
         await user.should_see("hello")
 
-        user.find("Advanced").click()
+        user.find("Developer mode").click()
         user.find("Exec").click()
         await user.should_see("hello — exec", retries=20)
 
@@ -267,7 +267,7 @@ class TestExecAndAttachAreDeveloperTools:
         await user.open("/docker")
         await user.should_see("hello")
 
-        user.find("Advanced").click()
+        user.find("Developer mode").click()
         user.find("Attach").click()
 
         await user.should_see("hello — attach", retries=20)
@@ -356,7 +356,7 @@ class TestTheExecTerminalItself:
         await user.open("/docker")
         await user.should_see("hello")
 
-        user.find("Advanced").click()
+        user.find("Developer mode").click()
         user.find("Exec").click()
         await user.should_see("hello — exec", retries=20)
         user.find(marker="exec-run").click()
@@ -411,7 +411,7 @@ class TestTheExecTerminalItself:
         client = await user.open("/docker")
         await user.should_see("hello")
 
-        user.find("Advanced").click()
+        user.find("Developer mode").click()
         user.find("Exec").click()
         await user.should_see("hello — exec", retries=20)
         user.find(marker="exec-run").click()
@@ -441,7 +441,7 @@ class TestTheExecTerminalItself:
         await user.open("/docker")
         await user.should_see("hello")
 
-        user.find("Advanced").click()
+        user.find("Developer mode").click()
         user.find("Attach").click()
         await user.should_see("hello — attach", retries=20)
         user.find(marker="pick-open").click()
@@ -469,7 +469,7 @@ class TestTheEditorFollowsTheOperatingSystem:
         await user.should_see("hello")
 
         # Editing is a developer feature, so it is behind the advanced switch.
-        user.find("Advanced").click()
+        user.find("Developer mode").click()
         user.find("Edit").click()
 
         # Wait on "Save", which exists only in this dialog. Waiting on the file
@@ -591,7 +591,7 @@ class TestTheSettingsForm:
         await self._open(user, settings)
         await user.should_not_see(str(configurable.path / ".env"))
 
-        user.find("Advanced").click()
+        user.find("Developer mode").click()
         await user.should_see(str(configurable.path / ".env"))
 
 
@@ -706,7 +706,7 @@ class TestAnAppCanMarkItsOwnSettingsAdvanced:
         await user.should_see("Greeting")
         await user.should_not_see("Profiling endpoint")
 
-        user.find("Advanced").click()
+        user.find("Developer mode").click()
         await user.should_see("Profiling endpoint")
 
     async def test_the_whole_field_is_marked_and_not_just_its_widget(
@@ -724,7 +724,7 @@ class TestAnAppCanMarkItsOwnSettingsAdvanced:
         visible: with it off there is nothing to find, which is the other half of the
         claim and is what the test above checks."""
         await self._open(user, settings)
-        user.find("Advanced").click()
+        user.find("Developer mode").click()
         await user.should_see("Profiling endpoint")
 
         field = user.find(marker="setting-PROFILING").elements.pop().parent_slot.parent
@@ -778,7 +778,7 @@ class TestEditingTheEnvFileFromTheSettingsWindow:
         await user.open("/docker")
         await user.should_see("configurable")
 
-        user.find("Advanced").click()
+        user.find("Developer mode").click()
         user.find("Settings").click()
         await user.should_see("configurable — settings", retries=20)
 

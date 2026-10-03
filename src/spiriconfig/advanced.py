@@ -22,6 +22,20 @@ Plugins use it like this::
 Elements inside :func:`only` are *bound* to the setting rather than conditionally
 created, so flipping the toggle shows and hides them instantly, with no page
 rebuild and no lost state in whatever the user was doing.
+
+A container plugin (a separate process behind the reverse proxy, see
+:mod:`spiriconfig.proxy` and ``docs/container-plugins.md``) cannot call
+:func:`enabled` -- it does not share this interpreter. What it *can* do is
+read :data:`BROWSER_STORAGE_KEY` out of ``localStorage`` and listen for the
+browser's own ``storage`` event, because the plugin is proxied onto the same
+origin as the shell and ``localStorage`` is shared across same-origin
+documents, iframe or not. This module keeps that key mirrored on every
+change, fire-and-forget, so a plugin gets a live signal with no polling and
+no change to the proxy's wire contract::
+
+    window.addEventListener('storage', event => {
+        if (event.key === 'spiriconfig-developer-mode') { ... }
+    });
 """
 
 from __future__ import annotations
@@ -42,6 +56,32 @@ PREFERENCE_KEY = "advanced"
 
 #: Key for the per-connection state object in NiceGUI's client storage.
 _STATE_KEY = "advanced_state"
+
+#: ``localStorage`` key mirroring the current value, for container plugins
+#: to read -- see the module docstring. Not a security boundary: anything
+#: in ``localStorage`` is as trustworthy as the browser it's running in,
+#: same as advanced mode itself. "developer-mode" rather than "advanced" --
+#: this is the string a plugin author reads and copies, so it should say
+#: what the UI now says.
+BROWSER_STORAGE_KEY = "spiriconfig-developer-mode"
+
+
+def _sync_to_browser_storage(value: bool) -> None:
+    """Mirror ``value`` into ``localStorage``, best-effort.
+
+    Left un-awaited on purpose: this runs from plain synchronous code
+    (:func:`state` and :func:`set_enabled`), and ``ui.run_javascript``
+    already fires-and-forgets its own background task when nothing awaits
+    it (see ``nicegui.awaitable_response.AwaitableResponse.__init__``) --
+    wrapping it in a *second* background task races that internal one and
+    trips its "must be awaited immediately or not at all" guard.
+    """
+    try:
+        ui.run_javascript(
+            f"localStorage.setItem('{BROWSER_STORAGE_KEY}', '{'true' if value else 'false'}')"
+        )
+    except Exception:  # noqa: BLE001 - best-effort, see docstring
+        logger.debug("could not mirror advanced mode into localStorage")
 
 
 @binding.bindable_dataclass
@@ -74,6 +114,7 @@ def state() -> AdvancedState:
             logger.exception("could not read the advanced-mode preference")
             stored = default
         client_storage[_STATE_KEY] = AdvancedState(enabled=bool(stored))
+        _sync_to_browser_storage(client_storage[_STATE_KEY].enabled)
     return client_storage[_STATE_KEY]
 
 
@@ -90,6 +131,7 @@ def set_enabled(value: bool) -> None:
     appears not to work.
     """
     state().enabled = value
+    _sync_to_browser_storage(value)
     try:
         preferences().set(PREFERENCE_KEY, value)
     except Exception:  # noqa: BLE001
@@ -139,7 +181,7 @@ def toggle() -> ui.switch:
     ring around everything it reveals: the switch is the legend for the marks.
     """
     switch = ui.switch(
-        "Advanced",
+        "Developer mode",
         value=enabled(),
         on_change=lambda event: set_enabled(event.value),
     ).props(f"color={theme.ADVANCED}")

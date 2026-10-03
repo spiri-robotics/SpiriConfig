@@ -101,7 +101,7 @@ class TestToggle:
         await user.open("/gated")
         await user.should_not_see("developers only")
 
-        user.find("Advanced").click()
+        user.find("Developer mode").click()
         await user.should_see("developers only")
 
     async def test_turning_it_off_hides_them_again(
@@ -112,17 +112,17 @@ class TestToggle:
         await user.open("/gated")
         await user.should_see("developers only")
 
-        user.find("Advanced").click()
+        user.find("Developer mode").click()
         await user.should_not_see("developers only")
 
     async def test_the_toggle_itself_is_never_hidden(self, user: User) -> None:
         """A switch you can only see once it is on would be a trap with no way back."""
         web.build([Gated()])
         await user.open("/gated")
-        await user.should_see("Advanced")
+        await user.should_see("Developer mode")
 
-        user.find("Advanced").click()
-        await user.should_see("Advanced")
+        user.find("Developer mode").click()
+        await user.should_see("Developer mode")
 
     async def test_the_choice_is_written_to_the_preference_store(
         self, user: User
@@ -132,7 +132,7 @@ class TestToggle:
 
         web.build([Gated()])
         await user.open("/gated")
-        user.find("Advanced").click()
+        user.find("Developer mode").click()
         await user.should_see("developers only")
 
         assert store.writes == [("advanced", True)]
@@ -189,7 +189,7 @@ class TestTheStoreCanBeSwapped:
         await user.should_see("everyone sees this")
 
         # And toggling still works, even though the choice cannot be saved.
-        user.find("Advanced").click()
+        user.find("Developer mode").click()
         await user.should_see("developers only")
 
 

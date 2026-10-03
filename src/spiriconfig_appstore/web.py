@@ -423,7 +423,7 @@ async def _add_store_dialog(config: AppStoreSettings, refresh) -> None:
         # it lives in its own section (see _logins_section), not here.
         ui.label(
             "For a private store, add the host login first under App store logins "
-            "below (advanced)."
+            "below (developer mode)."
         ).classes("text-xs text-gray-500")
 
         async def do_add() -> None:

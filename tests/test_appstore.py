@@ -662,7 +662,7 @@ class TestThePage:
         await user.should_see("whoami")
         await user.should_not_see("App store logins")
 
-        user.find("Advanced").click()
+        user.find("Developer mode").click()
         await user.should_see("App store logins")
 
     async def test_an_installed_app_says_so(

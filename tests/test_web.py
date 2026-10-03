@@ -88,7 +88,7 @@ class TestTheSidebar:
     async def test_the_advanced_toggle_lives_in_it(self, user: User) -> None:
         web.build([Pageful()])
         await user.open("/pageful")
-        await user.should_see("Advanced")
+        await user.should_see("Developer mode")
 
     async def test_it_can_be_collapsed_and_brought_back(self, user: User) -> None:
         """Hiding the sidebar must not be a one-way door: the button that hides it

@@ -456,7 +456,7 @@ class TestItIsHiddenNotForbidden:
         await user.open("/")
         await user.should_not_see("Terminal")
 
-        user.find("Advanced").click()
+        user.find("Developer mode").click()
         await user.should_see("Terminal")
 
     async def test_the_page_is_still_reachable_with_advanced_off(
