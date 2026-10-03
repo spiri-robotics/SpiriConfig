@@ -1,6 +1,6 @@
 [project]
 name = "spiriconfig"
-version = "0.3.0"
+version = "0.3.1"
 description = "Plugin-based configuration and container management"
 readme = "README.md"
 requires-python = ">=3.13"
