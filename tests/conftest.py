@@ -114,10 +114,19 @@ def _docker_available() -> bool:
     return proc.returncode == 0
 
 
-docker_required = pytest.mark.skipif(
+_skip_without_docker = pytest.mark.skipif(
     not _docker_available(),
     reason="needs a working `docker compose`",
 )
+
+
+def docker_required(obj):
+    """Skip ``obj`` without docker, and mark it ``docker`` for ``pytest -m docker``.
+
+    The marker is what ``scripts/test-docker.sh`` selects on; a bare ``skipif``
+    is invisible to ``-m``, which left that job running zero tests.
+    """
+    return pytest.mark.docker(_skip_without_docker(obj))
 
 
 @pytest.fixture

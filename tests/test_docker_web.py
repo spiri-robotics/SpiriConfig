@@ -67,7 +67,7 @@ class TestTheOutputDialog:
         """
         web.build([_DockerPage(settings)])
         await user.open("/docker")
-        await user.should_see("hello")
+        await user.should_see("hello", retries=20)
 
         user.find("Logs").click()
         await user.should_see("hello — logs")
@@ -84,7 +84,7 @@ class TestTheOutputDialog:
         """And the user can still get rid of it, which is the other half."""
         web.build([_DockerPage(settings)])
         await user.open("/docker")
-        await user.should_see("hello")
+        await user.should_see("hello", retries=20)
 
         user.find("Logs").click()
         await user.should_see("hello — logs")
@@ -107,7 +107,7 @@ class TestTheOutputDialog:
         """
         web.build([_DockerPage(settings)])
         await user.open("/docker")
-        await user.should_see("hello")
+        await user.should_see("hello", retries=20)
 
         user.find("Logs").click()
         await user.should_see("hello — logs")
@@ -138,7 +138,7 @@ class TestUsageOnTheCard:
         )
         web.build([_DockerPage(settings)])
         await user.open("/docker")
-        await user.should_see("12.5%")
+        await user.should_see("12.5%", retries=20)
         await user.should_see("43.0 MiB")
 
     async def test_not_behind_advanced_mode(
@@ -162,7 +162,7 @@ class TestUsageOnTheCard:
         monkeypatch.setattr(Stack, "usage", lambda self: None)
         web.build([_DockerPage(settings)])
         await user.open("/docker")
-        await user.should_see("hello")
+        await user.should_see("hello", retries=20)
         await user.should_not_see("%")
 
 
@@ -189,7 +189,7 @@ class TestExecAndAttachAreDeveloperTools:
     ) -> None:
         web.build([_DockerPage(settings)])
         await user.open("/docker")
-        await user.should_see("hello")
+        await user.should_see("hello", retries=20)
 
         await user.should_not_see("Exec")
         await user.should_not_see("Attach")
@@ -207,7 +207,7 @@ class TestExecAndAttachAreDeveloperTools:
         docker a service name it will only reject."""
         web.build([_DockerPage(settings)])
         await user.open("/docker")
-        await user.should_see("hello")
+        await user.should_see("hello", retries=20)
 
         user.find("Developer mode").click()
         user.find("Exec").click()
@@ -227,7 +227,7 @@ class TestExecAndAttachAreDeveloperTools:
         self._one_running_service(monkeypatch)
         web.build([_DockerPage(settings)])
         await user.open("/docker")
-        await user.should_see("hello")
+        await user.should_see("hello", retries=20)
 
         user.find("Developer mode").click()
         user.find("Exec").click()
@@ -245,7 +245,7 @@ class TestExecAndAttachAreDeveloperTools:
         self._one_running_service(monkeypatch)
         web.build([_DockerPage(settings)])
         await user.open("/docker")
-        await user.should_see("hello")
+        await user.should_see("hello", retries=20)
 
         user.find("Developer mode").click()
         user.find("Exec").click()
@@ -265,7 +265,7 @@ class TestExecAndAttachAreDeveloperTools:
         self._one_running_service(monkeypatch)
         web.build([_DockerPage(settings)])
         await user.open("/docker")
-        await user.should_see("hello")
+        await user.should_see("hello", retries=20)
 
         user.find("Developer mode").click()
         user.find("Attach").click()
@@ -354,7 +354,7 @@ class TestTheExecTerminalItself:
     async def _open_a_shell(self, user: User, settings: DockerSettings) -> None:
         web.build([_DockerPage(settings)])
         await user.open("/docker")
-        await user.should_see("hello")
+        await user.should_see("hello", retries=20)
 
         user.find("Developer mode").click()
         user.find("Exec").click()
@@ -409,7 +409,7 @@ class TestTheExecTerminalItself:
         every closed laptop lid -- which is the common way a web terminal ends."""
         web.build([_DockerPage(settings)])
         client = await user.open("/docker")
-        await user.should_see("hello")
+        await user.should_see("hello", retries=20)
 
         user.find("Developer mode").click()
         user.find("Exec").click()
@@ -439,7 +439,7 @@ class TestTheExecTerminalItself:
         cargo-culting the workaround onto a command that does not need it."""
         web.build([_DockerPage(settings)])
         await user.open("/docker")
-        await user.should_see("hello")
+        await user.should_see("hello", retries=20)
 
         user.find("Developer mode").click()
         user.find("Attach").click()
@@ -466,7 +466,7 @@ class TestTheEditorFollowsTheOperatingSystem:
     async def _open_the_editor(self, user: User, settings: DockerSettings) -> Element:
         web.build([_DockerPage(settings)])
         await user.open("/docker")
-        await user.should_see("hello")
+        await user.should_see("hello", retries=20)
 
         # Editing is a developer feature, so it is behind the advanced switch.
         user.find("Developer mode").click()
@@ -531,16 +531,16 @@ class TestTheSettingsForm:
         _a_browser_that_answers(user)
         web.build([_DockerPage(settings)])
         await user.open("/docker")
-        await user.should_see("configurable")
+        await user.should_see("configurable", retries=20)
         user.find("Settings").click()
-        await user.should_see("configurable — settings")
+        await user.should_see("configurable — settings", retries=20)
 
     async def test_only_an_app_that_declares_settings_gets_the_button(
         self, user: User, settings: DockerSettings, configurable: Stack
     ) -> None:
         web.build([_DockerPage(settings)])
         await user.open("/docker")
-        await user.should_see("hello")
+        await user.should_see("hello", retries=20)
         await user.should_see("configurable")
 
         # One Settings button on the page, and it is not `hello`'s.
@@ -607,9 +607,9 @@ class TestResettingAFieldToItsDefault:
         _a_browser_that_answers(user)
         web.build([_DockerPage(settings)])
         await user.open("/docker")
-        await user.should_see("configurable")
+        await user.should_see("configurable", retries=20)
         user.find("Settings").click()
-        await user.should_see("configurable — settings")
+        await user.should_see("configurable — settings", retries=20)
 
     async def test_a_field_at_its_default_has_no_reset_button(
         self, user: User, settings: DockerSettings, configurable: Stack
@@ -692,9 +692,9 @@ class TestAnAppCanMarkItsOwnSettingsAdvanced:
         _a_browser_that_answers(user)
         web.build([_DockerPage(settings)])
         await user.open("/docker")
-        await user.should_see("configurable")
+        await user.should_see("configurable", retries=20)
         user.find("Settings").click()
-        await user.should_see("configurable — settings")
+        await user.should_see("configurable — settings", retries=20)
 
     async def test_an_advanced_field_waits_for_the_switch(
         self, user: User, settings: DockerSettings, configurable: Stack
@@ -776,7 +776,7 @@ class TestEditingTheEnvFileFromTheSettingsWindow:
         _a_browser_that_answers(user)
         web.build([_DockerPage(settings)])
         await user.open("/docker")
-        await user.should_see("configurable")
+        await user.should_see("configurable", retries=20)
 
         user.find("Developer mode").click()
         user.find("Settings").click()

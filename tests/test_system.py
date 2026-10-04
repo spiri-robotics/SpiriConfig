@@ -76,6 +76,7 @@ def test_temperatures_drop_sentinel_thresholds(monkeypatch) -> None:
                 _Temp("Sensor 1", 40.0, 65261.85, 65261.85),  # sentinels, dropped
             ]
         },
+        raising=False,
     )
 
     temps = {t.label: t for t in system.temperatures()}
@@ -96,6 +97,7 @@ def test_temperatures_alarm_only_past_the_limit(monkeypatch) -> None:
                 _Temp("unbounded", 200.0, None, None),  # no limit -> never alarms
             ]
         },
+        raising=False,
     )
 
     temps = {t.label: t for t in system.temperatures()}
@@ -106,7 +108,7 @@ def test_temperatures_alarm_only_past_the_limit(monkeypatch) -> None:
 
 
 def test_temperatures_empty_when_none_reported(monkeypatch) -> None:
-    monkeypatch.setattr(system.psutil, "sensors_temperatures", dict)
+    monkeypatch.setattr(system.psutil, "sensors_temperatures", dict, raising=False)
     assert system.temperatures() == []
 
 
@@ -120,6 +122,7 @@ def test_temperatures_name_and_chip_are_readable(monkeypatch) -> None:
                 _Temp("", 56.0, None, None),  # unlabelled -> "sensor 2"
             ]
         },
+        raising=False,
     )
 
     temps = system.temperatures()
@@ -140,6 +143,7 @@ def test_temperatures_drop_unpopulated_zero_slots(monkeypatch) -> None:
                 _Temp("", 40.0, None, None),  # real, unlabelled -> kept
             ]
         },
+        raising=False,
     )
 
     temps = system.temperatures()

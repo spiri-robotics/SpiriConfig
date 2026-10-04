@@ -59,6 +59,7 @@ def _stub_psutil(monkeypatch) -> None:
         system.psutil,
         "sensors_temperatures",
         lambda: {"cpu": [_Temp("Package", 45.0, 90.0, 95.0)]},
+        raising=False,
     )
 
 
@@ -80,7 +81,7 @@ async def test_overview_survives_a_host_with_no_sensors(
     user: User, monkeypatch
 ) -> None:
     _stub_psutil(monkeypatch)
-    monkeypatch.setattr(system.psutil, "sensors_temperatures", dict)
+    monkeypatch.setattr(system.psutil, "sensors_temperatures", dict, raising=False)
     web.build([_SystemPage()])
     await user.open("/system")
     await user.should_see("No sensors reported.")

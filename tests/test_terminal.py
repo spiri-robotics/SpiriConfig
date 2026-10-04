@@ -157,7 +157,7 @@ class TestItIsARealTerminal:
     async def test_the_shell_gets_a_tty(self, session: PtySession) -> None:
         """`tty` prints the device, which the word "tty" on its own would not."""
         session.write("tty\n")
-        await read_until(session, rb"/dev/pts/\d+")
+        await read_until(session, rb"/dev/(pts/\d+|ttys\d+)")  # Linux, macOS
 
     async def test_the_child_gets_a_controlling_terminal(self) -> None:
         """And gets it from *us*, rather than from whatever we happened to run.

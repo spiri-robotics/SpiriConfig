@@ -56,6 +56,9 @@ packages = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+markers = [
+    "docker: needs a working docker daemon (scripts/test-docker.sh runs only these)",
+]
 
 # NiceGUI's `user` fixture otherwise looks for a main.py to import pages from.
 # We have none: pages are registered by spiriconfig.web.build(), which each test
