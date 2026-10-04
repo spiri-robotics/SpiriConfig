@@ -429,6 +429,35 @@ class TestUpdates:
         assert "whoami:v1.11.0" in merged, "the store's change was not applied"
         assert not store.in_merge
 
+    def test_an_update_needs_no_git_identity_on_the_box(
+        self, store, upstream: Path, compose_root: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """A drone has no ``user.name``. Both the commit of the user's edit and the
+        merge commit it forces must bring their own, or the update dies on
+        "Committer identity unknown" -- which it did, on CI's bare runner."""
+        app = store.app("whoami")
+        run(install_command(app, compose_root)).check()
+        compose = compose_root / "whoami" / "compose.yaml"
+        compose.write_text(compose.read_text().replace("8080:80", "9080:80"))
+        _bump_upstream(upstream, "whoami:v1.10.1", "whoami:v1.11.0", "bump")
+
+        # No global config, and no guessing an identity from the hostname: what a
+        # machine nobody ran `git config --global` on looks like.
+        monkeypatch.setenv("GIT_CONFIG_GLOBAL", "/dev/null")
+        monkeypatch.setenv("GIT_CONFIG_NOSYSTEM", "1")
+        monkeypatch.setenv("GIT_CONFIG_COUNT", "1")
+        monkeypatch.setenv("GIT_CONFIG_KEY_0", "user.useConfigOnly")
+        monkeypatch.setenv("GIT_CONFIG_VALUE_0", "true")
+        for name in ("GIT_AUTHOR_NAME", "GIT_AUTHOR_EMAIL", "GIT_COMMITTER_NAME",
+                     "GIT_COMMITTER_EMAIL", "EMAIL"):
+            monkeypatch.delenv(name, raising=False)
+
+        for command in update_plan(store):
+            run(command).check()
+
+        merged = compose.read_text()
+        assert "9080:80" in merged and "whoami:v1.11.0" in merged
+
     def test_discard_local_throws_the_edit_away(
         self, store, upstream: Path, compose_root: Path
     ) -> None:
@@ -879,7 +908,9 @@ class TestAdoptAsks:
         # Polling the filesystem is the honest way to wait for them, because the
         # filesystem is the thing under test -- waiting on a label would let a
         # broken adopt pass as long as it rendered.
-        await _until(lambda: not link.is_symlink())
+        # Wait for the cp, not just the rm: between the two there is a moment with
+        # neither a link nor a copy, and a check landing there fails a good adopt.
+        await _until(lambda: not link.is_symlink() and (link / "compose.yaml").is_file())
 
         assert not link.is_symlink(), "still a symlink after confirming"
         assert link.is_dir(), "the real copy was not made"

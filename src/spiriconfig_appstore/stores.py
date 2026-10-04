@@ -300,11 +300,14 @@ class Store:
         the operation that reconciles two lines of change while keeping both. If
         it conflicts, it conflicts in the file, with the markers git always uses,
         and the user resolves it in the editor they already have.
-        """
-        return self._git("merge", "--no-edit", UPSTREAM)
 
-    def _commit(self, *args: str) -> Command:
-        """A ``git commit`` carrying an identity, since the box may not have one.
+        Carries an identity like :meth:`_commit` does: once both sides have moved,
+        the merge makes a merge commit, and without one git refuses.
+        """
+        return self._identified("merge", "--no-edit", UPSTREAM)
+
+    def _identified(self, *args: str) -> Command:
+        """A git command that may commit, carrying an identity since the box may not have one.
 
         Passed with ``-c`` rather than written into the repo's config so that the
         line we print is the whole truth -- a user who copies it gets the same
@@ -313,8 +316,12 @@ class Store:
         return self._git(
             "-c", f"user.name={self.settings.commit_name}",
             "-c", f"user.email={self.settings.commit_email}",
-            "commit", *args,
+            *args,
         )
+
+    def _commit(self, *args: str) -> Command:
+        """A ``git commit`` carrying an identity -- see :meth:`_identified`."""
+        return self._identified("commit", *args)
 
     def commit_local_command(self, message: str) -> Command:
         """Commit whatever the user has edited, before merging over it.
