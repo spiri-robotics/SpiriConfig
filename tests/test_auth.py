@@ -203,7 +203,9 @@ class TestGroupMembership:
         assert auth._in_group("alice", "nope") is False
 
 
-def _starlette_session_cookie(session: dict, secret: str) -> str:
+def _starlette_session_cookie(
+    session: dict, secret: str, name: str = "session"
+) -> str:
     """Sign a session the way starlette.middleware.sessions does, for the header.
 
     The websocket guard has to read exactly what Starlette wrote, so the test
@@ -212,7 +214,7 @@ def _starlette_session_cookie(session: dict, secret: str) -> str:
     """
     signer = itsdangerous.TimestampSigner(str(secret))
     data = base64.b64encode(json.dumps(session).encode())
-    return f"session={signer.sign(data).decode()}"
+    return f"{name}={signer.sign(data).decode()}"
 
 
 class TestSessionCookieDecode:
@@ -240,6 +242,16 @@ class TestSessionCookieDecode:
         assert auth._session_id_from_cookie("othercookie=x", self.SECRET) is None
         assert auth._session_id_from_cookie(good, "") is None
         assert auth._session_id_from_cookie(good, None) is None
+
+    def test_renamed_cookie_is_read_by_its_own_name_only(self) -> None:
+        """A SpiriConfig proxied inside another shares the outer one's origin, so
+        the browser sends it both cookies. It must read its own and ignore the
+        outer ``session`` cookie, even one that would verify."""
+        inner = _starlette_session_cookie({"id": "inner"}, self.SECRET, "spiri-mu-1")
+        outer = _starlette_session_cookie({"id": "outer"}, self.SECRET)
+        header = f"{outer}; {inner}"
+        assert auth._session_id_from_cookie(header, self.SECRET, "spiri-mu-1") == "inner"
+        assert auth._session_id_from_cookie(outer, self.SECRET, "spiri-mu-1") is None
 
 
 class TestAttachRule:

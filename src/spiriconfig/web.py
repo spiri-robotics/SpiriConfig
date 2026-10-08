@@ -368,7 +368,7 @@ def serve(config: Settings, plugins: list[Plugin] | None = None) -> None:
         # The middleware gates page renders; this gates the WebSocket those pages
         # run over, which no HTTP middleware ever sees. Without it the login is
         # only skin-deep -- see spiriconfig.auth.install_websocket_guard.
-        auth.install_websocket_guard()
+        auth.install_websocket_guard(config.session_cookie)
         logger.info("PAM login enabled (service {!r})", config.auth_service)
         if tls_plan.generate:
             # The whole reason TLS defaults on: with PAM the login sends a real host
@@ -405,13 +405,14 @@ def serve(config: Settings, plugins: list[Plugin] | None = None) -> None:
         app.add_middleware(HstsMiddleware)
 
     # Extra kwargs flow through NiceGUI to uvicorn (the ssl_* pair) and to the
-    # session cookie (https_only -> the Secure flag, which is only honest to set
-    # once the cookie actually travels over TLS).
-    run_kwargs: dict[str, object] = {}
+    # session cookie: its name, and https_only -> the Secure flag, which is only
+    # honest to set once the cookie actually travels over TLS.
+    session_kwargs: dict[str, object] = {"session_cookie": config.session_cookie}
+    run_kwargs: dict[str, object] = {"session_middleware_kwargs": session_kwargs}
     if tls_plan.enabled:
         run_kwargs["ssl_certfile"] = str(tls_plan.certfile)
         run_kwargs["ssl_keyfile"] = str(tls_plan.keyfile)
-        run_kwargs["session_middleware_kwargs"] = {"https_only": True}
+        session_kwargs["https_only"] = True
 
     app.on_startup(
         lambda: logger.info(

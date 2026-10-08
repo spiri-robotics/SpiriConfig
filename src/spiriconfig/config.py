@@ -72,6 +72,15 @@ class Settings(BaseSettings):
     because the cookie they were keyed on can no longer be verified.
     """
 
+    session_cookie: str = "session"
+    """Name of that cookie. ``SPIRICONFIG_SESSION_COOKIE``.
+
+    Only matters when one SpiriConfig is proxied inside another (a robot's UI inside
+    the SDK's, at ``/plugin/<name>/``). The two then share an origin, so with the same
+    cookie name each login overwrites the other's. Give the inner one its own name,
+    e.g. ``spiriconfig-mu-1``.
+    """
+
     tls: Literal["auto", "off"] = "auto"
     """Whether the web UI serves HTTPS, and how. ``SPIRICONFIG_TLS``.
 

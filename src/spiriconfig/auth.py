@@ -209,8 +209,14 @@ _GUARDED_SOCKET_EVENTS = ("event", "javascript_response", "ack", "log")
 #: Matches Starlette's SessionMiddleware default, which NiceGUI does not override.
 _SESSION_MAX_AGE = 14 * 24 * 60 * 60
 
+#: The session cookie's name, as handed to SessionMiddleware. Set by
+#: :func:`install_websocket_guard` from ``SPIRICONFIG_SESSION_COOKIE``.
+_session_cookie = "session"
 
-def _session_id_from_cookie(cookie_header: str, secret: str | None) -> str | None:
+
+def _session_id_from_cookie(
+    cookie_header: str, secret: str | None, name: str = "session"
+) -> str | None:
     """The session id inside a signed Starlette session cookie, or ``None``.
 
     Mirrors ``starlette.middleware.sessions.SessionMiddleware`` exactly: a
@@ -226,7 +232,7 @@ def _session_id_from_cookie(cookie_header: str, secret: str | None) -> str | Non
         jar.load(cookie_header)
     except http.cookies.CookieError:
         return None
-    morsel = jar.get("session")
+    morsel = jar.get(name)
     if morsel is None:
         return None
     signer = itsdangerous.TimestampSigner(str(secret))
@@ -251,7 +257,7 @@ def _session_is_authenticated(environ: dict) -> bool:
     from nicegui import core, storage
 
     session_id = _session_id_from_cookie(
-        environ.get("HTTP_COOKIE", ""), storage.Storage.secret
+        environ.get("HTTP_COOKIE", ""), storage.Storage.secret, _session_cookie
     )
     if session_id is None:
         return False
@@ -286,15 +292,19 @@ def _query_client_id(environ: dict) -> str | None:
     return values[0] if values else None
 
 
-def install_websocket_guard() -> None:
+def install_websocket_guard(session_cookie: str = "session") -> None:
     """Enforce the login gate on the WebSocket, not only on page renders.
 
     Call once with auth on, after NiceGUI has registered its own socket handlers
     (any time after ``from nicegui import ui``) and before ``ui.run``. With auth
-    off there is no session to bind to, so it must not run.
+    off there is no session to bind to, so it must not run. ``session_cookie`` must
+    be the name SessionMiddleware writes, or no socket ever reads as logged in.
     """
     import socketio
     from nicegui import core
+
+    global _session_cookie
+    _session_cookie = session_cookie
 
     sio = core.sio
     handlers = sio.handlers.get("/", {})
