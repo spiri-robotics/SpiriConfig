@@ -37,3 +37,11 @@ Network management for wfb-ng.
 The tailscale plugin is a good idea, better licensing than zerotier. Still need to set up our infra to manage it though.
 
 Disk usage plugin, see where your storage space is being used (duc based?).
+
+---
+
+Undo when there's a conflict kills your local change
+
+---
+
+Nested session prefixing, as part of the background jobs work (NOTES-background-jobs.md). Proxied apps share the shell's origin, so any NiceGUI/Starlette app that sets a `session` cookie clobbers the shell's login (and a robot's SpiriConfig inside the SDK's clobbers the SDK's). `SPIRICONFIG_SESSION_COOKIE` papers over it for our own nested SpiriConfig, but every app author has to remember to rename theirs. Needs a real fix: cookie names/paths derived from `X-Forwarded-Prefix` so nesting works at any depth with no config. The library is SpiriConfig itself: a container plugin imports it, and it handles session prefixing, sets up its routes, and shows live jobs when the app runs stand-alone (unframed). Same work as the jobs spec's app side, so do them together (versioned under `spiriconfig.plugin.api`, NOTES-out-of-process-plugins.md).
