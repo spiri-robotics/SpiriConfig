@@ -8,11 +8,12 @@ is worth asserting, not just checking by hand once.
 
 from __future__ import annotations
 
+import pytest
 import typer
 from nicegui import ui
 from nicegui.testing import User
 
-from spiriconfig import web
+from spiriconfig import proxy, web
 from spiriconfig.plugins import Plugin
 
 
@@ -120,6 +121,45 @@ class TestPluginFailureIsContained:
         web.build([Exploding(), Pageful()])
         await user.open("/pageful")
         await user.should_see("hello from the plugin")
+
+
+class TestAProxiedPluginsFrame:
+    """The shell page at ``/app/<name>`` frames ``/plugin/<name>``. When the shell is
+    itself proxied (a robot's SpiriConfig inside the SDK's), that path only exists
+    under the prefix the outer proxy announces."""
+
+    @pytest.fixture(autouse=True)
+    def _one_target(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setattr(proxy, "_DISCOVERED", {})
+        monkeypatch.setattr(proxy, "_MANUAL", {})
+        proxy.register("fw", "http://fw:8080", title="Firmware")
+
+    @staticmethod
+    def _iframe_src(user: User) -> str:
+        (frame,) = [e for e in user.client.elements.values() if e.tag == "iframe"]
+        return frame.props["src"]
+
+    async def test_unproxied_it_frames_the_plugin_at_our_root(self, user: User) -> None:
+        web.build([])
+        await user.open("/app/fw/deep/path")
+        assert self._iframe_src(user) == "/plugin/fw/deep/path"
+
+    async def test_nested_it_frames_the_plugin_under_the_forwarded_prefix(
+        self, user: User
+    ) -> None:
+        web.build([])
+        user.http_client.headers["X-Forwarded-Prefix"] = "/plugin/mu-1"
+        await user.open("/app/fw/deep/path")
+        assert self._iframe_src(user) == "/plugin/mu-1/plugin/fw/deep/path"
+
+    async def test_a_hostile_prefix_cannot_break_out_of_the_attribute(
+        self, user: User
+    ) -> None:
+        """The header is whatever a client sends when we are exposed directly."""
+        web.build([])
+        user.http_client.headers["X-Forwarded-Prefix"] = '/x" onload="alert(1)'
+        await user.open("/app/fw")
+        assert '"' not in self._iframe_src(user)
 
 
 class TestTheRealPluginSet:

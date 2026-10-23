@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import os
 import secrets
+import urllib.parse
 
 from loguru import logger
 from nicegui import app, background_tasks, ui
@@ -67,7 +68,21 @@ def _proxy_nav_item(target: proxy.Target, current: str | None) -> None:
             ui.item_label(target.title)
 
 
-def _proxy_page(name: str, found: list[Plugin], sub: str) -> None:
+def _forwarded_prefix(request: Request) -> str:
+    """The path we are mounted under, if a proxy in front of us says so.
+
+    Set when this whole shell is itself a proxied plugin -- a robot's SpiriConfig
+    inside the SDK's, at ``/plugin/mu-1`` -- and empty otherwise. NiceGUI applies it
+    to its own URLs; any absolute URL we build has to apply it too. The header is
+    client-controlled on a directly-exposed app, so it is escaped exactly as NiceGUI
+    escapes it (``nicegui/client.py``): nothing that is not path-legal survives.
+    """
+    return urllib.parse.quote(
+        request.headers.get("X-Forwarded-Prefix", ""), safe="/:@!$&'()*+,;=%"
+    )
+
+
+def _proxy_page(name: str, found: list[Plugin], sub: str, prefix: str = "") -> None:
     """Render a proxied plugin at ``/app/<name>/<sub>``: the shell, then its iframe.
 
     Looks the target up live rather than being bound to one, because discovery adds
@@ -78,6 +93,8 @@ def _proxy_page(name: str, found: list[Plugin], sub: str) -> None:
     The iframe points at ``/plugin/<name>/<sub>``: the same sub-path this page was
     reached at, so a reload rebuilds the identical frame and deep links survive. The
     content slot is stripped of its padding and gap so the plugin owns the whole area.
+    Behind a proxy that path sits under ``prefix``: a robot's plugin is at
+    ``/plugin/mu-1/plugin/<name>/`` on the SDK's origin, not ``/plugin/<name>/``.
     """
     target = proxy.get(name)
     _layout(found, current=name)
@@ -96,7 +113,7 @@ def _proxy_page(name: str, found: list[Plugin], sub: str) -> None:
     # made a flex column for the content to grow into.
     ui.query(".q-page").classes("column no-wrap")
     ui.query(".nicegui-content").classes(replace="w-full grow p-0 gap-0 no-wrap")
-    src = f"{proxy.MOUNT}/{name}/{sub}"
+    src = f"{prefix}{proxy.MOUNT}/{name}/{sub}"
     ui.element("iframe").props(f'src="{src}"').classes("w-full grow").style("border: 0")
 
 
@@ -246,8 +263,8 @@ def _register_proxy_pages(found: list[Plugin]) -> None:
 
     @ui.page(f"{proxy.APP_PREFIX}/{{name}}")
     @ui.page(f"{proxy.APP_PREFIX}/{{name}}/{{sub:path}}")
-    def _proxied(name: str, sub: str = "") -> None:
-        _proxy_page(name, found, sub)
+    def _proxied(request: Request, name: str, sub: str = "") -> None:
+        _proxy_page(name, found, sub, _forwarded_prefix(request))
 
 
 def _storage_secret(config: Settings) -> str:
