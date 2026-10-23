@@ -140,14 +140,16 @@ class TestCommands:
         ]
         assert command.cwd == stack.path
 
-    def test_up_dev_layers_the_override_as_a_second_file(
+    def test_up_dev_layers_the_override_as_a_second_file_and_rebuilds(
         self, compose_dir: Path
     ) -> None:
+        """Dev builds from source, and compose reuses an existing image unless told
+        to rebuild -- so without --build a relaunch would run stale code."""
         (compose_dir / "hello" / "compose.dev.yaml").write_text("services: {}\n")
         stack = get(DockerSettings(compose_dir=compose_dir), "hello")
         assert list(stack.up(dev=True).argv) == [
             "docker", "compose", "-p", "hello",
-            "-f", "compose.yaml", "-f", "compose.dev.yaml", "up", "-d",
+            "-f", "compose.yaml", "-f", "compose.dev.yaml", "up", "-d", "--build",
         ]
 
     def test_up_dev_is_a_noop_when_there_is_no_override(

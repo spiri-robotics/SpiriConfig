@@ -48,7 +48,7 @@ DevOption = Annotated[
     bool,
     typer.Option(
         "--dev",
-        help="Layer the app's compose.dev.yaml override on top, if it has one.",
+        help="Layer the app's compose.dev.yaml override on top, if it has one, and rebuild.",
     ),
 ]
 StackArg = Annotated[str, typer.Argument(help="Name of the compose project.")]

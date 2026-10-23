@@ -176,8 +176,12 @@ class Stack:
         With ``dev=True`` and a dev-override file present, layer it on top of the
         base compose (``-f compose.yaml -f compose.dev.yaml``) so the stack runs the
         app author's development variant -- build from source, mount it, live-reload.
+        That variant also gets ``--build``: compose only builds an image that does not
+        exist yet, so without it a second dev launch would run yesterday's source.
         Without an override the flag does nothing, so a plain stack still comes up.
         """
+        if dev and self.dev_override is not None:
+            return self._compose("up", "-d", "--build", dev=dev)
         return self._compose("up", "-d", dev=dev)
 
     def down(self) -> Command:
