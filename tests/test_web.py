@@ -8,6 +8,8 @@ is worth asserting, not just checking by hand once.
 
 from __future__ import annotations
 
+import socket
+
 import pytest
 import typer
 from nicegui import ui
@@ -105,6 +107,14 @@ class TestTheSidebar:
 
         user.find(marker="sidebar-toggle").click()
         assert drawer.value is True
+
+
+class TestTheHeader:
+    async def test_it_names_the_machine(self, user: User) -> None:
+        """Shells nest, so the header has to say whose shell this one is."""
+        web.build([])
+        await user.open("/")
+        await user.should_see(socket.gethostname(), marker="hostname")
 
 
 class TestPluginFailureIsContained:

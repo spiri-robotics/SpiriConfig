@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import os
 import secrets
+import socket
 import urllib.parse
 
 from loguru import logger
@@ -161,6 +162,9 @@ def _layout(plugins: list[Plugin], current: str | None = None) -> None:
         ).mark("sidebar-toggle").tooltip("Show or hide the sidebar")
         with ui.link(target="/").classes("no-underline text-white"):
             ui.label("SpiriConfig").classes("text-xl font-bold")
+        # Which machine this is. Shells nest -- a robot's SpiriConfig framed inside
+        # the SDK's -- and two identical headers stacked up say nothing otherwise.
+        ui.label(socket.gethostname()).classes("text-lg opacity-80").mark("hostname")
 
         # Draws nothing unless someone is logged in, so it is safe with auth off:
         # a session that never authenticated carries no username to show.
