@@ -15,6 +15,8 @@ No database, no registry, no bespoke on-disk format. If SpiriConfig vanished
 tomorrow, everything it manages would keep working -- and you would already know
 the commands to manage it.
 
+Documentation: https://spiri-robotics.github.io/SpiriConfig/
+
 ## Installation
 
 Every service SpiriConfig manages runs in a container; SpiriConfig itself cannot,
@@ -155,3 +157,21 @@ Tests that need a docker daemon are skipped when there is not one, so the suite
 passes on a laptop with no docker and still means something on a machine that has
 it. Most of them never need one anyway: the plugin *builds* commands and the tests
 assert on the command line, which is the actual contract.
+
+## Releasing
+
+1. Move the `## Unreleased` entries in `CHANGES.md` under the new version.
+2. Bump `version` in `pyproject.toml`, then `uv lock`.
+3. Tag `vX.Y.Z` and push the tag. CI then:
+   - publishes the package to PyPI (trusted publishing; the tag must match the version);
+   - attaches the docs' controlled PDF to the release.
+
+## First-time GitHub setup
+
+Docs are published to GitHub Pages by `.github/workflows/docs.yml`. Turn it on once, in
+**Settings → Pages → Build and deployment → Source: GitHub Actions**.
+
+## Template
+
+Generated from [SpiriProjectTemplates](https://github.com/spiri-robotics/SpiriProjectTemplates).
+Pull in template changes with `uvx copier update`.

@@ -1,14 +1,35 @@
 # AGENTS.md
 
 Plugin-based configuration and container management (docker stacks + app stores), served as a Typer CLI and a NiceGUI web UI. Python 3.13, managed with uv.
+Generated from the SpiriProjectTemplates copier template; `uvx copier update` pulls
+in template changes.
 
 ## Commands
 
+- Everything CI checks: `make check`.
+- Format and autofix: `make format`.
+- Tests: `uv run pytest`.
+- Docs: `make docs` (Sphinx, MyST markdown; warnings are errors), `make pdf` for the controlled
+  PDF, `make lint-docs` for prose (Vale). HTML is published to GitHub Pages from `main`.
+
+## Conventions
+
+- The docs are a controlled document (spiri-docs, as for every Spiri manual): `revisions.yaml`
+  is the only place the document's revision is written. Revise it when what the docs say
+  changes; it's separate from the package version.
+- The template owns the versions it ships (base dependencies, workflow actions, the uv image)
+  and bumps them weekly; take them with `uvx copier update` and `uv lock`, not by hand.
+- Every change gets a categorized entry in `CHANGES.md` (Features / Fixes / Improvements /
+  Tests / Internal) under `## Unreleased`; commits use conventional-commit style (`feat:`,
+  `fix:`, `refactor:`).
+
+## Project commands
+
 ```sh
 uv sync                          # install everything, incl. dev group
-uv run pytest                    # 525 tests, no lint/typecheck configured
+uv run pytest                    # 525 tests
 uv run pytest tests/test_x.py    # one file
-uv run sphinx-build -b html docs docs/_build
+make docs                        # warnings are errors
 ./scripts/test-data.sh           # build gitignored test_data/ (compose dir + example app store)
 ```
 

@@ -1,4 +1,22 @@
+---
+orphan: false
+---
+
 # SpiriConfig
+
+:::{admonition} Document control
+:class: note
+
+| | |
+| --- | --- |
+| Document number | **{{ document_number }}** |
+| Revision | **{{ revision }}** |
+| Status | {{ document_status }} |
+| Effective date | {{ effective_date }} |
+| Issued by | Alex Davies |
+
+{{ distribution_statement }}
+:::
 
 Plugin-based configuration and container management.
 
@@ -63,7 +81,7 @@ It shows up in the UI on the next refresh.
 
 ```{toctree}
 :maxdepth: 2
-:caption: Contents
+:numbered:
 
 install
 configuration
@@ -74,4 +92,11 @@ plugins
 container-plugins
 design
 api
+```
+
+```{toctree}
+:maxdepth: 1
+:caption: Document control
+
+revisions
 ```

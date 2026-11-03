@@ -152,7 +152,7 @@ Update stopped: your edits conflict with the store's.
 
 The file now has conflict markers in it:
 
-```yaml
+```text
 services:
   whoami:
 <<<<<<< HEAD

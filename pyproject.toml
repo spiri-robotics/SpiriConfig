@@ -4,6 +4,7 @@ version = "0.3.2"
 description = "Plugin-based configuration and container management"
 readme = "README.md"
 requires-python = ">=3.13"
+authors = [{name = "Alex Davies", email = "traverse.da@gmail.com"}]
 dependencies = [
     "loguru>=0.7.3",
     "nicegui>=3.14.0",
@@ -53,6 +54,11 @@ packages = [
     "src/spiriconfig_system",
 ]
 
+[tool.uv]
+# Without this, `uv run sphinx-build` in a fresh clone fails to find Sphinx: uv
+# installs only the `dev` group unless told otherwise.
+default-groups = ["dev", "docs"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
@@ -65,11 +71,27 @@ markers = [
 # calls with the plugin set it wants to exercise.
 main_file = ""
 
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "N", "SIM"]
+# N999: the package is named like the repo (SpiriGateway, SpiriCamera).
+# B008: typer's idiom. SIM117: nested `with` blocks are how NiceGUI lays out a page.
+ignore = ["N999", "B008", "SIM117"]
+
 [dependency-groups]
 dev = [
-    "myst-parser>=5.1.0",
-    "pytest>=9.1.1",
+    "pytest>=9.2.0",
     "pytest-asyncio>=1.4.0",
-    "sphinx>=9.1.0",
-    "sphinx-rtd-theme>=3.1.0",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.17.3",
+]
+docs = [
+    "furo>=2025.12.19",
+    "myst-parser>=5.1.0",
+    "sphinx>=9.2.0",
+    # Document control, PDF footer and naming, safety panels: the same extension
+    # every Spiri manual uses. https://github.com/spiri-robotics/spiri-docs-tooling
+    "spiri-docs>=0.2.0",
 ]

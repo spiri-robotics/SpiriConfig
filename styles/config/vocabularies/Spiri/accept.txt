@@ -1,0 +1,12 @@
+Spiri
+SpiriConfig
+spiriconfig
+Alex Davies
+airframe
+autopilot
+geofence
+telemetry
+waypoint
+zenoh
+SpiriSynq
+SpiriConfig

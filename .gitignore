@@ -1,19 +1,49 @@
-# Python-generated files
+# Python
 __pycache__/
-*.py[oc]
-build/
+*.py[cod]
+*.egg-info/
 dist/
-wheels/
-*.egg-info
+build/
+*.egg
 
 # Virtual environments
-.venv
+.venv/
+env/
+ENV/
 
-# Sphinx
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Distribution / packaging
+dist/
+*.whl
+
+# Coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+*.coverage
+
+# Docs build output
 docs/_build/
 
-# Test artifacts
-.pytest_cache/
+# `vale sync` downloads style packages into styles/. The vocabulary under
+# styles/config is ours and is committed; everything else is fetched.
+styles/*
+!styles/config/
+
+# OS
+.DS_Store
+Thumbs.db
 
 # Built by ./scripts/test-data.sh: a throwaway compose directory and a git app
 # store to install from. Disposable by design -- the script points this

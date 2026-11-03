@@ -1,0 +1,23 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: v0.5.0
+_src_path: gh:spiri-robotics/SpiriProjectTemplates
+audience: customer
+author_email: traverse.da@gmail.com
+author_name: Alex Davies
+description: Plugin-based configuration and container management
+distribution_statement: Uncontrolled when printed.
+document_number: SPIRI-SPIRICONFIG-001
+github_org: spiri-robotics
+include_docs: true
+include_nix: false
+include_tests: true
+kind: library
+license: MIT
+project_name: SpiriConfig
+python_package_name: spiriconfig
+python_version: '3.13'
+scaffold: false
+spirisynq: false
+use_spiri_brand: true
+use_vale: true
+version: 0.3.2
