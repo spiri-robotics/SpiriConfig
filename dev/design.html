@@ -1,0 +1,727 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="./">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="9. API reference" href="api.html"><link rel="prev" title="7. Container plugins" href="container-plugins.html">
+        <link rel="canonical" href="https://spiri-robotics.github.io/SpiriConfig/latest/design.html">
+        <link rel="prefetch" href="_static/spiri-logo-light.svg" as="image">
+        <link rel="prefetch" href="_static/spiri-logo-dark.svg" as="image">
+
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
+        <title>8. Design notes - SpiriConfig</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=bde8c6b5" />
+    <link rel="stylesheet" type="text/css" href="_static/spiri-safety-icon.css?v=01762096" />
+    <link rel="stylesheet" type="text/css" href="_static/spiri-safety.css?v=84605d0a" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">SpiriConfig</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo only-light" src="_static/spiri-logo-light.svg" alt="Light Logo"/>
+    <img class="sidebar-logo only-dark" src="_static/spiri-logo-dark.svg" alt="Dark Logo"/>
+  </div>
+  
+  <span class="sidebar-brand-text">SpiriConfig</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div>
+<div class="spiri-versions" hidden>
+  <label class="spiri-versions__label" for="spiri-version">Version</label>
+  <select class="spiri-versions__select" id="spiri-version"></select>
+  <a class="spiri-versions__pdf" hidden>Download PDF</a>
+</div>
+<script>
+  (() => {
+    const box = document.currentScript.previousElementSibling;
+    // This version's root, and the site's root above it.
+    const root = new URL(document.documentElement.dataset.content_root || "./", location.href);
+    const site = new URL("../", root);
+    const current = root.href.slice(site.href.length).replace(/\/$/, "");
+    const page = location.pathname.slice(root.pathname.length);
+
+    fetch(new URL("versions.json", site))
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        const name = current === "latest" ? data?.latest : current;
+        const here = data?.versions.find((v) => v.name === name);
+        if (!here) return;
+
+        const select = box.querySelector("select");
+        for (const v of data.versions) {
+          const label =
+            v.name === "dev" ? "dev (main)" : v.name === data.latest ? `${v.name} (latest)` : v.name;
+          select.add(new Option(label, v.name, false, v === here));
+        }
+        // The same page in the chosen version, or its front page if it has no such page.
+        select.addEventListener("change", async () => {
+          const chosen = data.versions.find((v) => v.name === select.value);
+          const front = new URL(chosen.path, site);
+          const same = new URL(page, front);
+          const exists = await fetch(same, { method: "HEAD" }).then((r) => r.ok, () => false);
+          location.href = (exists ? same : front).href;
+        });
+
+        if (here.pdf) {
+          const pdf = box.querySelector("a");
+          pdf.href = new URL(here.pdf, site).href;
+          pdf.hidden = false;
+        }
+        box.hidden = false;
+      })
+      .catch(() => {});
+  })();
+</script><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">1. Installing SpiriConfig</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">2. Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced.html">3. Advanced mode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docker.html">4. The docker plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="appstore.html">5. App store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plugins.html">6. Writing a plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="container-plugins.html">7. Container plugins</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">8. Design notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">9. API reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Document control</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="revisions.html">Revision history</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="_sources/design.md.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="design-notes">
+<h1><span class="section-number">8. </span>Design notes<a class="headerlink" href="#design-notes" title="Link to this heading">¶</a></h1>
+<p>Why the code looks the way it does. Read this before changing the core.</p>
+<section id="progressive-enhancement-is-the-whole-point">
+<h2><span class="section-number">8.1. </span>Progressive enhancement is the whole point<a class="headerlink" href="#progressive-enhancement-is-the-whole-point" title="Link to this heading">¶</a></h2>
+<p>Most management UIs are a trap. You click a button, something happens, and now
+the state of your machine lives in the tool’s database. To understand your own
+system you have to understand the tool. To leave, you have to reverse-engineer
+what it did. The tool has stopped being a convenience and started being a
+dependency.</p>
+<p>SpiriConfig is built so that cannot happen. The rule:</p>
+<blockquote>
+<div><p>Anything SpiriConfig can do, the user must be able to do without it.</p>
+</div></blockquote>
+<p>Every design decision below follows from that one, and any change that erodes it
+is a bug, however convenient it seems.</p>
+</section>
+<section id="consequences">
+<h2><span class="section-number">8.2. </span>Consequences<a class="headerlink" href="#consequences" title="Link to this heading">¶</a></h2>
+<section id="traditional-devops-workflows-continue-to-work">
+<h3><span class="section-number">8.2.1. </span>Traditional devops workflows continue to work<a class="headerlink" href="#traditional-devops-workflows-continue-to-work" title="Link to this heading">¶</a></h3>
+<p>You can manage a drone with ansible, terraform, whatever sysadmin tools make sense for
+managing your cluster of drones and sensor platforms.</p>
+</section>
+<section id="we-shell-out-on-purpose">
+<h3><span class="section-number">8.2.2. </span>We shell out, on purpose<a class="headerlink" href="#we-shell-out-on-purpose" title="Link to this heading">¶</a></h3>
+<p>Everything SpiriConfig does to the system is done by running the command a human
+would have run. We do not use <code class="docutils literal notranslate"><span class="pre">docker-py</span></code>; we run <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">compose</span></code>.</p>
+<p>This looks primitive, and it is deliberate. A subprocess call is something we can
+<em>show the user</em>, and they can copy it, run it, and understand it. A library call
+is invisible and unreproducible. <code class="docutils literal notranslate"><span class="pre">str(Command)</span></code> renders a copy-pasteable shell
+line – properly quoted, <code class="docutils literal notranslate"><span class="pre">cd</span></code> included – and there is a test that pipes it
+through a real shell to prove it is not decorative.</p>
+</section>
+<section id="output-goes-to-a-terminal-because-the-command-expects-one">
+<h3><span class="section-number">8.2.3. </span>Output goes to a terminal, because the command expects one<a class="headerlink" href="#output-goes-to-a-terminal-because-the-command-expects-one" title="Link to this heading">¶</a></h3>
+<p>The UI streams command output into xterm.js, and the command runs attached to a
+<strong>pseudo-terminal</strong> rather than a pipe. Both halves of that are necessary, and
+the first one is the surprising one.</p>
+<p>Docker asks whether its output is going to a terminal, and <em>changes what it says</em>
+based on the answer. On a pipe it emits a flat transcript. On a tty it draws
+progress bars, redraws layer-download status in place, and colours each service
+differently. So piping the output does not give you a plain version of the same
+information — it gives you a program that concluded you were not worth talking to
+properly. <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">compose</span> <span class="pre">pull</span></code> is the clearest case: through a pipe it is a wall
+of “Pulling”; on a tty it is a live picture of what is happening.</p>
+<p>Since the entire project is built on <em>running the command a human would have run</em>,
+running it in a way that makes it behave differently than it would for that human
+is a bug in the premise. <a class="reference internal" href="api.html#spiriconfig.commands.stream_pty" title="spiriconfig.commands.stream_pty"><code class="xref py py-func docutils literal notranslate"><span class="pre">stream_pty()</span></code></a> gives it a
+terminal.</p>
+<p>That decision forces the second: the bytes coming back are raw, carriage returns
+and escape sequences and all, and they only mean anything to something that can
+interpret them. We do not interpret them. Writing that interpreter is writing a
+terminal emulator, and one already exists — NiceGUI ships xterm.js, so there is
+no CDN, no vendored blob, and nothing to fetch on a machine with no internet.</p>
+<p>The bytes are also never decoded on our side. A multi-byte character split across
+a read boundary would be mangled; the browser reassembles the stream.</p>
+</section>
+<section id="the-output-dialog-waits-for-the-human-not-the-command">
+<h3><span class="section-number">8.2.4. </span>The output dialog waits for the human, not the command<a class="headerlink" href="#the-output-dialog-waits-for-the-human-not-the-command" title="Link to this heading">¶</a></h3>
+<p><a class="reference internal" href="api.html#spiriconfig.commands.stream_pty" title="spiriconfig.commands.stream_pty"><code class="xref py py-func docutils literal notranslate"><span class="pre">stream_pty()</span></code></a> finishing is not the end of the
+interaction — the person still has to <em>read</em> the thing. So the dialog returns
+when it is dismissed, not when the command exits.</p>
+<p>Every action does
+<code class="docutils literal notranslate"><span class="pre">await</span> <span class="pre">_run_in_dialog(...)</span></code> and then <code class="docutils literal notranslate"><span class="pre">refresh()</span></code>, and refresh clears the
+container the dialog was created inside — deleting it. <code class="docutils literal notranslate"><span class="pre">up</span></code> and <code class="docutils literal notranslate"><span class="pre">pull</span></code> stream for
+long enough that nobody noticed. <code class="docutils literal notranslate"><span class="pre">logs</span></code> returns instantly, so the modal appeared
+and vanished before it could be read, and after a refresh there was nothing there
+at all.</p>
+<p>The fix is to not hand control back to the code that clears things until the user
+is done looking. And then to <code class="docutils literal notranslate"><span class="pre">delete()</span></code> the dialog, because a closed dialog is
+still an element on the page, and a session spent starting and stopping things
+would otherwise accrete a pile of invisible modals still holding their output.</p>
+</section>
+<section id="refresh-must-not-schedule-itself-inside-the-thing-it-clears">
+<h3><span class="section-number">8.2.5. </span>Refresh must not schedule itself inside the thing it clears<a class="headerlink" href="#refresh-must-not-schedule-itself-inside-the-thing-it-clears" title="Link to this heading">¶</a></h3>
+<p>The other half of the same bug, and the one that actually blanked the page.</p>
+<p>Every action refreshes the list afterwards, and <code class="docutils literal notranslate"><span class="pre">refresh()</span></code> schedules <code class="docutils literal notranslate"><span class="pre">render()</span></code>
+on a <code class="docutils literal notranslate"><span class="pre">ui.timer</span></code>. A NiceGUI event handler runs with the <em>clicked element’s</em> slot
+active – and the button that was clicked lives in a card, inside the container.
+So the timer became a child of the container. <code class="docutils literal notranslate"><span class="pre">render()</span></code>’s first act is to clear
+that container, which deleted the timer whose callback was running, cancelling it
+half-done: cleared, and never repopulated. Close a dialog, and the page behind it
+was empty.</p>
+<p>The first render works only by accident, because <code class="docutils literal notranslate"><span class="pre">page()</span></code> calls <code class="docutils literal notranslate"><span class="pre">refresh()</span></code> from
+the page slot, outside the container.</p>
+<p>The timer is now pinned to <code class="docutils literal notranslate"><span class="pre">container.parent_slot</span></code>. Any code that reaches for
+<code class="docutils literal notranslate"><span class="pre">ui.timer</span></code> from inside a handler should ask the same question first: which slot
+is this actually landing in, and is something about to delete it?</p>
+</section>
+<section id="building-a-command-is-separate-from-running-it">
+<h3><span class="section-number">8.2.6. </span>Building a command is separate from running it<a class="headerlink" href="#building-a-command-is-separate-from-running-it" title="Link to this heading">¶</a></h3>
+<p>Every function that acts on a stack <em>returns</em> a <code class="docutils literal notranslate"><span class="pre">Command</span></code>; it does not execute
+one. That separation is what makes three things possible at once:</p>
+<ul class="simple">
+<li><p>the UI can show the exact command before and while it runs</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--show</span></code> can print it instead of running it</p></li>
+<li><p>tests can assert on the command line with no docker daemon in sight</p></li>
+</ul>
+<p>Most of the docker plugin’s test suite runs on a machine with no docker
+installed, because the thing worth testing is <em>which command we built</em>.</p>
+</section>
+<section id="there-is-no-state-that-is-ours">
+<h3><span class="section-number">8.2.7. </span>There is no state that is ours<a class="headerlink" href="#there-is-no-state-that-is-ours" title="Link to this heading">¶</a></h3>
+<p>No database, no registry, no lockfile, no <code class="docutils literal notranslate"><span class="pre">enabled/</span></code> directory. A stack exists
+because a directory with a compose file exists. A stack is running because docker
+says it is running. We do not track anything, so we cannot drift out of sync with
+reality, and a user who edits the filesystem behind our back is not doing anything
+wrong – they are using the system exactly as intended.</p>
+<p>This is why <code class="docutils literal notranslate"><span class="pre">--show</span></code> is safe on a production box and why <code class="docutils literal notranslate"><span class="pre">mkdir</span></code> is a supported
+way to add a service.</p>
+</section>
+<section id="the-project-name-is-the-directory-name">
+<h3><span class="section-number">8.2.8. </span>The project name is the directory name<a class="headerlink" href="#the-project-name-is-the-directory-name" title="Link to this heading">¶</a></h3>
+<p>We pass <code class="docutils literal notranslate"><span class="pre">-p</span> <span class="pre">&lt;directory-name&gt;</span></code> to compose, which is what compose would have
+defaulted to anyway. If we picked our own project name, SpiriConfig would be
+managing a <em>different set of containers</em> than the user gets from running
+<code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">compose</span> <span class="pre">up</span></code> in that same directory, and they would never find ours. This
+one line is what keeps <code class="docutils literal notranslate"><span class="pre">spiriconfig</span> <span class="pre">docker</span> <span class="pre">up</span> <span class="pre">x</span></code> and a bare <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">compose</span> <span class="pre">up</span> <span class="pre">-d</span></code>
+interchangeable.</p>
+</section>
+<section id="compose-files-are-text-not-parsed-yaml">
+<h3><span class="section-number">8.2.9. </span>Compose files are text, not parsed YAML<a class="headerlink" href="#compose-files-are-text-not-parsed-yaml" title="Link to this heading">¶</a></h3>
+<p>Saving an edited compose file writes the user’s text verbatim. We never round-trip
+it through a YAML parser, because that would silently eat their comments and
+reformat their file. We <em>validate</em> by asking <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">compose</span> <span class="pre">config</span></code> – the same
+authority that will have to accept the file later – and restore the original if
+it says no.</p>
+</section>
+<section id="advanced-mode-hides-it-does-not-forbid">
+<h3><span class="section-number">8.2.10. </span>Advanced mode hides, it does not forbid<a class="headerlink" href="#advanced-mode-hides-it-does-not-forbid" title="Link to this heading">¶</a></h3>
+<p>The web UI serves two audiences from one machine, so <a class="reference internal" href="advanced.html"><span class="std std-doc">advanced mode</span></a>
+filters what a page renders. It is tempting to reach for it as a permission system
+– “regular users cannot edit compose files” – and that would be a lie twice over.</p>
+<p>The first lie is the usual one: the CLI still does everything, so a hidden button
+is not a removed capability.</p>
+<p>The second is more immediate. <strong>The toggle is self-service.</strong> It is in the sidebar,
+it is labelled, and anyone can click it. A “regular user” who wants the Edit button
+turns advanced mode on and gets it, in the browser, without a shell. And below
+that, hiding an element is only a statement about what the page draws – the
+websocket underneath does not care what the browser chose to render.</p>
+<p>Nothing is withheld from anyone, so there is nothing here to lean on.</p>
+<p>Advanced mode is a preference, like a dark-mode switch. Nothing about it is a
+boundary, and it is not trying to be.</p>
+</section>
+<section id="pam-is-a-login-gate-not-a-permission-model">
+<h3><span class="section-number">8.2.11. </span>PAM is a login gate, not a permission model<a class="headerlink" href="#pam-is-a-login-gate-not-a-permission-model" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">SPIRICONFIG_AUTH=pam</span></code> gates the UI behind a PAM login (see
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">spiriconfig.auth</span></code> and <a class="reference internal" href="configuration.html#authentication"><span class="std std-ref">configuration</span></a>),
+authenticating against the host’s own accounts with no user list of ours. That is
+all it does. It answers one question – “does the machine trust this person enough
+to let them in?” – and nothing past the door.</p>
+<p>So <strong>everyone who gets in is equal.</strong> They share the one process, running as
+whatever unix user SpiriConfig runs as, and can do everything the UI can do. PAM
+tells us <em>who</em> is at the keyboard; it does not, and is not trying to, tell us what
+they may touch once inside. There is no authorization layer, and none planned –
+this is a login gate, not a permissions system.</p>
+<p>If we ever did want per-user permissions, they would belong to the OS, not to us:
+file modes, group membership, whether they are in the <code class="docutils literal notranslate"><span class="pre">docker</span></code> group – no role
+model, no ACL table, nothing of ours to get wrong or to keep in sync. That is the
+same argument as <a class="reference internal" href="#there-is-no-state-that-is-ours">there is no state that is ours</a>,
+and it is the only permission design we would entertain. But that is a hypothetical,
+not a roadmap. Today the honest statement is the one above: authenticated users are
+undifferentiated.</p>
+</section>
+<section id="an-installed-app-is-a-symlink-and-that-is-the-whole-app-store">
+<h3><span class="section-number">8.2.12. </span>An installed app is a symlink, and that is the whole app store<a class="headerlink" href="#an-installed-app-is-a-symlink-and-that-is-the-whole-app-store" title="Link to this heading">¶</a></h3>
+<p>An <a class="reference internal" href="appstore.html"><span class="std std-doc">app store</span></a> is a git repo with one directory per app. Installing
+one is:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>ln<span class="w"> </span>-s<span class="w"> </span>/var/lib/spiriconfig/stores/spiri-apps/whoami<span class="w"> </span>/srv/compose/whoami
+</pre></div>
+</div>
+<p>That is not an implementation detail, it is the design. Everything an app store
+has to know is a question the symlink and the git repo behind it already answer:</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Question</p></th>
+<th class="head"><p>Answer</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Where did this app come from?</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">readlink</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Have I changed it?</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">status</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>What did I change?</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">diff</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>What did the store change?</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">diff</span> <span class="pre">HEAD</span> <span class="pre">&#64;{upstream}</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Update it</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">merge</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Uninstall it</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">rm</span></code> a symlink – which deletes nothing real</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Note what is <em>not</em> on that list: anything of ours. There is no install manifest,
+no version database, no lockfile, no record of which commit an app came from. The
+symlink is the record, and git is the state – and git is a tool the user already
+has, already understands, and can drive without us when we are wrong.</p>
+<p>It also means the docker plugin needed no changes at all. A symlink to a
+directory <em>is</em> a directory, so an installed app is just a stack: <code class="docutils literal notranslate"><span class="pre">spiriconfig</span> <span class="pre">docker</span> <span class="pre">up</span> <span class="pre">whoami</span></code> works on it, and so does <code class="docutils literal notranslate"><span class="pre">cd</span> <span class="pre">/srv/compose/whoami</span> <span class="pre">&amp;&amp;</span> <span class="pre">docker</span> <span class="pre">compose</span> <span class="pre">up</span> <span class="pre">-d</span></code>. The app store and the thing that runs apps do not know about each
+other, which is why neither can drift out of sync with the other.</p>
+<section id="versions-are-a-label-not-a-mechanism">
+<h4><span class="section-number">8.2.12.1. </span>Versions are a label, not a mechanism<a class="headerlink" href="#versions-are-a-label-not-a-mechanism" title="Link to this heading">¶</a></h4>
+<p>Nothing decides whether to update based on a version, because git can answer that
+question exactly: an app has an update if <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">diff</span> <span class="pre">HEAD</span> <span class="pre">&#64;{upstream}</span> <span class="pre">--</span> <span class="pre">&lt;app&gt;/</span></code>
+says its files changed. That is what “update available” means, and it is precise
+even when the store bumps three images, rewrites a healthcheck, and touches a
+config file the maintainer forgot to bump a number for.</p>
+<p>Which is the escape from a genuinely hard problem. “What version is this bag of
+containers?” has no good answer, so we do not need one to be right. The version
+string is <em>cosmetic</em>: <code class="docutils literal notranslate"><span class="pre">x-spiri-config-version</span></code> if a maintainer set one, and the
+date of the last commit touching the app if they did not. A store maintainer who
+never thinks about versioning still gets one that moves when the app does.</p>
+</section>
+<section id="updates-are-per-store-and-that-is-on-purpose">
+<h4><span class="section-number">8.2.12.2. </span>Updates are per-store, and that is on purpose<a class="headerlink" href="#updates-are-per-store-and-that-is-on-purpose" title="Link to this heading">¶</a></h4>
+<p>The symlinks all point into one working tree, which is at one commit, so
+“update whoami but not nextcloud” is not a state the repository can be in.</p>
+<p>This sounds like a limitation and is closer to a feature. Pulling a store only
+rewrites files on disk: nothing is restarted, nothing is pulled from a registry,
+and no running container changes until someone runs <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">compose</span> <span class="pre">up</span></code> on that
+stack. Per-app control still exists – it moved to up-time, which is where the
+user was going to make that decision anyway, and where they can see what they are
+about to restart.</p>
+</section>
+<section id="an-edit-is-a-commit-so-an-update-is-a-merge">
+<h4><span class="section-number">8.2.12.3. </span>An edit is a commit, so an update is a merge<a class="headerlink" href="#an-edit-is-a-commit-so-an-update-is-a-merge" title="Link to this heading">¶</a></h4>
+<p>Editing an installed app edits a file in the store’s git working tree. So when
+the store moves on, an update is a three-way merge, and the user’s changes and
+the store’s changes are reconciled by the thing that is best in the world at
+reconciling them.</p>
+<p>Before merging, we <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">commit</span></code> whatever the user has edited. This is the step
+that makes an update non-destructive, and it is worth being explicit about why
+the alternatives are worse: <code class="docutils literal notranslate"><span class="pre">stash</span></code>, <code class="docutils literal notranslate"><span class="pre">reset</span></code>, and <code class="docutils literal notranslate"><span class="pre">checkout</span></code> all end with the
+user’s work somewhere they will not think to look. Committing it puts the edit on
+the branch, so the merge has to <em>reconcile</em> with it. The worst case becomes a
+conflict they can see, rather than an edit that silently vanished – and it is
+what makes “undo the update” safe to offer, because their work survives the abort.</p>
+<p>A conflict is left in the file with git’s usual markers, and then something nice
+happens for free: <strong>conflict markers are not valid YAML.</strong> So <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">compose</span></code>
+refuses the file, and <code class="docutils literal notranslate"><span class="pre">Stack.write</span></code> – which validates with <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">compose</span> <span class="pre">config</span></code> before saving – refuses it too. A half-merged app cannot be started and
+cannot be saved over. We did not build that safety net; it fell out.</p>
+<p>The one place git will <em>not</em> save us is finishing the merge. <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">commit</span> <span class="pre">--all</span></code>
+stages unmerged files, which git reads as “the user resolved these” – so it will
+cheerfully commit a file still full of <code class="docutils literal notranslate"><span class="pre">&lt;&lt;&lt;&lt;&lt;&lt;&lt;</span></code> markers and report a successful
+update. So <code class="docutils literal notranslate"><span class="pre">resolve</span></code> scans for markers itself and refuses while any remain. That
+guard is ours because there is no git flag that will do it.</p>
+</section>
+<section id="things-the-symlink-design-costs">
+<h4><span class="section-number">8.2.12.4. </span>Things the symlink design costs<a class="headerlink" href="#things-the-symlink-design-costs" title="Link to this heading">¶</a></h4>
+<p>Worth stating plainly, because both are real:</p>
+<p><strong>Relative bind mounts write into the store’s checkout.</strong> A compose file with
+<code class="docutils literal notranslate"><span class="pre">./config:/config</span></code> resolves that path against the symlink, so docker creates
+<code class="docutils literal notranslate"><span class="pre">config/</span></code> inside the git clone. This is why “have I modified this app?” means
+<em>tracked</em> files only – otherwise every user would be told their apps were
+modified the moment they started one. Store authors should prefer named volumes.</p>
+<p><strong>Editing an installed app edits the store’s copy of it.</strong> Two installs of the
+same app from the same store are the same files. If you want an app that is
+yours, <code class="docutils literal notranslate"><span class="pre">adopt</span></code> it: that replaces the symlink with a real copy, and the app leaves
+the store’s orbit for good.</p>
+</section>
+<section id="two-clever-ideas-that-were-rejected">
+<h4><span class="section-number">8.2.12.5. </span>Two clever ideas that were rejected<a class="headerlink" href="#two-clever-ideas-that-were-rejected" title="Link to this heading">¶</a></h4>
+<p><em>Copy the app in, and record where it came from in a sidecar file.</em> This is the
+obvious design, and it is worse in every particular: it invents a file format,
+makes SpiriConfig the keeper of provenance, and requires reimplementing three-way
+merge against a base version we would have to store somewhere. The symlink makes
+all of that git’s problem, and git already solved it.</p>
+<p><em>Make <code class="docutils literal notranslate"><span class="pre">/srv/compose</span></code> itself the clone, with sparse-checkout picking the installed
+apps.</em> Seductive – install becomes <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">sparse-checkout</span> <span class="pre">add</span> <span class="pre">whoami</span></code> – and
+fatally wrong. It makes the entire compose directory the property of one store,
+so the user’s own hand-made projects become untracked files in somebody else’s
+repository, <code class="docutils literal notranslate"><span class="pre">mkdir</span></code> stops being a supported way to add a service, and you can
+never have two stores. The user owns that tree. A symlink is a guest in it; a
+working tree is a landlord.</p>
+</section>
+</section>
+<section id="one-seam-for-whose-setting-is-this">
+<h3><span class="section-number">8.2.13. </span>One seam for “whose setting is this?”<a class="headerlink" href="#one-seam-for-whose-setting-is-this" title="Link to this heading">¶</a></h3>
+<p>Advanced mode is per-person, and SpiriConfig currently has no people – so
+“person” means “browser”, via a session cookie. Users are coming, and when they
+arrive the setting should follow the human, not the laptop.</p>
+<p>Every preference therefore goes through <a class="reference internal" href="api.html#module-spiriconfig.preferences" title="spiriconfig.preferences"><code class="xref py py-mod docutils literal notranslate"><span class="pre">spiriconfig.preferences</span></code></a>, and
+nothing else touches browser storage. Adding user support is registering a
+different store, once; no plugin changes. The module-level store is a deliberate
+process-wide global – the alternative is threading a preferences object through
+every plugin’s <code class="docutils literal notranslate"><span class="pre">page()</span></code>, which buys nothing and would be the very refactor the
+seam exists to avoid.</p>
+</section>
+<section id="plugins-are-entry-points">
+<h3><span class="section-number">8.2.14. </span>Plugins are entry points<a class="headerlink" href="#plugins-are-entry-points" title="Link to this heading">¶</a></h3>
+<p>Installing a package is what installs a plugin. This is not novel, and that is
+the appeal: it is how the rest of the Python ecosystem already works, so there is
+no bespoke plugin format, no plugin directory to manage, and nothing for us to
+keep in sync.</p>
+<p>A broken plugin is logged and skipped, never fatal. The failure mode of a
+half-written plugin should be “my plugin is missing and the log says why”, not
+“I can no longer administer this machine”.</p>
+</section>
+</section>
+<section id="things-we-deliberately-do-not-do">
+<h2><span class="section-number">8.3. </span>Things we deliberately do not do<a class="headerlink" href="#things-we-deliberately-do-not-do" title="Link to this heading">¶</a></h2>
+<p><strong>An “enabled” state.</strong> An earlier design had nginx-style
+<code class="docutils literal notranslate"><span class="pre">available/</span></code> + <code class="docutils literal notranslate"><span class="pre">enabled/</span></code> symlinks. It was dropped: docker already knows whether
+a stack is running, so a second source of truth could only ever disagree with the
+first. Up and down is the whole lifecycle.</p>
+<p><strong>Creating or deleting project directories.</strong> The user owns that tree. We read it.</p>
+<p>The <a class="reference internal" href="appstore.html"><span class="std std-doc">app store</span></a> does not bend this rule, it is shaped by it. An
+install creates a <em>symlink</em>, and an uninstall removes one; the app’s actual files
+live in the store’s checkout the whole time, and are still there afterwards. If
+installing meant <code class="docutils literal notranslate"><span class="pre">cp</span> <span class="pre">-r</span></code> and uninstalling meant <code class="docutils literal notranslate"><span class="pre">rm</span> <span class="pre">-rf</span></code>, we would be deleting
+directories full of the user’s data on their behalf, and this line would have had
+to go. It did not, and the design is better for having had to obey it.</p>
+<p><strong>Anything clever with the docker socket.</strong> If a thing cannot be expressed as a
+command line, it does not belong in a plugin – because it could not be shown to
+the user, and they could not do it themselves.</p>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="api.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title"><span class="section-number">9. </span>API reference</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="container-plugins.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title"><span class="section-number">7. </span>Container plugins</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2026, Alex Davies
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">8. Design notes</a><ul>
+<li><a class="reference internal" href="#progressive-enhancement-is-the-whole-point">8.1. Progressive enhancement is the whole point</a></li>
+<li><a class="reference internal" href="#consequences">8.2. Consequences</a><ul>
+<li><a class="reference internal" href="#traditional-devops-workflows-continue-to-work">8.2.1. Traditional devops workflows continue to work</a></li>
+<li><a class="reference internal" href="#we-shell-out-on-purpose">8.2.2. We shell out, on purpose</a></li>
+<li><a class="reference internal" href="#output-goes-to-a-terminal-because-the-command-expects-one">8.2.3. Output goes to a terminal, because the command expects one</a></li>
+<li><a class="reference internal" href="#the-output-dialog-waits-for-the-human-not-the-command">8.2.4. The output dialog waits for the human, not the command</a></li>
+<li><a class="reference internal" href="#refresh-must-not-schedule-itself-inside-the-thing-it-clears">8.2.5. Refresh must not schedule itself inside the thing it clears</a></li>
+<li><a class="reference internal" href="#building-a-command-is-separate-from-running-it">8.2.6. Building a command is separate from running it</a></li>
+<li><a class="reference internal" href="#there-is-no-state-that-is-ours">8.2.7. There is no state that is ours</a></li>
+<li><a class="reference internal" href="#the-project-name-is-the-directory-name">8.2.8. The project name is the directory name</a></li>
+<li><a class="reference internal" href="#compose-files-are-text-not-parsed-yaml">8.2.9. Compose files are text, not parsed YAML</a></li>
+<li><a class="reference internal" href="#advanced-mode-hides-it-does-not-forbid">8.2.10. Advanced mode hides, it does not forbid</a></li>
+<li><a class="reference internal" href="#pam-is-a-login-gate-not-a-permission-model">8.2.11. PAM is a login gate, not a permission model</a></li>
+<li><a class="reference internal" href="#an-installed-app-is-a-symlink-and-that-is-the-whole-app-store">8.2.12. An installed app is a symlink, and that is the whole app store</a><ul>
+<li><a class="reference internal" href="#versions-are-a-label-not-a-mechanism">8.2.12.1. Versions are a label, not a mechanism</a></li>
+<li><a class="reference internal" href="#updates-are-per-store-and-that-is-on-purpose">8.2.12.2. Updates are per-store, and that is on purpose</a></li>
+<li><a class="reference internal" href="#an-edit-is-a-commit-so-an-update-is-a-merge">8.2.12.3. An edit is a commit, so an update is a merge</a></li>
+<li><a class="reference internal" href="#things-the-symlink-design-costs">8.2.12.4. Things the symlink design costs</a></li>
+<li><a class="reference internal" href="#two-clever-ideas-that-were-rejected">8.2.12.5. Two clever ideas that were rejected</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#one-seam-for-whose-setting-is-this">8.2.13. One seam for “whose setting is this?”</a></li>
+<li><a class="reference internal" href="#plugins-are-entry-points">8.2.14. Plugins are entry points</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#things-we-deliberately-do-not-do">8.3. Things we deliberately do not do</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="_static/documentation_options.js?v=1b390748"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

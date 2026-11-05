@@ -1,0 +1,651 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="./">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="3. Advanced mode" href="advanced.html"><link rel="prev" title="1. Installing SpiriConfig" href="install.html">
+        <link rel="canonical" href="https://spiri-robotics.github.io/SpiriConfig/latest/configuration.html">
+        <link rel="prefetch" href="_static/spiri-logo-light.svg" as="image">
+        <link rel="prefetch" href="_static/spiri-logo-dark.svg" as="image">
+
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
+        <title>2. Configuration - SpiriConfig</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=bde8c6b5" />
+    <link rel="stylesheet" type="text/css" href="_static/spiri-safety-icon.css?v=01762096" />
+    <link rel="stylesheet" type="text/css" href="_static/spiri-safety.css?v=84605d0a" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">SpiriConfig</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo only-light" src="_static/spiri-logo-light.svg" alt="Light Logo"/>
+    <img class="sidebar-logo only-dark" src="_static/spiri-logo-dark.svg" alt="Dark Logo"/>
+  </div>
+  
+  <span class="sidebar-brand-text">SpiriConfig</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div>
+<div class="spiri-versions" hidden>
+  <label class="spiri-versions__label" for="spiri-version">Version</label>
+  <select class="spiri-versions__select" id="spiri-version"></select>
+  <a class="spiri-versions__pdf" hidden>Download PDF</a>
+</div>
+<script>
+  (() => {
+    const box = document.currentScript.previousElementSibling;
+    // This version's root, and the site's root above it.
+    const root = new URL(document.documentElement.dataset.content_root || "./", location.href);
+    const site = new URL("../", root);
+    const current = root.href.slice(site.href.length).replace(/\/$/, "");
+    const page = location.pathname.slice(root.pathname.length);
+
+    fetch(new URL("versions.json", site))
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        const name = current === "latest" ? data?.latest : current;
+        const here = data?.versions.find((v) => v.name === name);
+        if (!here) return;
+
+        const select = box.querySelector("select");
+        for (const v of data.versions) {
+          const label =
+            v.name === "dev" ? "dev (main)" : v.name === data.latest ? `${v.name} (latest)` : v.name;
+          select.add(new Option(label, v.name, false, v === here));
+        }
+        // The same page in the chosen version, or its front page if it has no such page.
+        select.addEventListener("change", async () => {
+          const chosen = data.versions.find((v) => v.name === select.value);
+          const front = new URL(chosen.path, site);
+          const same = new URL(page, front);
+          const exists = await fetch(same, { method: "HEAD" }).then((r) => r.ok, () => false);
+          location.href = (exists ? same : front).href;
+        });
+
+        if (here.pdf) {
+          const pdf = box.querySelector("a");
+          pdf.href = new URL(here.pdf, site).href;
+          pdf.hidden = false;
+        }
+        box.hidden = false;
+      })
+      .catch(() => {});
+  })();
+</script><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">1. Installing SpiriConfig</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">2. Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced.html">3. Advanced mode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docker.html">4. The docker plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="appstore.html">5. App store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plugins.html">6. Writing a plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="container-plugins.html">7. Container plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="design.html">8. Design notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">9. API reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Document control</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="revisions.html">Revision history</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="_sources/configuration.md.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="configuration">
+<h1><span class="section-number">2. </span>Configuration<a class="headerlink" href="#configuration" title="Link to this heading">¶</a></h1>
+<p>SpiriConfig is configured entirely through environment variables. There is no
+config file to learn and none for us to rewrite behind your back, which means a
+systemd unit, a shell, a <code class="docutils literal notranslate"><span class="pre">.env</span></code> file, or a container runtime can all configure
+it the same way.</p>
+<p>If a <code class="docutils literal notranslate"><span class="pre">.env</span></code> file exists in the working directory it is read, but real environment
+variables always win. Flags to <code class="docutils literal notranslate"><span class="pre">spiriconfig</span> <span class="pre">serve</span></code> win over both:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>spiriconfig<span class="w"> </span>serve<span class="w">                         </span><span class="c1"># $SPIRICONFIG_HOST:$SPIRICONFIG_PORT</span>
+<span class="gp">$ </span>spiriconfig<span class="w"> </span>serve<span class="w"> </span><span class="m">127</span>.0.0.1:8338<span class="w">          </span><span class="c1"># HOST:PORT</span>
+<span class="gp">$ </span>spiriconfig<span class="w"> </span>serve<span class="w"> </span><span class="m">0</span>.0.0.0<span class="w">                 </span><span class="c1"># HOST, configured port</span>
+<span class="gp">$ </span>spiriconfig<span class="w"> </span>serve<span class="w"> </span>:8338<span class="w">                   </span><span class="c1"># PORT, configured host ([::1]:8338 for IPv6)</span>
+<span class="gp">$ </span>spiriconfig<span class="w"> </span>serve<span class="w"> </span>--no-login-required<span class="w">     </span><span class="c1"># SPIRICONFIG_AUTH=none</span>
+</pre></div>
+</div>
+<section id="core">
+<h2><span class="section-number">2.1. </span>Core<a class="headerlink" href="#core" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Variable</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SPIRICONFIG_HOST</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">127.0.0.1</span></code></p></td>
+<td><p>Address the web UI binds to. Loopback by default; set <code class="docutils literal notranslate"><span class="pre">0.0.0.0</span></code> to expose it on the network.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SPIRICONFIG_PORT</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">8337</span></code></p></td>
+<td><p>Port the web UI binds to.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SPIRICONFIG_LOG_LEVEL</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">INFO</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">DEBUG</span></code>, <code class="docutils literal notranslate"><span class="pre">INFO</span></code>, <code class="docutils literal notranslate"><span class="pre">WARNING</span></code>, <code class="docutils literal notranslate"><span class="pre">ERROR</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SPIRICONFIG_LOG_FILE</span></code></p></td>
+<td><p><em>(none)</em></p></td>
+<td><p>Also log to this file, rotated at 10 MB.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SPIRICONFIG_ADVANCED</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">false</span></code></p></td>
+<td><p>Default for <a class="reference internal" href="advanced.html"><span class="std std-doc">advanced mode</span></a>, for someone who has not chosen.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SPIRICONFIG_STORAGE_SECRET</span></code></p></td>
+<td><p><em>(generated)</em></p></td>
+<td><p>Signs the cookie per-person settings are keyed on. Set it, or those settings reset on every restart.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SPIRICONFIG_AUTH</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pam</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">none</span></code> or <code class="docutils literal notranslate"><span class="pre">pam</span></code>. <code class="docutils literal notranslate"><span class="pre">pam</span></code> puts a login in front of every page. See <a class="reference internal" href="#authentication">Authentication</a>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SPIRICONFIG_AUTH_SERVICE</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">login</span></code></p></td>
+<td><p>PAM service (a file under <code class="docutils literal notranslate"><span class="pre">/etc/pam.d/</span></code>) to authenticate against.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SPIRICONFIG_AUTH_GROUP</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">wheel</span></code></p></td>
+<td><p>Group whose members may log in, <em>when SpiriConfig runs as root</em>. <code class="docutils literal notranslate"><span class="pre">sudo</span></code> on Debian.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SPIRICONFIG_TLS</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">auto</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">auto</span></code> or <code class="docutils literal notranslate"><span class="pre">off</span></code>. <code class="docutils literal notranslate"><span class="pre">auto</span></code> serves a self-signed cert when exposed off loopback; <code class="docutils literal notranslate"><span class="pre">off</span></code> stays plain HTTP. See <a class="reference internal" href="#transport-tls">Transport (TLS)</a>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SPIRICONFIG_TLS_CERT</span></code></p></td>
+<td><p><em>(none)</em></p></td>
+<td><p>Path to a TLS cert to serve instead of a generated one. Set with <code class="docutils literal notranslate"><span class="pre">SPIRICONFIG_TLS_KEY</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SPIRICONFIG_TLS_KEY</span></code></p></td>
+<td><p><em>(none)</em></p></td>
+<td><p>Path to the private key for <code class="docutils literal notranslate"><span class="pre">SPIRICONFIG_TLS_CERT</span></code>.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="authentication">
+<h2><span class="section-number">2.2. </span>Authentication<a class="headerlink" href="#authentication" title="Link to this heading">¶</a></h2>
+<p>By default every page requires a login, checked against the host’s PAM stack — the
+same accounts that can <code class="docutils literal notranslate"><span class="pre">ssh</span></code> in or <code class="docutils literal notranslate"><span class="pre">sudo</span></code>, no separate user list of ours. Set
+<code class="docutils literal notranslate"><span class="pre">SPIRICONFIG_AUTH=none</span></code> to drop that gate, which only makes sense on loopback in a
+checkout with no other users on the box; <code class="docutils literal notranslate"><span class="pre">spiriconfig</span> <span class="pre">serve</span></code> warns if you bind a
+non-loopback address and turn it off.</p>
+<p>Who can log in depends on whether SpiriConfig runs as root, because only root can
+verify another account’s password:</p>
+<ul class="simple">
+<li><p><strong>As root</strong>, it can authenticate any system user, so a group gates who counts as
+an administrator. Membership of <code class="docutils literal notranslate"><span class="pre">SPIRICONFIG_AUTH_GROUP</span></code> (default <code class="docutils literal notranslate"><span class="pre">wheel</span></code>) is the
+gate — set it to <code class="docutils literal notranslate"><span class="pre">sudo</span></code> on Debian, or to whatever group your admins are in.</p></li>
+<li><p><strong>Not as root</strong>, it can only authenticate the one account it runs as. That is the
+only login the page will accept (it prefills the name for you), and the group
+setting does not apply.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">login</span></code> is used as the PAM service because it exists on essentially every system.
+A deployment that wants its own policy can drop a <code class="docutils literal notranslate"><span class="pre">/etc/pam.d/spiriconfig</span></code> file and
+set <code class="docutils literal notranslate"><span class="pre">SPIRICONFIG_AUTH_SERVICE=spiriconfig</span></code>.</p>
+<p>Set <code class="docutils literal notranslate"><span class="pre">SPIRICONFIG_STORAGE_SECRET</span></code> when auth is on: it signs the session cookie, and
+without a stable one everybody is logged out every time the process restarts.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This is authentication, not authorization. It only decides who may log in. Once
+logged in, everyone drives the same process with the same access — anyone you let
+in can do anything the UI can. Per-user permissions are not part of the model. See
+<a class="reference internal" href="design.html"><span class="std std-doc">design</span></a>.</p>
+</div>
+</section>
+<section id="transport-tls">
+<h2><span class="section-number">2.3. </span>Transport (TLS)<a class="headerlink" href="#transport-tls" title="Link to this heading">¶</a></h2>
+<p>With <code class="docutils literal notranslate"><span class="pre">auth=pam</span></code> the login sends a real host password, so it must not travel over
+plain HTTP. These are appliances with no reverse proxy in front, so the TLS lives
+here: bind a non-loopback address and, by default (<code class="docutils literal notranslate"><span class="pre">SPIRICONFIG_TLS=auto</span></code>),
+SpiriConfig generates a <strong>self-signed</strong> cert and serves HTTPS. The cert is written
+once to the service’s state directory (<code class="docutils literal notranslate"><span class="pre">/var/lib/spiriconfig/tls</span></code> as a system
+service, <code class="docutils literal notranslate"><span class="pre">~/.local/state/spiriconfig/tls</span></code> as a user one) and reused across
+restarts, so the browser warning is a one-time approval, not a per-boot one. A
+loopback checkout stays on plain HTTP, where a cert warning would be pure friction.</p>
+<p>Be clear about what self-signed buys. It encrypts the wire, so a <strong>passive</strong>
+eavesdropper on the LAN cannot read the password or the session cookie. It does
+<strong>not</strong> stop an <strong>active</strong> man-in-the-middle: the browser warns, the operator
+clicks through, and an attacker presenting <em>their own</em> self-signed cert is clicked
+through just the same. Self-signed is encryption, not identity.</p>
+<p>For a deployment that must resist an active attacker, give SpiriConfig a cert the
+browser can <em>validate</em> — a per-device cert from a CA your fleet trusts — with
+<code class="docutils literal notranslate"><span class="pre">SPIRICONFIG_TLS_CERT</span></code> and <code class="docutils literal notranslate"><span class="pre">SPIRICONFIG_TLS_KEY</span></code>. That is the only path where a
+substitute cert is rejected instead of clicked through, and the only one where
+<code class="docutils literal notranslate"><span class="pre">Strict-Transport-Security</span></code> is sent (HSTS on a self-signed origin would forbid the
+very click-through the operator needs and lock them out).</p>
+<p>Set <code class="docutils literal notranslate"><span class="pre">SPIRICONFIG_TLS=off</span></code> only when something in front already terminates TLS —
+a reverse proxy — so SpiriConfig should not encrypt a second time. On a
+non-loopback bind with <code class="docutils literal notranslate"><span class="pre">pam</span></code> and <code class="docutils literal notranslate"><span class="pre">tls=off</span></code>, <code class="docutils literal notranslate"><span class="pre">spiriconfig</span> <span class="pre">serve</span></code> warns that
+passwords are going out in the clear.</p>
+</section>
+<section id="docker-plugin">
+<h2><span class="section-number">2.4. </span>Docker plugin<a class="headerlink" href="#docker-plugin" title="Link to this heading">¶</a></h2>
+<p>Every plugin namespaces its settings under its own prefix, so plugin config never
+collides.</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Variable</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SPIRICONFIG_DOCKER_COMPOSE_DIR</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">/srv/compose</span></code> as root, <code class="docutils literal notranslate"><span class="pre">~/spiri-apps</span></code> otherwise</p></td>
+<td><p>Directory holding one subdirectory per compose project. Installed apps are symlinks in here.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SPIRICONFIG_DOCKER_DOCKER_BIN</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">docker</span></code></p></td>
+<td><p>The docker executable. Set to <code class="docutils literal notranslate"><span class="pre">podman</span></code> to use podman.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SPIRICONFIG_DOCKER_COMMAND_TIMEOUT</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">300</span></code></p></td>
+<td><p>Seconds before a captured command is considered hung.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="app-store-plugin">
+<h2><span class="section-number">2.5. </span>App store plugin<a class="headerlink" href="#app-store-plugin" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Variable</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SPIRICONFIG_APPSTORE_STORES</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[]</span></code></p></td>
+<td><p>JSON list of git URLs, or local paths, of <a class="reference internal" href="appstore.html"><span class="std std-doc">app stores</span></a> to offer before any is added.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SPIRICONFIG_APPSTORE_STORE_DIR</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">/var/lib/spiriconfig/stores</span></code> as root, <code class="docutils literal notranslate"><span class="pre">~/.local/share/spiriconfig/stores</span></code> otherwise</p></td>
+<td><p>Where store clones live. Not a cache: your edits to installed apps are commits in here.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SPIRICONFIG_APPSTORE_GIT_BIN</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">git</span></code></p></td>
+<td><p>The git executable.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SPIRICONFIG_APPSTORE_COMMAND_TIMEOUT</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">300</span></code></p></td>
+<td><p>Seconds before a git command is considered hung.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="where-things-live-by-default">
+<h2><span class="section-number">2.6. </span>Where things live by default<a class="headerlink" href="#where-things-live-by-default" title="Link to this heading">¶</a></h2>
+<p>The path defaults depend only on who runs SpiriConfig, and are the same ones
+<code class="docutils literal notranslate"><span class="pre">spiriconfig</span> <span class="pre">install</span></code> writes into the service’s environment file – so
+<code class="docutils literal notranslate"><span class="pre">uvx</span> <span class="pre">spiriconfig</span> <span class="pre">serve</span></code> and the installed service, run as the same user, see the
+same apps:</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p></p></th>
+<th class="head"><p>root</p></th>
+<th class="head"><p>anyone else</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Installed apps (<code class="docutils literal notranslate"><span class="pre">SPIRICONFIG_DOCKER_COMPOSE_DIR</span></code>)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">/srv/compose</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">~/spiri-apps</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Store clones (<code class="docutils literal notranslate"><span class="pre">SPIRICONFIG_APPSTORE_STORE_DIR</span></code>)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">/var/lib/spiriconfig/stores</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">$XDG_DATA_HOME/spiriconfig/stores</span></code> (<code class="docutils literal notranslate"><span class="pre">~/.local/share/...</span></code>)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The compose directory is created by the first app install if it does not exist.</p>
+<p><strong>A checkout overrides them.</strong> Running out of a checkout should not start
+managing the containers on the developer’s actual machine, so
+<code class="docutils literal notranslate"><span class="pre">./scripts/test-data.sh</span></code> builds a disposable <code class="docutils literal notranslate"><span class="pre">test_data/</span></code> tree with an example app
+store in it, and appends lines to the checkout’s (gitignored) <code class="docutils literal notranslate"><span class="pre">.env</span></code> pointing all
+three app settings at it.</p>
+</section>
+<section id="what-gets-logged">
+<h2><span class="section-number">2.7. </span>What gets logged<a class="headerlink" href="#what-gets-logged" title="Link to this heading">¶</a></h2>
+<p>Commands that <em>change</em> something – <code class="docutils literal notranslate"><span class="pre">up</span></code>, <code class="docutils literal notranslate"><span class="pre">down</span></code>, <code class="docutils literal notranslate"><span class="pre">restart</span></code>, <code class="docutils literal notranslate"><span class="pre">pull</span></code> – are logged
+at INFO, as the exact shell line that ran:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>13:34:30 INFO     docker   $ cd /srv/compose/hello &amp;&amp; docker compose -p hello -f compose.yaml up -d
+</pre></div>
+</div>
+<p>Read-only queries (statuses, listings) are logged at DEBUG, so the INFO log stays
+a clean record of what SpiriConfig actually did to the machine. Set
+<code class="docutils literal notranslate"><span class="pre">SPIRICONFIG_LOG_LEVEL=DEBUG</span></code> to see everything.</p>
+</section>
+<section id="running-as-a-service">
+<h2><span class="section-number">2.8. </span>Running as a service<a class="headerlink" href="#running-as-a-service" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">spiriconfig</span> <span class="pre">install</span></code> writes a unit like the one below and enables it for you –
+see <a class="reference internal" href="install.html"><span class="std std-doc">Installing SpiriConfig</span></a>. This section shows the unit itself,
+because nothing about SpiriConfig is special here: it is a normal program that
+reads its environment, so you can also just write the unit by hand.</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[Unit]</span>
+<span class="na">Description</span><span class="o">=</span><span class="s">SpiriConfig</span>
+<span class="na">After</span><span class="o">=</span><span class="s">docker.service</span>
+<span class="na">Wants</span><span class="o">=</span><span class="s">docker.service</span>
+
+<span class="k">[Service]</span>
+<span class="na">Environment</span><span class="o">=</span><span class="s">SPIRICONFIG_DOCKER_COMPOSE_DIR=/srv/compose</span>
+<span class="na">Environment</span><span class="o">=</span><span class="s">SPIRICONFIG_APPSTORE_STORE_DIR=/var/lib/spiriconfig/stores</span>
+<span class="na">Environment</span><span class="o">=</span><span class="s">SPIRICONFIG_APPSTORE_STORES=[&quot;https://github.com/spiri/spiri-apps&quot;]</span>
+<span class="na">Environment</span><span class="o">=</span><span class="s">SPIRICONFIG_PORT=8080</span>
+<span class="na">ExecStart</span><span class="o">=</span><span class="s">/usr/local/bin/spiriconfig serve</span>
+<span class="na">Restart</span><span class="o">=</span><span class="s">on-failure</span>
+
+<span class="k">[Install]</span>
+<span class="na">WantedBy</span><span class="o">=</span><span class="s">multi-user.target</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>SpiriConfig runs <code class="docutils literal notranslate"><span class="pre">docker</span></code> as whatever user it runs as. That user needs access to
+the docker socket. Granting docker socket access is equivalent to granting root,
+so run SpiriConfig somewhere you would be comfortable running <code class="docutils literal notranslate"><span class="pre">docker</span></code> by hand.</p>
+</div>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="advanced.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title"><span class="section-number">3. </span>Advanced mode</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="install.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title"><span class="section-number">1. </span>Installing SpiriConfig</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2026, Alex Davies
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">2. Configuration</a><ul>
+<li><a class="reference internal" href="#core">2.1. Core</a></li>
+<li><a class="reference internal" href="#authentication">2.2. Authentication</a></li>
+<li><a class="reference internal" href="#transport-tls">2.3. Transport (TLS)</a></li>
+<li><a class="reference internal" href="#docker-plugin">2.4. Docker plugin</a></li>
+<li><a class="reference internal" href="#app-store-plugin">2.5. App store plugin</a></li>
+<li><a class="reference internal" href="#where-things-live-by-default">2.6. Where things live by default</a></li>
+<li><a class="reference internal" href="#what-gets-logged">2.7. What gets logged</a></li>
+<li><a class="reference internal" href="#running-as-a-service">2.8. Running as a service</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="_static/documentation_options.js?v=1b390748"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

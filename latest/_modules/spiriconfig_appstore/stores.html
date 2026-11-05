@@ -1,0 +1,1107 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html">
+        <link rel="canonical" href="https://spiri-robotics.github.io/SpiriConfig/latest/_modules/spiriconfig_appstore/stores.html">
+        <link rel="prefetch" href="../../_static/spiri-logo-light.svg" as="image">
+        <link rel="prefetch" href="../../_static/spiri-logo-dark.svg" as="image">
+
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
+        <title>spiriconfig_appstore.stores - SpiriConfig</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=bde8c6b5" />
+    <link rel="stylesheet" type="text/css" href="../../_static/spiri-safety-icon.css?v=01762096" />
+    <link rel="stylesheet" type="text/css" href="../../_static/spiri-safety.css?v=84605d0a" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../index.html"><div class="brand">SpiriConfig</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo only-light" src="../../_static/spiri-logo-light.svg" alt="Light Logo"/>
+    <img class="sidebar-logo only-dark" src="../../_static/spiri-logo-dark.svg" alt="Dark Logo"/>
+  </div>
+  
+  <span class="sidebar-brand-text">SpiriConfig</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div>
+<div class="spiri-versions" hidden>
+  <label class="spiri-versions__label" for="spiri-version">Version</label>
+  <select class="spiri-versions__select" id="spiri-version"></select>
+  <a class="spiri-versions__pdf" hidden>Download PDF</a>
+</div>
+<script>
+  (() => {
+    const box = document.currentScript.previousElementSibling;
+    // This version's root, and the site's root above it.
+    const root = new URL(document.documentElement.dataset.content_root || "./", location.href);
+    const site = new URL("../", root);
+    const current = root.href.slice(site.href.length).replace(/\/$/, "");
+    const page = location.pathname.slice(root.pathname.length);
+
+    fetch(new URL("versions.json", site))
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        const name = current === "latest" ? data?.latest : current;
+        const here = data?.versions.find((v) => v.name === name);
+        if (!here) return;
+
+        const select = box.querySelector("select");
+        for (const v of data.versions) {
+          const label =
+            v.name === "dev" ? "dev (main)" : v.name === data.latest ? `${v.name} (latest)` : v.name;
+          select.add(new Option(label, v.name, false, v === here));
+        }
+        // The same page in the chosen version, or its front page if it has no such page.
+        select.addEventListener("change", async () => {
+          const chosen = data.versions.find((v) => v.name === select.value);
+          const front = new URL(chosen.path, site);
+          const same = new URL(page, front);
+          const exists = await fetch(same, { method: "HEAD" }).then((r) => r.ok, () => false);
+          location.href = (exists ? same : front).href;
+        });
+
+        if (here.pdf) {
+          const pdf = box.querySelector("a");
+          pdf.href = new URL(here.pdf, site).href;
+          pdf.hidden = false;
+        }
+        box.hidden = false;
+      })
+      .catch(() => {});
+  })();
+</script><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">1. Installing SpiriConfig</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../configuration.html">2. Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../advanced.html">3. Advanced mode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../docker.html">4. The docker plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../appstore.html">5. App store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plugins.html">6. Writing a plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../container-plugins.html">7. Container plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../design.html">8. Design notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">9. API reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Document control</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../revisions.html">Revision history</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <h1>Source code for spiriconfig_appstore.stores</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;App stores, and the git commands that act on them.</span>
+
+<span class="sd">An *app store* is a git repository with one top-level directory per app, each</span>
+<span class="sd">containing a compose file. An *app* is one of those directories. There is no</span>
+<span class="sd">manifest, no index, and no registry -- the repository layout is the format, so a</span>
+<span class="sd">store can be read with ``ls`` and published with ``git push``.</span>
+
+<span class="sd">Installing an app **symlinks** it into the compose directory::</span>
+
+<span class="sd">    /srv/compose/whoami -&gt; /var/lib/spiriconfig/stores/spiri-apps/whoami</span>
+
+<span class="sd">That single decision is what makes the rest of this module small, because it</span>
+<span class="sd">means SpiriConfig records nothing about the install. The symlink *is* the record:</span>
+
+<span class="sd">* Where did this app come from? -- ``readlink``</span>
+<span class="sd">* Have I changed it? -- ``git status``</span>
+<span class="sd">* What did I change? -- ``git diff``</span>
+<span class="sd">* What did the store change? -- ``git diff HEAD @{upstream}``</span>
+<span class="sd">* Update it -- ``git merge``</span>
+<span class="sd">* Uninstall it -- ``rm`` the symlink, which deletes nothing real</span>
+
+<span class="sd">Every one of those is a git question with a git answer, on a working tree the</span>
+<span class="sd">user can ``cd`` into. We are not tracking installs; git is, and it was going to</span>
+<span class="sd">do a better job of it than we would.</span>
+
+<span class="sd">As everywhere else in SpiriConfig, functions that act on a store *return* a</span>
+<span class="sd">:class:`~spiriconfig.commands.Command` rather than running it, so the UI can show</span>
+<span class="sd">the user the git line before it runs and tests can assert on it without a network.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">loguru</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">spiriconfig.commands</span><span class="w"> </span><span class="kn">import</span> <span class="n">Command</span><span class="p">,</span> <span class="n">CommandError</span><span class="p">,</span> <span class="n">Result</span><span class="p">,</span> <span class="n">run</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">spiriconfig_docker.stacks</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_compose_file</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">spiriconfig_appstore.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">AppStoreSettings</span>
+
+<span class="c1">#: The compose key a store maintainer can set to name a version themselves.</span>
+<span class="c1">#:</span>
+<span class="c1">#: Versioning a bag of containers is not a thing anyone can do well, so we do not</span>
+<span class="c1">#: ask them to. This is optional, and when it is absent we fall back to the date</span>
+<span class="c1">#: of the last commit that touched the app -- which is always available, always</span>
+<span class="c1">#: monotonic, and requires no discipline from the maintainer.</span>
+<span class="c1">#:</span>
+<span class="c1">#: Nothing depends on it. See :meth:`App.version`.</span>
+<span class="n">VERSION_KEY</span> <span class="o">=</span> <span class="s2">&quot;x-spiri-config-version&quot;</span>
+
+<span class="c1">#: The upstream ref, as git spells it: the branch our checkout tracks.</span>
+<span class="c1">#:</span>
+<span class="c1">#: Using ``@{upstream}`` rather than hardcoding ``origin/main`` means a store on</span>
+<span class="c1">#: ``master``, or on a branch a user checked out themselves, just works.</span>
+<span class="n">UPSTREAM</span> <span class="o">=</span> <span class="s2">&quot;@</span><span class="si">{upstream}</span><span class="s2">&quot;</span>
+
+<span class="c1">#: The start of a git conflict marker. See :meth:`Store.unresolved`.</span>
+<span class="n">CONFLICT_MARKER</span> <span class="o">=</span> <span class="s2">&quot;&lt;&lt;&lt;&lt;&lt;&lt;&lt; &quot;</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logger</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">plugin</span><span class="o">=</span><span class="s2">&quot;appstore&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="StoreError">
+<a class="viewcode-back" href="../../api.html#spiriconfig_appstore.stores.StoreError">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">StoreError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Something is wrong with a store, or with the request made of it.&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="slug_for">
+<a class="viewcode-back" href="../../api.html#spiriconfig_appstore.stores.slug_for">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">slug_for</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Derive a directory name from a git URL.</span>
+
+<span class="sd">    ``https://github.com/spiri/spiri-apps.git`` -&gt; ``spiri-apps``. Purely</span>
+<span class="sd">    cosmetic -- it names the clone directory and the store in the UI.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">tail</span> <span class="o">=</span> <span class="n">url</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">tail</span><span class="o">.</span><span class="n">removesuffix</span><span class="p">(</span><span class="s2">&quot;.git&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;store&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="remote_url">
+<a class="viewcode-back" href="../../api.html#spiriconfig_appstore.stores.remote_url">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">remote_url</span><span class="p">(</span><span class="n">settings</span><span class="p">:</span> <span class="n">AppStoreSettings</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read a checkout&#39;s origin URL, or None if it has none we can read.</span>
+
+<span class="sd">    This is what makes disk the source of truth: a store is a clone, and a clone</span>
+<span class="sd">    remembers where it came from, so we ask *it* rather than keeping a list of our</span>
+<span class="sd">    own. ``git remote get-url origin`` is the same question ``readlink`` answers</span>
+<span class="sd">    for an installed app -- &quot;where did this come from?&quot; asked of the filesystem.</span>
+
+<span class="sd">    None for a directory with no ``origin`` (someone&#39;s local-only repo, say): still</span>
+<span class="sd">    a perfectly good store to install from, just one with no upstream to show or</span>
+<span class="sd">    pull. The caller decides what to display for it.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">command</span> <span class="o">=</span> <span class="n">Command</span><span class="p">(</span><span class="n">argv</span><span class="o">=</span><span class="p">[</span><span class="n">settings</span><span class="o">.</span><span class="n">git_bin</span><span class="p">,</span> <span class="s2">&quot;-C&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="s2">&quot;remote&quot;</span><span class="p">,</span> <span class="s2">&quot;get-url&quot;</span><span class="p">,</span> <span class="s2">&quot;origin&quot;</span><span class="p">])</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">run</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">command_timeout</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">CommandError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;could not read origin for </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="o">.</span><span class="n">ok</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="ow">or</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="App">
+<a class="viewcode-back" href="../../api.html#spiriconfig_appstore.stores.App">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">App</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;One app in a store: a directory with a compose file in it.&quot;&quot;&quot;</span>
+
+    <span class="n">store</span><span class="p">:</span> <span class="n">Store</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The directory name in the store, and the default name once installed.&quot;&quot;&quot;</span>
+
+    <span class="n">path</span><span class="p">:</span> <span class="n">Path</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The app&#39;s directory inside the store&#39;s checkout.&quot;&quot;&quot;</span>
+
+    <span class="n">compose_file</span><span class="p">:</span> <span class="n">Path</span>
+
+<div class="viewcode-block" id="App.version">
+<a class="viewcode-back" href="../../api.html#spiriconfig_appstore.stores.App.version">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">version</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;A human-readable label for what is currently checked out.</span>
+
+<span class="sd">        Two sources, in order: the store maintainer&#39;s :data:`VERSION_KEY` if they</span>
+<span class="sd">        set one, otherwise the date of the last commit to touch this app.</span>
+
+<span class="sd">        This is *only* a label. Nothing decides whether to update based on it,</span>
+<span class="sd">        because git can answer that question exactly -- see</span>
+<span class="sd">        :meth:`Store.apps_with_updates`. Which is the escape from the usual</span>
+<span class="sd">        trap: we never have to define what &quot;version 2&quot; of a set of containers</span>
+<span class="sd">        means, or trust a maintainer to bump a number they forgot about.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">declared</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_declared_version</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">declared</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">declared</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_commit_date</span><span class="p">()</span> <span class="ow">or</span> <span class="s2">&quot;unknown&quot;</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_declared_version</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read :data:`VERSION_KEY` out of the compose file, if it is there.</span>
+
+<span class="sd">        Reading YAML is fine; we never write it back. A malformed compose file is</span>
+<span class="sd">        the user&#39;s problem to see in the editor, not a reason to fail a listing,</span>
+<span class="sd">        so anything unparseable just means &quot;no declared version&quot;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">document</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compose_file</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="n">yaml</span><span class="o">.</span><span class="n">YAMLError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;could not read a version from </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">compose_file</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">document</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">declared</span> <span class="o">=</span> <span class="n">document</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">VERSION_KEY</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">declared</span><span class="p">)</span> <span class="k">if</span> <span class="n">declared</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="App.log_command">
+<a class="viewcode-back" href="../../api.html#spiriconfig_appstore.stores.App.log_command">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">log_command</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Command</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;``git log`` for the last commit touching this app. ``%cs`` is a date.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">store</span><span class="o">.</span><span class="n">_git</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">,</span> <span class="s2">&quot;-1&quot;</span><span class="p">,</span> <span class="s2">&quot;--format=</span><span class="si">%c</span><span class="s2">s&quot;</span><span class="p">,</span> <span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_last_commit_date</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">store</span><span class="o">.</span><span class="n">_capture</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log_command</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">result</span><span class="o">.</span><span class="n">ok</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="ow">or</span> <span class="kc">None</span>
+
+    <span class="c1"># -- what has changed, and who changed it ---------------------------------</span>
+    <span class="c1">#</span>
+    <span class="c1"># Two different questions, and keeping them apart is what makes an update</span>
+    <span class="c1"># safe. &quot;Did I change this?&quot; is HEAD vs the working tree. &quot;Did the store</span>
+    <span class="c1"># change this?&quot; is HEAD vs upstream. An update is only risky where both are</span>
+    <span class="c1"># true, and that is precisely where we hand the user a diff.</span>
+
+<div class="viewcode-block" id="App.local_diff">
+<a class="viewcode-back" href="../../api.html#spiriconfig_appstore.stores.App.local_diff">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">local_diff</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Command</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;What the user has changed in this app, against the store&#39;s version.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">store</span><span class="o">.</span><span class="n">_git</span><span class="p">(</span><span class="s2">&quot;diff&quot;</span><span class="p">,</span> <span class="s2">&quot;HEAD&quot;</span><span class="p">,</span> <span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="App.upstream_diff">
+<a class="viewcode-back" href="../../api.html#spiriconfig_appstore.stores.App.upstream_diff">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">upstream_diff</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Command</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;What the store has changed in this app since we last pulled.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">store</span><span class="o">.</span><span class="n">_git</span><span class="p">(</span><span class="s2">&quot;diff&quot;</span><span class="p">,</span> <span class="s2">&quot;HEAD&quot;</span><span class="p">,</span> <span class="n">UPSTREAM</span><span class="p">,</span> <span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="App.changed_locally">
+<a class="viewcode-back" href="../../api.html#spiriconfig_appstore.stores.App.changed_locally">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">changed_locally</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The app&#39;s *tracked* files that the user has edited.</span>
+
+<span class="sd">        Tracked files only, and that is deliberate. A compose file with a</span>
+<span class="sd">        relative bind mount (``./config:/config``) makes docker create data</span>
+<span class="sd">        directories inside the store&#39;s checkout, which show up as untracked</span>
+<span class="sd">        files. Those are the user&#39;s data, not an edit to the app, and counting</span>
+<span class="sd">        them as a modification would tell every user their apps were &quot;modified&quot;</span>
+<span class="sd">        the moment they started one.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">store</span><span class="o">.</span><span class="n">_changed</span><span class="p">(</span><span class="s2">&quot;HEAD&quot;</span><span class="p">,</span> <span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="App.changed_upstream">
+<a class="viewcode-back" href="../../api.html#spiriconfig_appstore.stores.App.changed_upstream">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">changed_upstream</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The app&#39;s files the store has changed since the version we have.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">store</span><span class="o">.</span><span class="n">_changed</span><span class="p">(</span><span class="s2">&quot;HEAD&quot;</span><span class="p">,</span> <span class="n">UPSTREAM</span><span class="p">,</span> <span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_modified</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">changed_locally</span><span class="p">())</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">has_update</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">changed_upstream</span><span class="p">())</span>
+
+    <span class="c1"># -- installation ---------------------------------------------------------</span>
+
+<div class="viewcode-block" id="App.link_path">
+<a class="viewcode-back" href="../../api.html#spiriconfig_appstore.stores.App.link_path">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">link_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">compose_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Where this app&#39;s symlink would live in the compose directory.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">compose_dir</span> <span class="o">/</span> <span class="p">(</span><span class="n">name</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="App.install_command">
+<a class="viewcode-back" href="../../api.html#spiriconfig_appstore.stores.App.install_command">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">install_command</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">compose_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Command</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The ``ln -s`` that installs this app.</span>
+
+<span class="sd">        Rendered as a command rather than done with :func:`os.symlink` for the</span>
+<span class="sd">        usual reason: it is the line the user could have typed, and ``--show``</span>
+<span class="sd">        has to be able to print it.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Command</span><span class="p">(</span>
+            <span class="n">argv</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;ln&quot;</span><span class="p">,</span> <span class="s2">&quot;-s&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">link_path</span><span class="p">(</span><span class="n">compose_dir</span><span class="p">,</span> <span class="n">name</span><span class="p">))]</span>
+        <span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Store">
+<a class="viewcode-back" href="../../api.html#spiriconfig_appstore.stores.Store">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Store</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;One cloned app store.&quot;&quot;&quot;</span>
+
+    <span class="n">slug</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">url</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">path</span><span class="p">:</span> <span class="n">Path</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The clone&#39;s working tree.&quot;&quot;&quot;</span>
+
+    <span class="n">settings</span><span class="p">:</span> <span class="n">AppStoreSettings</span>
+
+    <span class="c1"># -- command construction -------------------------------------------------</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_git</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Command</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Command</span><span class="p">(</span><span class="n">argv</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">git_bin</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">],</span> <span class="n">cwd</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_capture</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">command</span><span class="p">:</span> <span class="n">Command</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run a read-only git command, returning None if git could not run.</span>
+
+<span class="sd">        A missing git binary, or a store directory that is not a repository,</span>
+<span class="sd">        should degrade a page to &quot;I cannot tell you about this store&quot; rather than</span>
+<span class="sd">        crash it -- the same bargain :meth:`Stack.containers` makes with docker.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">run</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">command_timeout</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">CommandError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;git failed in </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Files that differ, for some ``git diff`` argument list.</span>
+
+<span class="sd">        ``--name-only`` rather than ``--quiet``: both answer the question, but</span>
+<span class="sd">        ``--quiet`` answers it by *exiting 1*, and an exit code of 1 is</span>
+<span class="sd">        indistinguishable to :func:`~spiriconfig.commands.run` from git falling</span>
+<span class="sd">        over -- so every routine &quot;has this changed?&quot; check would log itself as a</span>
+<span class="sd">        command failure. Asking for the names instead keeps a clean exit clean,</span>
+<span class="sd">        and hands back the file list we want to show the user anyway.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_capture</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_git</span><span class="p">(</span><span class="s2">&quot;diff&quot;</span><span class="p">,</span> <span class="s2">&quot;--name-only&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">result</span><span class="o">.</span><span class="n">ok</span><span class="p">:</span>
+            <span class="c1"># We could not ask. Report &quot;nothing changed&quot; rather than guessing:</span>
+            <span class="c1"># the update path re-checks before it acts, so the cost of being</span>
+            <span class="c1"># wrong here is a missing badge, not a bad merge.</span>
+            <span class="k">return</span> <span class="p">[]</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">line</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span> <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span>
+
+<div class="viewcode-block" id="Store.clone_command">
+<a class="viewcode-back" href="../../api.html#spiriconfig_appstore.stores.Store.clone_command">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clone_command</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Command</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Clone the store.</span>
+
+<span class="sd">        No ``cwd``: both the source and the target are absolute (see</span>
+<span class="sd">        :func:`stores`), so this runs correctly from anywhere, and git creates</span>
+<span class="sd">        the leading directories itself.</span>
+
+<span class="sd">        ``credential.helper=store`` lets a private store authenticate from the</span>
+<span class="sd">        credential a user saved when adding it (see</span>
+<span class="sd">        :mod:`spiriconfig_appstore.credentials`). It is on the line unconditionally</span>
+<span class="sd">        because it is harmless without one -- with no matching entry the helper</span>
+<span class="sd">        finds nothing and the clone proceeds exactly as before, anonymous for a</span>
+<span class="sd">        public store and prompting nowhere -- and putting it here keeps the token</span>
+<span class="sd">        itself off the command line, where it would otherwise have to live.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Command</span><span class="p">(</span>
+            <span class="n">argv</span><span class="o">=</span><span class="p">[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">git_bin</span><span class="p">,</span>
+                <span class="s2">&quot;-c&quot;</span><span class="p">,</span> <span class="s2">&quot;credential.helper=store&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;clone&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">),</span>
+            <span class="p">],</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Store.fetch_command">
+<a class="viewcode-back" href="../../api.html#spiriconfig_appstore.stores.Store.fetch_command">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fetch_command</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Command</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Ask the remote what it has, without touching the working tree.</span>
+
+<span class="sd">        Carries ``credential.helper=store`` for the same reason</span>
+<span class="sd">        :meth:`clone_command` does: a private store&#39;s periodic ``check`` has to</span>
+<span class="sd">        authenticate too, from the same saved credential, and the flag is inert</span>
+<span class="sd">        when there is none.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_git</span><span class="p">(</span><span class="s2">&quot;-c&quot;</span><span class="p">,</span> <span class="s2">&quot;credential.helper=store&quot;</span><span class="p">,</span> <span class="s2">&quot;fetch&quot;</span><span class="p">,</span> <span class="s2">&quot;origin&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Store.merge_command">
+<a class="viewcode-back" href="../../api.html#spiriconfig_appstore.stores.Store.merge_command">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">merge_command</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Command</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Merge the fetched upstream into the checkout.</span>
+
+<span class="sd">        A merge, not a rebase or a reset: the user&#39;s edits to installed apps are</span>
+<span class="sd">        commits on this branch (see :meth:`commit_local_command`), and a merge is</span>
+<span class="sd">        the operation that reconciles two lines of change while keeping both. If</span>
+<span class="sd">        it conflicts, it conflicts in the file, with the markers git always uses,</span>
+<span class="sd">        and the user resolves it in the editor they already have.</span>
+
+<span class="sd">        Carries an identity like :meth:`_commit` does: once both sides have moved,</span>
+<span class="sd">        the merge makes a merge commit, and without one git refuses.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_identified</span><span class="p">(</span><span class="s2">&quot;merge&quot;</span><span class="p">,</span> <span class="s2">&quot;--no-edit&quot;</span><span class="p">,</span> <span class="n">UPSTREAM</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_identified</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Command</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;A git command that may commit, carrying an identity since the box may not have one.</span>
+
+<span class="sd">        Passed with ``-c`` rather than written into the repo&#39;s config so that the</span>
+<span class="sd">        line we print is the whole truth -- a user who copies it gets the same</span>
+<span class="sd">        commit we would have made, on a machine with no git identity at all.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_git</span><span class="p">(</span>
+            <span class="s2">&quot;-c&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;user.name=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">commit_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;-c&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;user.email=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">commit_email</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_commit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Command</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;A ``git commit`` carrying an identity -- see :meth:`_identified`.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_identified</span><span class="p">(</span><span class="s2">&quot;commit&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Store.commit_local_command">
+<a class="viewcode-back" href="../../api.html#spiriconfig_appstore.stores.Store.commit_local_command">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">commit_local_command</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Command</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Commit whatever the user has edited, before merging over it.</span>
+
+<span class="sd">        This is the step that makes an update non-destructive. git will refuse to</span>
+<span class="sd">        merge across uncommitted changes, and the tempting fixes -- stash, reset,</span>
+<span class="sd">        checkout -- all end with the user&#39;s work somewhere they will not think to</span>
+<span class="sd">        look. Committing it puts their edit on the branch, so the merge has to</span>
+<span class="sd">        *reconcile* with it, and the worst case is a conflict they can see rather</span>
+<span class="sd">        than an edit that silently vanished.</span>
+
+<span class="sd">        ``--all`` stages tracked modifications only, which is what we want: the</span>
+<span class="sd">        data directories docker creates inside the checkout are untracked, and</span>
+<span class="sd">        committing a user&#39;s media library into the app store would be a memorable</span>
+<span class="sd">        way to fail.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_commit</span><span class="p">(</span><span class="s2">&quot;--all&quot;</span><span class="p">,</span> <span class="s2">&quot;--message&quot;</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Store.discard_local_command">
+<a class="viewcode-back" href="../../api.html#spiriconfig_appstore.stores.Store.discard_local_command">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">discard_local_command</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Command</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Throw away every local edit in this store. Asked for, never assumed.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_git</span><span class="p">(</span><span class="s2">&quot;checkout&quot;</span><span class="p">,</span> <span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Store.remove_command">
+<a class="viewcode-back" href="../../api.html#spiriconfig_appstore.stores.Store.remove_command">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">remove_command</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Command</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Delete this store&#39;s checkout: ``rm -rf`` the clone.</span>
+
+<span class="sd">        The counterpart to :meth:`clone_command`, and safe to offer for exactly the</span>
+<span class="sd">        reason ``adopt`` is: we made this directory with ``git clone``, so removing</span>
+<span class="sd">        it puts the machine back where it was before we added the store. Nothing</span>
+<span class="sd">        else here deletes a directory -- an app uninstall only unlinks -- and this</span>
+<span class="sd">        one is allowed to precisely because it is undoing our own ``clone`` and</span>
+<span class="sd">        touching nothing the user created.</span>
+
+<span class="sd">        Apps installed from the store become dangling symlinks, which the docker</span>
+<span class="sd">        plugin and :func:`spiriconfig_appstore.installs.installed` already tolerate.</span>
+<span class="sd">        The caller is expected to warn about them first; git will not, because as</span>
+<span class="sd">        far as it is concerned this is just a directory.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Command</span><span class="p">(</span><span class="n">argv</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;rm&quot;</span><span class="p">,</span> <span class="s2">&quot;-rf&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)])</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">status_command</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Command</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_git</span><span class="p">(</span><span class="s2">&quot;status&quot;</span><span class="p">,</span> <span class="s2">&quot;--short&quot;</span><span class="p">)</span>
+
+    <span class="c1"># -- finishing a conflicted merge -----------------------------------------</span>
+    <span class="c1">#</span>
+    <span class="c1"># A conflict is not a failure state, it is a question, and the user is the</span>
+    <span class="c1"># only one who can answer it. What would be a failure is leaving them stranded</span>
+    <span class="c1"># in it -- a half-merged repo they did not ask for, cannot see, and have no</span>
+    <span class="c1"># button to get out of. So both answers are always available: finish it, or</span>
+    <span class="c1"># pretend it never happened.</span>
+
+<div class="viewcode-block" id="Store.resolve_plan">
+<a class="viewcode-back" href="../../api.html#spiriconfig_appstore.stores.Store.resolve_plan">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">resolve_plan</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Command</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Conclude a conflicted merge: stage the fixed files, commit the merge.</span>
+
+<span class="sd">        Guarded by :meth:`unresolved`, and that guard is not decoration. It is</span>
+<span class="sd">        tempting to write this as ``git commit --all``, which reads like &quot;commit</span>
+<span class="sd">        whatever is there&quot; -- and it is a trap. ``-a`` stages *unmerged* files</span>
+<span class="sd">        too, which git treats as &quot;the user has resolved these&quot;, so a file still</span>
+<span class="sd">        full of ``&lt;&lt;&lt;&lt;&lt;&lt;&lt;`` markers gets committed into the store as though it</span>
+<span class="sd">        were a considered decision. The user gets told the update finished, and</span>
+<span class="sd">        the broken file is now the app&#39;s history.</span>
+
+<span class="sd">        So: refuse while any marker remains, and stage explicitly rather than</span>
+<span class="sd">        with ``-a``. Git will not check this for us -- it has no idea what a</span>
+<span class="sd">        conflict marker means once the index says the file is resolved.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">remaining</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unresolved</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">remaining</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">StoreError</span><span class="p">(</span>
+                <span class="s2">&quot;these files still have conflict markers in them:</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">remaining</span><span class="p">)</span>
+                <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Edit them, keep the version you want, and delete the &quot;</span>
+                <span class="s2">&quot;&lt;&lt;&lt;&lt;&lt;&lt;&lt; ======= &gt;&gt;&gt;&gt;&gt;&gt;&gt; lines.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">conflicted</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conflicts</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">conflicted</span><span class="p">:</span>
+            <span class="c1"># Everything is already staged; just land the merge commit.</span>
+            <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_commit</span><span class="p">(</span><span class="s2">&quot;--no-edit&quot;</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_git</span><span class="p">(</span><span class="s2">&quot;add&quot;</span><span class="p">,</span> <span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">conflicted</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_commit</span><span class="p">(</span><span class="s2">&quot;--no-edit&quot;</span><span class="p">),</span>
+        <span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="Store.unresolved">
+<a class="viewcode-back" href="../../api.html#spiriconfig_appstore.stores.Store.unresolved">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">unresolved</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Conflicted files that still contain conflict markers.</span>
+
+<span class="sd">        A text search, because a conflict marker is a text fact. We are not</span>
+<span class="sd">        parsing the YAML -- a half-merged compose file is usually not valid YAML</span>
+<span class="sd">        at all, which is the point.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">remaining</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">conflicts</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">text</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">errors</span><span class="o">=</span><span class="s2">&quot;replace&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;could not read </span><span class="si">{}</span><span class="s2"> to check for markers: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">CONFLICT_MARKER</span> <span class="ow">in</span> <span class="n">text</span><span class="p">:</span>
+                <span class="n">remaining</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">remaining</span></div>
+
+
+<div class="viewcode-block" id="Store.abort_command">
+<a class="viewcode-back" href="../../api.html#spiriconfig_appstore.stores.Store.abort_command">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">abort_command</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Command</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Undo the merge entirely, back to how things were before the update.</span>
+
+<span class="sd">        The user&#39;s own edits survive this: they were committed *before* the merge</span>
+<span class="sd">        began, precisely so that aborting could be a safe thing to offer.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_git</span><span class="p">(</span><span class="s2">&quot;merge&quot;</span><span class="p">,</span> <span class="s2">&quot;--abort&quot;</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">in_merge</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Whether a merge is in progress and waiting on the user.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;.git&quot;</span> <span class="o">/</span> <span class="s2">&quot;MERGE_HEAD&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Store.conflicts">
+<a class="viewcode-back" href="../../api.html#spiriconfig_appstore.stores.Store.conflicts">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">conflicts</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Files with unresolved conflict markers in them.&quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_capture</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_git</span><span class="p">(</span><span class="s2">&quot;diff&quot;</span><span class="p">,</span> <span class="s2">&quot;--name-only&quot;</span><span class="p">,</span> <span class="s2">&quot;--diff-filter=U&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">result</span><span class="o">.</span><span class="n">ok</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[]</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">line</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span> <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span></div>
+
+
+    <span class="c1"># -- state ----------------------------------------------------------------</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_cloned</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;.git&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Store.is_dirty">
+<a class="viewcode-back" href="../../api.html#spiriconfig_appstore.stores.Store.is_dirty">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_dirty</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Whether any tracked file in the store has been edited.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_changed</span><span class="p">(</span><span class="s2">&quot;HEAD&quot;</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="Store.apps">
+<a class="viewcode-back" href="../../api.html#spiriconfig_appstore.stores.Store.apps">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">apps</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">App</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Every app in the store: top-level directories with a compose file.</span>
+
+<span class="sd">        The same rule :mod:`spiriconfig_docker.stacks` uses to find a stack, and</span>
+<span class="sd">        that is not a coincidence -- a store is just a compose directory that</span>
+<span class="sd">        happens to live in git. Which is why ``git clone`` + ``cp -r`` is a</span>
+<span class="sd">        perfectly good way to use one without SpiriConfig at all.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_cloned</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[]</span>
+
+        <span class="n">apps</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">iterdir</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">child</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span> <span class="ow">or</span> <span class="n">child</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="n">compose_file</span> <span class="o">=</span> <span class="n">find_compose_file</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">compose_file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;skipping </span><span class="si">{}</span><span class="s2">: no compose file&quot;</span><span class="p">,</span> <span class="n">child</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="n">apps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">App</span><span class="p">(</span><span class="n">store</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">child</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">child</span><span class="p">,</span> <span class="n">compose_file</span><span class="o">=</span><span class="n">compose_file</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">apps</span></div>
+
+
+<div class="viewcode-block" id="Store.app">
+<a class="viewcode-back" href="../../api.html#spiriconfig_appstore.stores.Store.app">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">app</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">App</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the named app, or raise :class:`StoreError`.</span>
+
+<span class="sd">        Matched against what is on disk, so a caller cannot escape the store by</span>
+<span class="sd">        asking for something like ``../../etc``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">app</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">apps</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">app</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">app</span>
+        <span class="n">known</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">apps</span><span class="p">())</span> <span class="ow">or</span> <span class="s2">&quot;none&quot;</span>
+        <span class="k">raise</span> <span class="n">StoreError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;no such app: </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> in </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">slug</span><span class="si">}</span><span class="s2"> (available: </span><span class="si">{</span><span class="n">known</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="update_plan">
+<a class="viewcode-back" href="../../api.html#spiriconfig_appstore.stores.update_plan">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">update_plan</span><span class="p">(</span><span class="n">store</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">discard_local</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Command</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The commands that bring ``store`` up to date, in order.</span>
+
+<span class="sd">    A list rather than one command, because an update is genuinely three steps and</span>
+<span class="sd">    the middle one is conditional -- and the user should watch all three go past</span>
+<span class="sd">    rather than have us hide the interesting one.</span>
+
+<span class="sd">    Note what this does *not* do: update a single app. The symlinks all point into</span>
+<span class="sd">    one working tree, which is at one commit, so &quot;update whoami but not</span>
+<span class="sd">    nextcloud&quot; is not a state this repository can be in. That sounds like a</span>
+<span class="sd">    limitation and is closer to a feature: pulling the store only rewrites files</span>
+<span class="sd">    on disk. Nothing is restarted, nothing is pulled from a registry, and no</span>
+<span class="sd">    running container changes until someone runs ``docker compose up`` on that</span>
+<span class="sd">    stack. Per-app control still exists -- it just lives at up-time, where the</span>
+<span class="sd">    user was going to make that decision anyway.</span>
+
+<span class="sd">    Raises if a previous update is still waiting on a conflict. Merging on top of</span>
+<span class="sd">    an unfinished merge is how a confusing situation becomes an unrecoverable one.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">store</span><span class="o">.</span><span class="n">in_merge</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">StoreError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">store</span><span class="o">.</span><span class="n">slug</span><span class="si">}</span><span class="s2"> has an unfinished update with conflicts in: &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">store</span><span class="o">.</span><span class="n">conflicts</span><span class="p">())</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">&#39;unknown files&#39;</span><span class="si">}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Edit those files to remove the &lt;&lt;&lt;&lt;&lt;&lt;&lt; markers, then run &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;`spiriconfig appstore resolve`, or run &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;`spiriconfig appstore resolve --abort` to undo the update.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">plan</span> <span class="o">=</span> <span class="p">[</span><span class="n">store</span><span class="o">.</span><span class="n">fetch_command</span><span class="p">()]</span>
+
+    <span class="c1"># Checked before fetching, but fetch does not touch the working tree, so the</span>
+    <span class="c1"># answer cannot go stale between here and the merge.</span>
+    <span class="k">if</span> <span class="n">store</span><span class="o">.</span><span class="n">is_dirty</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">discard_local</span><span class="p">:</span>
+            <span class="n">plan</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">store</span><span class="o">.</span><span class="n">discard_local_command</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">plan</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">store</span><span class="o">.</span><span class="n">commit_local_command</span><span class="p">(</span><span class="s2">&quot;Local changes, before update&quot;</span><span class="p">))</span>
+
+    <span class="n">plan</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">store</span><span class="o">.</span><span class="n">merge_command</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">plan</span></div>
+
+
+
+<div class="viewcode-block" id="check_plan">
+<a class="viewcode-back" href="../../api.html#spiriconfig_appstore.stores.check_plan">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">check_plan</span><span class="p">(</span><span class="n">settings</span><span class="p">:</span> <span class="n">AppStoreSettings</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Command</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A fetch for every cloned store: &quot;check for updates&quot;, across the board.</span>
+
+<span class="sd">    One ``git fetch`` per store that is actually on disk. A store that is only a</span>
+<span class="sd">    seed (not cloned yet) has nothing to check and is skipped -- its own Clone</span>
+<span class="sd">    action is what brings it down.</span>
+
+<span class="sd">    This is the whole of what &quot;check for updates&quot; does, and it is deliberately</span>
+<span class="sd">    only half of git. Fetching never touches a working tree: it updates git&#39;s</span>
+<span class="sd">    record of where the remote is, which is exactly what makes the &quot;update</span>
+<span class="sd">    available&quot; markers truthful (they compare the checked-out commit against that</span>
+<span class="sd">    record -- see :meth:`App.has_update`). Nothing installed changes until someone</span>
+<span class="sd">    runs an :func:`update_plan`. That is what makes this safe to run on boot, and</span>
+<span class="sd">    safe to run as often as you like.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">store</span><span class="o">.</span><span class="n">fetch_command</span><span class="p">()</span> <span class="k">for</span> <span class="n">store</span> <span class="ow">in</span> <span class="n">stores</span><span class="p">(</span><span class="n">settings</span><span class="p">)</span> <span class="k">if</span> <span class="n">store</span><span class="o">.</span><span class="n">is_cloned</span><span class="p">]</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_absolute</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Make a *local path* store absolute, and leave a real URL alone.</span>
+
+<span class="sd">    Paths can be relative -- a checkout&#39;s ``.env`` may well say ``test_data/...``,</span>
+<span class="sd">    and so may anyone&#39;s ``SPIRICONFIG_APPSTORE_STORES``. That is a trap for</span>
+<span class="sd">    everything downstream: a relative path is only meaningful against</span>
+<span class="sd">    a working directory, and the two things we do with a store -- clone it, and</span>
+<span class="sd">    symlink into it -- each resolve paths against a *different* directory than</span>
+<span class="sd">    the one the user was standing in.</span>
+
+<span class="sd">    The symlink is the one that bites. ``ln -s test_data/stores/x/whoami</span>
+<span class="sd">    test_data/compose/whoami`` does not make a link to the store; it makes a link</span>
+<span class="sd">    that resolves against ``test_data/compose/``, which is nowhere, and the app</span>
+<span class="sd">    dangles. Absolute paths are the fix, and they also make every command we</span>
+<span class="sd">    print correct to paste from any directory.</span>
+
+<span class="sd">    A URL (``https://``, ``git@host:path``) is left exactly as given -- it is not</span>
+<span class="sd">    a path, and is not ours to rewrite.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="s2">&quot;://&quot;</span> <span class="ow">in</span> <span class="n">url</span> <span class="ow">or</span> <span class="n">url</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;git@&quot;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">url</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">url</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span><span class="o">.</span><span class="n">resolve</span><span class="p">())</span>
+
+
+<div class="viewcode-block" id="stores">
+<a class="viewcode-back" href="../../api.html#spiriconfig_appstore.stores.stores">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">stores</span><span class="p">(</span><span class="n">settings</span><span class="p">:</span> <span class="n">AppStoreSettings</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Store</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Every store: the clones on disk, plus any not-yet-cloned seeds.</span>
+
+<span class="sd">    Disk is the source of truth. A store *is* a git checkout under</span>
+<span class="sd">    :attr:`~spiriconfig_appstore.config.AppStoreSettings.store_dir`, so the live</span>
+<span class="sd">    list is whatever is actually cloned there -- which is what lets the UI add one</span>
+<span class="sd">    (clone it) and remove one (delete it) without SpiriConfig keeping a list of its</span>
+<span class="sd">    own. Each clone&#39;s URL is read back off the clone itself; see :func:`remote_url`.</span>
+
+<span class="sd">    :attr:`~spiriconfig_appstore.config.AppStoreSettings.stores` is a *seed* list,</span>
+<span class="sd">    not the authority. Any seed whose slug is not already cloned is included as a</span>
+<span class="sd">    not-yet-cloned store, so ``check`` (or the Clone button) can bring it down -- and</span>
+<span class="sd">    the moment it is cloned, disk discovery takes over and the seed entry is</span>
+<span class="sd">    deduplicated away. A store the user cloned themselves and never listed is a</span>
+<span class="sd">    first-class store; a seed the user removed stays gone until they clone it again.</span>
+
+<span class="sd">    Paths are resolved here, once, so that nothing downstream has to remember to.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">store_dir</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+
+    <span class="n">found</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Store</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">root</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">iterdir</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">child</span> <span class="o">/</span> <span class="s2">&quot;.git&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="k">continue</span>
+            <span class="n">found</span><span class="p">[</span><span class="n">child</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">Store</span><span class="p">(</span>
+                <span class="n">slug</span><span class="o">=</span><span class="n">child</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="n">url</span><span class="o">=</span><span class="n">remote_url</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="n">child</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                <span class="n">path</span><span class="o">=</span><span class="n">child</span><span class="p">,</span>
+                <span class="n">settings</span><span class="o">=</span><span class="n">settings</span><span class="p">,</span>
+            <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">stores</span><span class="p">:</span>
+        <span class="n">slug</span> <span class="o">=</span> <span class="n">slug_for</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">slug</span> <span class="ow">in</span> <span class="n">found</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">found</span><span class="p">[</span><span class="n">slug</span><span class="p">]</span> <span class="o">=</span> <span class="n">Store</span><span class="p">(</span>
+            <span class="n">slug</span><span class="o">=</span><span class="n">slug</span><span class="p">,</span>
+            <span class="n">url</span><span class="o">=</span><span class="n">_absolute</span><span class="p">(</span><span class="n">url</span><span class="p">),</span>
+            <span class="n">path</span><span class="o">=</span><span class="n">root</span> <span class="o">/</span> <span class="n">slug</span><span class="p">,</span>
+            <span class="n">settings</span><span class="o">=</span><span class="n">settings</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Insertion order: the cloned stores first (in sorted directory order, from the</span>
+    <span class="c1"># scan above), then any not-yet-cloned seeds in the order they are listed. Stable</span>
+    <span class="c1"># without re-sorting the two groups together, which would let a seed jump above a</span>
+    <span class="c1"># cloned store just because of its name.</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">found</span><span class="o">.</span><span class="n">values</span><span class="p">())</span></div>
+
+
+
+<div class="viewcode-block" id="store_for_url">
+<a class="viewcode-back" href="../../api.html#spiriconfig_appstore.stores.store_for_url">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">store_for_url</span><span class="p">(</span><span class="n">settings</span><span class="p">:</span> <span class="n">AppStoreSettings</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Store</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build the :class:`Store` that adding ``url`` would create.</span>
+
+<span class="sd">    Not necessarily one of :func:`stores` -- this is how a *new* store is named and</span>
+<span class="sd">    placed before it exists, so the caller can run its :meth:`Store.clone_command`.</span>
+<span class="sd">    Once cloned, :func:`stores` rediscovers it from disk like any other.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">store_dir</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+    <span class="n">slug</span> <span class="o">=</span> <span class="n">slug_for</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Store</span><span class="p">(</span><span class="n">slug</span><span class="o">=</span><span class="n">slug</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="n">_absolute</span><span class="p">(</span><span class="n">url</span><span class="p">),</span> <span class="n">path</span><span class="o">=</span><span class="n">root</span> <span class="o">/</span> <span class="n">slug</span><span class="p">,</span> <span class="n">settings</span><span class="o">=</span><span class="n">settings</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_store">
+<a class="viewcode-back" href="../../api.html#spiriconfig_appstore.stores.get_store">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_store</span><span class="p">(</span><span class="n">settings</span><span class="p">:</span> <span class="n">AppStoreSettings</span><span class="p">,</span> <span class="n">slug</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Store</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the named store, or raise :class:`StoreError`.&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">store</span> <span class="ow">in</span> <span class="n">stores</span><span class="p">(</span><span class="n">settings</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">store</span><span class="o">.</span><span class="n">slug</span> <span class="o">==</span> <span class="n">slug</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">store</span>
+    <span class="n">known</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">slug</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">stores</span><span class="p">(</span><span class="n">settings</span><span class="p">))</span> <span class="ow">or</span> <span class="s2">&quot;none&quot;</span>
+    <span class="k">raise</span> <span class="n">StoreError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;no such store: </span><span class="si">{</span><span class="n">slug</span><span class="si">!r}</span><span class="s2"> (configured: </span><span class="si">{</span><span class="n">known</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="find_app">
+<a class="viewcode-back" href="../../api.html#spiriconfig_appstore.stores.find_app">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">find_app</span><span class="p">(</span><span class="n">settings</span><span class="p">:</span> <span class="n">AppStoreSettings</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">App</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Find an app by ``name`` or ``store/name`` across every cloned store.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="s2">&quot;/&quot;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+        <span class="n">slug</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">app_name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">get_store</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="n">slug</span><span class="p">)</span><span class="o">.</span><span class="n">app</span><span class="p">(</span><span class="n">app_name</span><span class="p">)</span>
+
+    <span class="n">matches</span> <span class="o">=</span> <span class="p">[</span><span class="n">app</span> <span class="k">for</span> <span class="n">store</span> <span class="ow">in</span> <span class="n">stores</span><span class="p">(</span><span class="n">settings</span><span class="p">)</span> <span class="k">for</span> <span class="n">app</span> <span class="ow">in</span> <span class="n">store</span><span class="o">.</span><span class="n">apps</span><span class="p">()</span>
+               <span class="k">if</span> <span class="n">app</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">matches</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">StoreError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;no such app: </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">found</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">a</span><span class="o">.</span><span class="n">store</span><span class="o">.</span><span class="n">slug</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">a</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">matches</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">StoreError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> is in more than one store; say which: </span><span class="si">{</span><span class="n">found</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">matches</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;App&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Store&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;StoreError&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;VERSION_KEY&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;check_plan&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;find_app&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_store&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;remote_url&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;slug_for&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;store_for_url&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;stores&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;update_plan&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+</pre></div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2026, Alex Davies
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script src="../../_static/documentation_options.js?v=1b390748"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

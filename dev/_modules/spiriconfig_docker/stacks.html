@@ -1,0 +1,1132 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html">
+        <link rel="canonical" href="https://spiri-robotics.github.io/SpiriConfig/latest/_modules/spiriconfig_docker/stacks.html">
+        <link rel="prefetch" href="../../_static/spiri-logo-light.svg" as="image">
+        <link rel="prefetch" href="../../_static/spiri-logo-dark.svg" as="image">
+
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
+        <title>spiriconfig_docker.stacks - SpiriConfig</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=bde8c6b5" />
+    <link rel="stylesheet" type="text/css" href="../../_static/spiri-safety-icon.css?v=01762096" />
+    <link rel="stylesheet" type="text/css" href="../../_static/spiri-safety.css?v=84605d0a" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../index.html"><div class="brand">SpiriConfig</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo only-light" src="../../_static/spiri-logo-light.svg" alt="Light Logo"/>
+    <img class="sidebar-logo only-dark" src="../../_static/spiri-logo-dark.svg" alt="Dark Logo"/>
+  </div>
+  
+  <span class="sidebar-brand-text">SpiriConfig</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div>
+<div class="spiri-versions" hidden>
+  <label class="spiri-versions__label" for="spiri-version">Version</label>
+  <select class="spiri-versions__select" id="spiri-version"></select>
+  <a class="spiri-versions__pdf" hidden>Download PDF</a>
+</div>
+<script>
+  (() => {
+    const box = document.currentScript.previousElementSibling;
+    // This version's root, and the site's root above it.
+    const root = new URL(document.documentElement.dataset.content_root || "./", location.href);
+    const site = new URL("../", root);
+    const current = root.href.slice(site.href.length).replace(/\/$/, "");
+    const page = location.pathname.slice(root.pathname.length);
+
+    fetch(new URL("versions.json", site))
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        const name = current === "latest" ? data?.latest : current;
+        const here = data?.versions.find((v) => v.name === name);
+        if (!here) return;
+
+        const select = box.querySelector("select");
+        for (const v of data.versions) {
+          const label =
+            v.name === "dev" ? "dev (main)" : v.name === data.latest ? `${v.name} (latest)` : v.name;
+          select.add(new Option(label, v.name, false, v === here));
+        }
+        // The same page in the chosen version, or its front page if it has no such page.
+        select.addEventListener("change", async () => {
+          const chosen = data.versions.find((v) => v.name === select.value);
+          const front = new URL(chosen.path, site);
+          const same = new URL(page, front);
+          const exists = await fetch(same, { method: "HEAD" }).then((r) => r.ok, () => false);
+          location.href = (exists ? same : front).href;
+        });
+
+        if (here.pdf) {
+          const pdf = box.querySelector("a");
+          pdf.href = new URL(here.pdf, site).href;
+          pdf.hidden = false;
+        }
+        box.hidden = false;
+      })
+      .catch(() => {});
+  })();
+</script><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">1. Installing SpiriConfig</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../configuration.html">2. Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../advanced.html">3. Advanced mode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../docker.html">4. The docker plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../appstore.html">5. App store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plugins.html">6. Writing a plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../container-plugins.html">7. Container plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../design.html">8. Design notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">9. API reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Document control</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../revisions.html">Revision history</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <h1>Source code for spiriconfig_docker.stacks</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Compose projects, and the docker commands that act on them.</span>
+
+<span class="sd">A *stack* is one subdirectory of the configured compose directory that contains</span>
+<span class="sd">a compose file. That is the entire model. It maps exactly onto how ``docker</span>
+<span class="sd">compose`` already works, so a user who has never run SpiriConfig can drop a</span>
+<span class="sd">directory in, and a user who never opens the web UI can ``cd`` into one and run</span>
+<span class="sd">``docker compose up -d`` themselves.</span>
+
+<span class="sd">Every function here that acts on a stack returns a :class:`~spiriconfig.commands.Command`</span>
+<span class="sd">rather than running it. Building and running are kept separate so the UI can show</span>
+<span class="sd">the user what it is about to do, and so tests can assert on the command line</span>
+<span class="sd">without a docker daemon anywhere in sight.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">loguru</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">spiriconfig.commands</span><span class="w"> </span><span class="kn">import</span> <span class="n">Command</span><span class="p">,</span> <span class="n">CommandError</span><span class="p">,</span> <span class="n">run</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">spiriconfig_docker.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">DockerSettings</span>
+
+<span class="c1">#: Compose file names, in the precedence order docker compose itself uses.</span>
+<span class="n">COMPOSE_FILENAMES</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">&quot;compose.yaml&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;compose.yml&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;docker-compose.yaml&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;docker-compose.yml&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1">#: Dev-override compose files, one per base name. These are *overrides* layered on</span>
+<span class="c1">#: top of the base file (``docker compose -f compose.yaml -f compose.dev.yaml``),</span>
+<span class="c1">#: not standalone stacks -- exactly what the app template&#39;s ``compose.dev.yaml`` is</span>
+<span class="c1">#: written to be: build from source, mount it, live-reload. Optional, and only ever</span>
+<span class="c1">#: reached in advanced mode; a stack without one simply cannot be brought up in dev.</span>
+<span class="n">DEV_OVERRIDE_FILENAMES</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">&quot;compose.dev.yaml&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;compose.dev.yml&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;docker-compose.dev.yaml&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;docker-compose.dev.yml&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1">#: What a freshly created compose file starts as, when the user gives us no text of</span>
+<span class="c1">#: their own. Deliberately a working stack and not an empty file: ``docker compose</span>
+<span class="c1">#: config`` rejects a file with no services, so a blank template would fail the very</span>
+<span class="c1">#: validation :func:`create` runs, and the first thing a new user saw would be an</span>
+<span class="c1">#: error. ``whoami`` is tiny, real, and starts.</span>
+<span class="n">NEW_COMPOSE_TEMPLATE</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s2">services:</span>
+<span class="s2">  whoami:</span>
+<span class="s2">    image: traefik/whoami</span>
+<span class="s2">    ports:</span>
+<span class="s2">      - &quot;8080:80&quot;</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+<span class="c1">#: Container states that mean &quot;this is not coming back on its own&quot;.</span>
+<span class="c1">#:</span>
+<span class="c1">#: Deliberately a list of what is *dead* rather than what is alive: docker gains</span>
+<span class="c1">#: new states over time, and an unrecognised one is far more likely to be some</span>
+<span class="c1">#: flavour of &quot;in progress&quot; than a corpse. Guessing wrong in that direction shows</span>
+<span class="c1">#: a transient &quot;partial&quot; instead of falsely reporting a running stack as stopped.</span>
+<span class="n">DEAD_STATES</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="s2">&quot;exited&quot;</span><span class="p">,</span> <span class="s2">&quot;dead&quot;</span><span class="p">,</span> <span class="s2">&quot;removing&quot;</span><span class="p">})</span>
+
+<span class="c1">#: What :meth:`Stack.exec` runs when nobody says otherwise. See the method for why</span>
+<span class="c1">#: it is ``sh`` and not ``bash``.</span>
+<span class="n">DEFAULT_EXEC_COMMAND</span> <span class="o">=</span> <span class="s2">&quot;/bin/sh&quot;</span>
+
+<span class="c1">#: Wraps a supervised ``exec`` so that :meth:`Stack.hangup` has something to aim at.</span>
+<span class="c1">#: ``$0`` is the pidfile and ``$@`` the real command -- passed as arguments rather</span>
+<span class="c1">#: than pasted into the script, so that a command with a space or a quote in it</span>
+<span class="c1">#: cannot rewrite the shell line it travels in.</span>
+<span class="c1">#:</span>
+<span class="c1">#: The write is allowed to fail. A read-only container has nowhere to put a pidfile,</span>
+<span class="c1">#: and the right answer there is a terminal that works and does not get reaped, not</span>
+<span class="c1">#: a button that refuses to open. Hence ``2&gt;/dev/null`` and no ``&amp;&amp;``: whatever</span>
+<span class="c1">#: happens to the redirect, the ``exec`` still runs.</span>
+<span class="n">_RECORD_PID</span> <span class="o">=</span> <span class="s1">&#39;echo $$ &gt; &quot;$0&quot; 2&gt;/dev/null; exec &quot;$@&quot;&#39;</span>
+
+<span class="c1">#: The other half: hang up on whatever that recorded, and tidy the file away.</span>
+<span class="c1">#: Every failure here is ignored on purpose -- an exec that already exited leaves a</span>
+<span class="c1">#: pid that is gone, and &quot;kill: no such process&quot; is the sound of there being nothing</span>
+<span class="c1">#: to clean up. Success and &quot;already clean&quot; should look the same to the caller.</span>
+<span class="n">_HANGUP</span> <span class="o">=</span> <span class="s1">&#39;kill -HUP &quot;$(cat &quot;$0&quot; 2&gt;/dev/null)&quot; 2&gt;/dev/null; rm -f &quot;$0&quot;&#39;</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logger</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">plugin</span><span class="o">=</span><span class="s2">&quot;docker&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="StackError">
+<a class="viewcode-back" href="../../api.html#spiriconfig_docker.stacks.StackError">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">StackError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Something is wrong with a stack, or with the request made of it.&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="Usage">
+<a class="viewcode-back" href="../../api.html#spiriconfig_docker.stacks.Usage">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Usage</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A stack&#39;s live resource use, summed across its running containers.</span>
+
+<span class="sd">    Two numbers, because they answer the two questions a user actually asks of an</span>
+<span class="sd">    app -- &quot;is it working the processor&quot; and &quot;is it eating the memory&quot; -- and</span>
+<span class="sd">    disk, the third, is deliberately not here: sizing an app&#39;s real footprint</span>
+<span class="sd">    means sizing its volumes, which the daemon will not tell us cheaply. That is a</span>
+<span class="sd">    separate feature with a separate cost, not a column to bolt on here.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">cpu_percent</span><span class="p">:</span> <span class="nb">float</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Summed CPU use, where 100.0 is one core fully busy. Can exceed 100.&quot;&quot;&quot;</span>
+
+    <span class="n">mem_bytes</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Summed resident memory in use, in bytes.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">cpu_text</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">cpu_percent</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">mem_text</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_humanize_bytes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mem_bytes</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="Stack">
+<a class="viewcode-back" href="../../api.html#spiriconfig_docker.stacks.Stack">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Stack</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;One compose project on disk.&quot;&quot;&quot;</span>
+
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The directory name, which is also the compose project name.&quot;&quot;&quot;</span>
+
+    <span class="n">path</span><span class="p">:</span> <span class="n">Path</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The project directory.&quot;&quot;&quot;</span>
+
+    <span class="n">compose_file</span><span class="p">:</span> <span class="n">Path</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The compose file within :attr:`path`.&quot;&quot;&quot;</span>
+
+    <span class="n">settings</span><span class="p">:</span> <span class="n">DockerSettings</span>
+
+    <span class="n">dev_override</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A dev-override compose file to layer on :attr:`compose_file` in dev mode.</span>
+
+<span class="sd">    ``None`` for the common case of a stack that ships no such file. See</span>
+<span class="sd">    :data:`DEV_OVERRIDE_FILENAMES` and :meth:`up`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># -- command construction -------------------------------------------------</span>
+    <span class="c1">#</span>
+    <span class="c1"># Note the shape of every command: we cd into the project directory and name</span>
+    <span class="c1"># the compose file explicitly. `-p &lt;name&gt;` pins the project name so that our</span>
+    <span class="c1"># containers are the same containers the user gets when they run compose in</span>
+    <span class="c1"># that directory by hand -- if these disagreed, the UI would be managing a</span>
+    <span class="c1"># parallel set of containers and the user would never find them.</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_compose</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dev</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Command</span><span class="p">:</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;-f&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">compose_file</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+        <span class="c1"># A dev override is a second `-f`, layered on top -- the same</span>
+        <span class="c1"># `-f base -f override` docker compose merges by hand. Silently a no-op</span>
+        <span class="c1"># when the stack ships no override, so a caller need not check first.</span>
+        <span class="k">if</span> <span class="n">dev</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">dev_override</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">files</span> <span class="o">+=</span> <span class="p">[</span><span class="s2">&quot;-f&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dev_override</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">Command</span><span class="p">(</span>
+            <span class="n">argv</span><span class="o">=</span><span class="p">[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">docker_bin</span><span class="p">,</span>
+                <span class="s2">&quot;compose&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;-p&quot;</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="o">*</span><span class="n">files</span><span class="p">,</span>
+                <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+            <span class="p">],</span>
+            <span class="n">cwd</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="Stack.up">
+<a class="viewcode-back" href="../../api.html#spiriconfig_docker.stacks.Stack.up">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">up</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">dev</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Command</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create and start the stack, in the background.</span>
+
+<span class="sd">        With ``dev=True`` and a dev-override file present, layer it on top of the</span>
+<span class="sd">        base compose (``-f compose.yaml -f compose.dev.yaml``) so the stack runs the</span>
+<span class="sd">        app author&#39;s development variant -- build from source, mount it, live-reload.</span>
+<span class="sd">        That variant also gets ``--build``: compose only builds an image that does not</span>
+<span class="sd">        exist yet, so without it a second dev launch would run yesterday&#39;s source.</span>
+<span class="sd">        Without an override the flag does nothing, so a plain stack still comes up.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">dev</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">dev_override</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compose</span><span class="p">(</span><span class="s2">&quot;up&quot;</span><span class="p">,</span> <span class="s2">&quot;-d&quot;</span><span class="p">,</span> <span class="s2">&quot;--build&quot;</span><span class="p">,</span> <span class="n">dev</span><span class="o">=</span><span class="n">dev</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compose</span><span class="p">(</span><span class="s2">&quot;up&quot;</span><span class="p">,</span> <span class="s2">&quot;-d&quot;</span><span class="p">,</span> <span class="n">dev</span><span class="o">=</span><span class="n">dev</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Stack.down">
+<a class="viewcode-back" href="../../api.html#spiriconfig_docker.stacks.Stack.down">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">down</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Command</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Stop and remove the stack&#39;s containers.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compose</span><span class="p">(</span><span class="s2">&quot;down&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Stack.restart">
+<a class="viewcode-back" href="../../api.html#spiriconfig_docker.stacks.Stack.restart">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">restart</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Command</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Restart the stack&#39;s containers.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compose</span><span class="p">(</span><span class="s2">&quot;restart&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Stack.pull">
+<a class="viewcode-back" href="../../api.html#spiriconfig_docker.stacks.Stack.pull">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">pull</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Command</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Pull the stack&#39;s images.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compose</span><span class="p">(</span><span class="s2">&quot;pull&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Stack.logs">
+<a class="viewcode-back" href="../../api.html#spiriconfig_docker.stacks.Stack.logs">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">logs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">follow</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">tail</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">200</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Command</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Show the stack&#39;s logs.&quot;&quot;&quot;</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;logs&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;--tail=</span><span class="si">{</span><span class="n">tail</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">follow</span><span class="p">:</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;--follow&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compose</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Stack.ps">
+<a class="viewcode-back" href="../../api.html#spiriconfig_docker.stacks.Stack.ps">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ps</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Command</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;List the stack&#39;s containers, as JSON.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compose</span><span class="p">(</span><span class="s2">&quot;ps&quot;</span><span class="p">,</span> <span class="s2">&quot;--all&quot;</span><span class="p">,</span> <span class="s2">&quot;--format&quot;</span><span class="p">,</span> <span class="s2">&quot;json&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Stack.exec">
+<a class="viewcode-back" href="../../api.html#spiriconfig_docker.stacks.Stack.exec">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">exec</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">service</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">command</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span> <span class="o">*</span><span class="p">,</span> <span class="n">pidfile</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Command</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run a command inside a service&#39;s *running* container.</span>
+
+<span class="sd">        The command defaults to :data:`DEFAULT_EXEC_COMMAND`, which is a shell,</span>
+<span class="sd">        because &quot;give me a prompt in there&quot; is what people overwhelmingly want. It</span>
+<span class="sd">        is only a default: this is ``docker compose exec``, so anything the image</span>
+<span class="sd">        can run is fair game, and the UI hands the user a box to say so.</span>
+
+<span class="sd">        ``/bin/sh`` rather than ``bash``: sh is the one a container is actually</span>
+<span class="sd">        likely to have. Alpine -- which half the images on a device are built from</span>
+<span class="sd">        -- ships busybox and no bash at all, and a button that dies with &quot;executable</span>
+<span class="sd">        file not found&quot; on half the apps is worse than a plainer shell that works on</span>
+<span class="sd">        all of them. Somebody who wants bash types bash.</span>
+
+<span class="sd">        No TTY flag, because there is none to pass: unlike ``docker exec``, which</span>
+<span class="sd">        wants ``-it``, ``docker compose exec`` allocates a TTY *by default* and the</span>
+<span class="sd">        only related flag it has is ``-T``, to turn one off. The shell on the far</span>
+<span class="sd">        side gets a terminal without our asking for one.</span>
+
+<span class="sd">        ``pidfile`` is what the web terminal passes, and it is the whole of our</span>
+<span class="sd">        answer to :meth:`hangup` -- see there for why it has to exist at all. The</span>
+<span class="sd">        command line stops being the one a person would type when it is set, which</span>
+<span class="sd">        is precisely why it is *optional*: the CLI and the line shown on the page</span>
+<span class="sd">        are built without it, and only the session that has a browser tab to lose</span>
+<span class="sd">        is wrapped.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">argv</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">command</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[</span><span class="n">DEFAULT_EXEC_COMMAND</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">pidfile</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compose</span><span class="p">(</span><span class="s2">&quot;exec&quot;</span><span class="p">,</span> <span class="n">service</span><span class="p">,</span> <span class="o">*</span><span class="n">argv</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compose</span><span class="p">(</span><span class="s2">&quot;exec&quot;</span><span class="p">,</span> <span class="n">service</span><span class="p">,</span> <span class="s2">&quot;sh&quot;</span><span class="p">,</span> <span class="s2">&quot;-c&quot;</span><span class="p">,</span> <span class="n">_RECORD_PID</span><span class="p">,</span> <span class="n">pidfile</span><span class="p">,</span> <span class="o">*</span><span class="n">argv</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Stack.hangup">
+<a class="viewcode-back" href="../../api.html#spiriconfig_docker.stacks.Stack.hangup">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">hangup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">service</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">pidfile</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Command</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Kill what a ``pidfile``&#39;d :meth:`exec` left running in the container.</span>
+
+<span class="sd">        This exists because **docker will not do it for us**. That is a strong claim</span>
+<span class="sd">        about somebody else&#39;s software, so it is worth writing down what was actually</span>
+<span class="sd">        measured, because every plausible easier answer is wrong:</span>
+
+<span class="sd">        - It is not a missing ``-it``. Unlike ``docker exec``, ``docker compose exec``</span>
+<span class="sd">          allocates a TTY *by default*; the only flag it has is ``-T``, to turn one</span>
+<span class="sd">          off. Passing ``-it`` to a plain ``docker exec`` leaks identically.</span>
+<span class="sd">        - It is not a pty we forgot to close. With the client verifiably reaped and</span>
+<span class="sd">          nothing on the host holding the slave device open, the process inside the</span>
+<span class="sd">          container carries on regardless.</span>
+<span class="sd">        - It is not a signal we failed to send. SIGHUP kills the client and leaks;</span>
+<span class="sd">          SIGKILL leaks; SIGTERM and SIGINT do not even *kill the client*, which</span>
+<span class="sd">          sits in raw mode forwarding them as bytes. There is no polite signal that</span>
+<span class="sd">          makes it clean up, because there is nothing listening for one.</span>
+
+<span class="sd">        The reason is that an exec&#39;d process is not the client&#39;s child. It is</span>
+<span class="sd">        parented inside the container, and the daemon does not tear an exec down when</span>
+<span class="sd">        the hijacked API stream drops -- so the shell gets no EOF, no SIGHUP, and no</span>
+<span class="sd">        timeout. It simply carries on, forever, until the container stops. The docker</span>
+<span class="sd">        API can start an exec and inspect an exec, and offers no way whatsoever to</span>
+<span class="sd">        kill one; hence a pidfile, which is the shape everybody who has hit this ends</span>
+<span class="sd">        up at. Twelve years and counting:</span>
+
+<span class="sd">        - https://github.com/moby/moby/issues/9098  (open since 2014: killing the</span>
+<span class="sd">          ``docker exec`` client does not terminate the spawned process)</span>
+<span class="sd">        - https://github.com/moby/moby/issues/29700 (the orphan, reparented to</span>
+<span class="sd">          PPID 0, when the client disconnects)</span>
+<span class="sd">        - https://github.com/moby/moby/issues/35703 (the request for a</span>
+<span class="sd">          ``docker exec kill`` that would make this method unnecessary)</span>
+
+<span class="sd">        Nobody meets this at a real terminal, because at a real terminal you type</span>
+<span class="sd">        ``exit`` -- and a shell that exits is clean. A browser tab has no ``exit``;</span>
+<span class="sd">        closing it *is* the hangup. So the rare accident becomes the ordinary path,</span>
+<span class="sd">        and we have to do by hand what the tty would have done for us.</span>
+
+<span class="sd">        Killing the shell is enough to kill what it was running. It is a session</span>
+<span class="sd">        leader with a controlling terminal, so the kernel SIGHUPs the foreground</span>
+<span class="sd">        process group when it dies -- the runaway ``ping`` goes with it, exactly as</span>
+<span class="sd">        when a real terminal window closes.</span>
+
+<span class="sd">        ``-T`` because this one has no terminal and wants none: it is a command we</span>
+<span class="sd">        run *at* the container, not a session anybody is sitting in.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compose</span><span class="p">(</span><span class="s2">&quot;exec&quot;</span><span class="p">,</span> <span class="s2">&quot;-T&quot;</span><span class="p">,</span> <span class="n">service</span><span class="p">,</span> <span class="s2">&quot;sh&quot;</span><span class="p">,</span> <span class="s2">&quot;-c&quot;</span><span class="p">,</span> <span class="n">_HANGUP</span><span class="p">,</span> <span class="n">pidfile</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Stack.attach">
+<a class="viewcode-back" href="../../api.html#spiriconfig_docker.stacks.Stack.attach">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">attach</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">service</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Command</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Attach to a running container&#39;s main process, stdin included.</span>
+
+<span class="sd">        The difference from :meth:`exec` is worth being clear about, because the</span>
+<span class="sd">        buttons sit next to each other and only one of them is safe to be careless</span>
+<span class="sd">        with. ``exec`` starts a *new* process alongside the app; you can exit it and</span>
+<span class="sd">        nothing has happened to the container. ``attach`` connects you to the</span>
+<span class="sd">        process the container already *is* -- pid 1, the app itself. It is how you</span>
+<span class="sd">        talk to a REPL an app is serving on its stdin, and how you see output that</span>
+<span class="sd">        goes nowhere near the logs.</span>
+
+<span class="sd">        Deliberately plain: no ``--sig-proxy``, no ``--detach-keys``. Whatever</span>
+<span class="sd">        ``docker compose attach`` does with a signal is docker&#39;s business and its</span>
+<span class="sd">        documented behaviour, and a person who typed this line into a shell would</span>
+<span class="sd">        get exactly what this button gives them. Bolting on flags the user did not</span>
+<span class="sd">        ask for, however well meant, is the point at which the UI stops being a face</span>
+<span class="sd">        over the command line and starts being a different program.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compose</span><span class="p">(</span><span class="s2">&quot;attach&quot;</span><span class="p">,</span> <span class="n">service</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Stack.validate">
+<a class="viewcode-back" href="../../api.html#spiriconfig_docker.stacks.Stack.validate">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Command</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Ask docker compose to parse the file and say nothing if it is valid.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compose</span><span class="p">(</span><span class="s2">&quot;config&quot;</span><span class="p">,</span> <span class="s2">&quot;--quiet&quot;</span><span class="p">)</span></div>
+
+
+    <span class="c1"># -- state ----------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="Stack.containers">
+<a class="viewcode-back" href="../../api.html#spiriconfig_docker.stacks.Stack.containers">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">containers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the stack&#39;s containers as reported by ``docker compose ps``.</span>
+
+<span class="sd">        Returns an empty list if docker is unreachable or the project has never</span>
+<span class="sd">        been created, because &quot;I cannot tell you about this stack&quot; and &quot;this</span>
+<span class="sd">        stack has no containers&quot; look the same to a user, and neither is worth</span>
+<span class="sd">        crashing a page render over. A machine with no docker installed should</span>
+<span class="sd">        still get a UI that loads and tells them so.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ps</span><span class="p">(),</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">command_timeout</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">CommandError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="c1"># Missing binary, or a hung daemon.</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;could not reach docker for </span><span class="si">{!r}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="o">.</span><span class="n">ok</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;could not list containers for </span><span class="si">{!r}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">[]</span>
+        <span class="k">return</span> <span class="n">_parse_ps</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Stack.status">
+<a class="viewcode-back" href="../../api.html#spiriconfig_docker.stacks.Stack.status">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">status</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;A one-word summary: ``running``, ``partial``, ``stopped``, or ``down``.</span>
+
+<span class="sd">        The three-way split matters more than it looks. ``docker compose up -d``</span>
+<span class="sd">        returns once it has *started* the containers, which is a moment before the</span>
+<span class="sd">        daemon reports them as ``running`` -- so a status check immediately after</span>
+<span class="sd">        an up can legitimately see ``created``. Calling that &quot;stopped&quot; would be a</span>
+<span class="sd">        lie, and one a script could act on. Anything that is neither running nor</span>
+<span class="sd">        dead is therefore ``partial``: in flux, ask again shortly.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">containers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">containers</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">containers</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;down&quot;</span>
+
+        <span class="n">states</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;State&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">containers</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">state</span> <span class="o">==</span> <span class="s2">&quot;running&quot;</span> <span class="k">for</span> <span class="n">state</span> <span class="ow">in</span> <span class="n">states</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s2">&quot;running&quot;</span>
+        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">state</span> <span class="ow">in</span> <span class="n">DEAD_STATES</span> <span class="k">for</span> <span class="n">state</span> <span class="ow">in</span> <span class="n">states</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s2">&quot;stopped&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;partial&quot;</span></div>
+
+
+<div class="viewcode-block" id="Stack.running_services">
+<a class="viewcode-back" href="../../api.html#spiriconfig_docker.stacks.Stack.running_services">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">running_services</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The services with a container up right now, sorted, for exec and attach.</span>
+
+<span class="sd">        Running, and not merely declared in the compose file, because both of the</span>
+<span class="sd">        things this feeds are things you can only do to a *process*. Offering a</span>
+<span class="sd">        person the name of a service that is not up would be offering them a button</span>
+<span class="sd">        whose only possible outcome is docker telling them so.</span>
+
+<span class="sd">        Which also means this is a snapshot and not a promise: a container can exit</span>
+<span class="sd">        between the menu being drawn and the user picking from it. The failure is</span>
+<span class="sd">        then docker&#39;s to report, which it does perfectly well -- there is no race</span>
+<span class="sd">        worth closing here, only one worth not pretending we have closed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="n">service</span>
+                <span class="k">for</span> <span class="n">container</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">containers</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">container</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;State&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;running&quot;</span>
+                <span class="ow">and</span> <span class="p">(</span><span class="n">service</span> <span class="o">:=</span> <span class="n">container</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Service&quot;</span><span class="p">))</span>
+            <span class="p">}</span>
+        <span class="p">)</span></div>
+
+
+    <span class="c1"># -- resource use ---------------------------------------------------------</span>
+
+<div class="viewcode-block" id="Stack.stats">
+<a class="viewcode-back" href="../../api.html#spiriconfig_docker.stacks.Stack.stats">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">stats</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">container_ids</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">as_json</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Command</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Live CPU and memory for the given containers, one snapshot then done.</span>
+
+<span class="sd">        Plain ``docker stats`` rather than ``docker compose stats``, because there</span>
+<span class="sd">        is no such compose subcommand -- stats is a daemon-level view, and the way</span>
+<span class="sd">        to scope it to one project is to name that project&#39;s containers. So the</span>
+<span class="sd">        caller passes the ids, which come from :meth:`containers`; run with none,</span>
+<span class="sd">        ``docker stats`` would report *every* container on the host, which is the</span>
+<span class="sd">        one thing this must not do.</span>
+
+<span class="sd">        ``--no-stream`` because a page is not a dashboard: we want the number as it</span>
+<span class="sd">        is right now and then our prompt back, not a live feed that never returns.</span>
+
+<span class="sd">        ``as_json`` is for the code that has to parse this; the CLI leaves it off</span>
+<span class="sd">        and gets docker&#39;s own table, which is already the thing a person would want</span>
+<span class="sd">        to read.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">argv</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">docker_bin</span><span class="p">,</span> <span class="s2">&quot;stats&quot;</span><span class="p">,</span> <span class="s2">&quot;--no-stream&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">as_json</span><span class="p">:</span>
+            <span class="n">argv</span> <span class="o">+=</span> <span class="p">[</span><span class="s2">&quot;--format&quot;</span><span class="p">,</span> <span class="s2">&quot;json&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">Command</span><span class="p">(</span><span class="n">argv</span><span class="o">=</span><span class="p">[</span><span class="o">*</span><span class="n">argv</span><span class="p">,</span> <span class="o">*</span><span class="n">container_ids</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="Stack.usage">
+<a class="viewcode-back" href="../../api.html#spiriconfig_docker.stacks.Stack.usage">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">usage</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Usage</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This stack&#39;s CPU and memory use right now, summed over its containers.</span>
+
+<span class="sd">        ``None`` when there is nothing to measure -- the stack is down, docker is</span>
+<span class="sd">        unreachable, or the snapshot could not be read. A stopped app consuming no</span>
+<span class="sd">        CPU and no memory is not the same as &quot;0%&quot;, and saying nothing is the honest</span>
+<span class="sd">        way to draw the difference: the status badge already says it is stopped.</span>
+
+<span class="sd">        Only *running* containers are asked about. ``docker stats`` will happily</span>
+<span class="sd">        take a stopped container&#39;s id and report a row of dashes for it, which</span>
+<span class="sd">        parses as nothing and would only slow the snapshot down.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">running</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">cid</span>
+            <span class="k">for</span> <span class="n">container</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">containers</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">container</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;State&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;running&quot;</span> <span class="ow">and</span> <span class="p">(</span><span class="n">cid</span> <span class="o">:=</span> <span class="n">container</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ID&quot;</span><span class="p">))</span>
+        <span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">running</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">run</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">(</span><span class="n">running</span><span class="p">,</span> <span class="n">as_json</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+                <span class="n">timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">command_timeout</span><span class="p">,</span>
+                <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="n">CommandError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;could not get stats for </span><span class="si">{!r}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="o">.</span><span class="n">ok</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;could not get stats for </span><span class="si">{!r}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">_parse_usage</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span></div>
+
+
+    <span class="c1"># -- the compose file itself ----------------------------------------------</span>
+
+<div class="viewcode-block" id="Stack.read">
+<a class="viewcode-back" href="../../api.html#spiriconfig_docker.stacks.Stack.read">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the compose file&#39;s raw text.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">compose_file</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Stack.write">
+<a class="viewcode-back" href="../../api.html#spiriconfig_docker.stacks.Stack.write">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Write the compose file, refusing to save something invalid.</span>
+
+<span class="sd">        Two checks, cheapest first: it must parse as YAML, and docker compose</span>
+<span class="sd">        itself must accept it. The second is what actually matters -- valid YAML</span>
+<span class="sd">        that compose rejects would leave a stack the user cannot start.</span>
+
+<span class="sd">        The file is only replaced once both checks pass, so a rejected save</span>
+<span class="sd">        leaves the previous, working file untouched.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">yaml</span><span class="o">.</span><span class="n">YAMLError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">StackError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;not valid YAML: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+
+        <span class="c1"># compose can only validate a file on disk, so the new text has to be</span>
+        <span class="c1"># written before it can be checked. Every path out of here from this</span>
+        <span class="c1"># point must therefore put the original back if the check does not pass.</span>
+        <span class="n">original</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compose_file</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">validate</span><span class="p">(),</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">command_timeout</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">CommandError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">compose_file</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">original</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">StackError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;could not run docker compose to check the file: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="o">.</span><span class="n">ok</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">compose_file</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">original</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">StackError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;docker compose rejected the file, so it was not saved:</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;wrote </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">compose_file</span><span class="p">)</span></div>
+</div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_parse_json_stream</span><span class="p">(</span><span class="n">stdout</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse docker&#39;s ``--format json`` output, whichever shape it took.</span>
+
+<span class="sd">    Docker is inconsistent about this across commands and versions: some emit a</span>
+<span class="sd">    single JSON array, others one JSON object per line. ``compose ps`` and</span>
+<span class="sd">    ``stats`` both do it, so both lean on this. Handle either.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">stdout</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">text</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">parsed</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parsed</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">parsed</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">parsed</span><span class="p">]</span>
+
+    <span class="n">documents</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">text</span><span class="o">.</span><span class="n">splitlines</span><span class="p">():</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">documents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">line</span><span class="p">))</span>
+        <span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;could not parse docker json line: </span><span class="si">{!r}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">documents</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_parse_ps</span><span class="p">(</span><span class="n">stdout</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse ``docker compose ps --format json`` output.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_parse_json_stream</span><span class="p">(</span><span class="n">stdout</span><span class="p">)</span>
+
+
+<span class="c1">#: Suffix -&gt; byte count, for the sizes docker prints. Memory is formatted with</span>
+<span class="c1">#: binary units (``MiB``), network and block IO with decimal ones (``MB``); we</span>
+<span class="c1">#: only read memory here, but knowing both makes the table complete and correct.</span>
+<span class="n">_SIZE_UNITS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;B&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s2">&quot;KB&quot;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span> <span class="s2">&quot;MB&quot;</span><span class="p">:</span> <span class="mi">1000</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;GB&quot;</span><span class="p">:</span> <span class="mi">1000</span><span class="o">**</span><span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;TB&quot;</span><span class="p">:</span> <span class="mi">1000</span><span class="o">**</span><span class="mi">4</span><span class="p">,</span> <span class="s2">&quot;PB&quot;</span><span class="p">:</span> <span class="mi">1000</span><span class="o">**</span><span class="mi">5</span><span class="p">,</span>
+    <span class="s2">&quot;KIB&quot;</span><span class="p">:</span> <span class="mi">1024</span><span class="p">,</span> <span class="s2">&quot;MIB&quot;</span><span class="p">:</span> <span class="mi">1024</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;GIB&quot;</span><span class="p">:</span> <span class="mi">1024</span><span class="o">**</span><span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;TIB&quot;</span><span class="p">:</span> <span class="mi">1024</span><span class="o">**</span><span class="mi">4</span><span class="p">,</span> <span class="s2">&quot;PIB&quot;</span><span class="p">:</span> <span class="mi">1024</span><span class="o">**</span><span class="mi">5</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">_SIZE_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;([0-9.]+)\s*([A-Za-z]+)&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_parse_bytes</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Turn a docker size like ``42.98MiB`` into a byte count.&quot;&quot;&quot;</span>
+    <span class="n">match</span> <span class="o">=</span> <span class="n">_SIZE_RE</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">match</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;not a docker size: </span><span class="si">{</span><span class="n">text</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">number</span><span class="p">,</span> <span class="n">unit</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">number</span><span class="p">)</span> <span class="o">*</span> <span class="n">_SIZE_UNITS</span><span class="p">[</span><span class="n">unit</span><span class="o">.</span><span class="n">upper</span><span class="p">()])</span>
+    <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;unknown size unit in </span><span class="si">{</span><span class="n">text</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_parse_percent</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Turn a docker percentage like ``0.01%`` into a float.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;%&quot;</span><span class="p">))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_parse_usage</span><span class="p">(</span><span class="n">stdout</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Usage</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Sum a ``docker stats --format json`` snapshot into one :class:`Usage`.</span>
+
+<span class="sd">    A row we cannot read is skipped rather than fatal: one container reporting a</span>
+<span class="sd">    stat in a shape we did not expect should cost that container&#39;s contribution,</span>
+<span class="sd">    not the whole app&#39;s number. The zero that a fully unreadable snapshot leaves</span>
+<span class="sd">    behind is the truthful answer to &quot;how much of this could we measure&quot;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cpu</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">mem</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">_parse_json_stream</span><span class="p">(</span><span class="n">stdout</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">cpu</span> <span class="o">+=</span> <span class="n">_parse_percent</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;CPUPerc&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
+            <span class="c1"># MemUsage is &quot;used / limit&quot;; only the used side is this app&#39;s.</span>
+            <span class="n">mem</span> <span class="o">+=</span> <span class="n">_parse_bytes</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;MemUsage&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;could not parse a stats row: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Usage</span><span class="p">(</span><span class="n">cpu_percent</span><span class="o">=</span><span class="n">cpu</span><span class="p">,</span> <span class="n">mem_bytes</span><span class="o">=</span><span class="n">mem</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_humanize_bytes</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Render a byte count the way docker does -- binary units, one decimal.&quot;&quot;&quot;</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">unit</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="s2">&quot;KiB&quot;</span><span class="p">,</span> <span class="s2">&quot;MiB&quot;</span><span class="p">,</span> <span class="s2">&quot;GiB&quot;</span><span class="p">,</span> <span class="s2">&quot;TiB&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="mi">1024</span> <span class="ow">or</span> <span class="n">unit</span> <span class="o">==</span> <span class="s2">&quot;TiB&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">value</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">unit</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">unit</span> <span class="o">==</span> <span class="s2">&quot;B&quot;</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">value</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">unit</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">value</span> <span class="o">/=</span> <span class="mi">1024</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">value</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> PiB&quot;</span>  <span class="c1"># unreachable for any real container</span>
+
+
+<div class="viewcode-block" id="find_compose_file">
+<a class="viewcode-back" href="../../api.html#spiriconfig_docker.stacks.find_compose_file">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">find_compose_file</span><span class="p">(</span><span class="n">directory</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the compose file in ``directory``, or None if there is not one.&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">COMPOSE_FILENAMES</span><span class="p">:</span>
+        <span class="n">candidate</span> <span class="o">=</span> <span class="n">directory</span> <span class="o">/</span> <span class="n">name</span>
+        <span class="k">if</span> <span class="n">candidate</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">candidate</span>
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="find_dev_override">
+<a class="viewcode-back" href="../../api.html#spiriconfig_docker.stacks.find_dev_override">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">find_dev_override</span><span class="p">(</span><span class="n">directory</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the dev-override compose file in ``directory``, or None if there is none.</span>
+
+<span class="sd">    The optional counterpart to :func:`find_compose_file`: a file dev mode layers on</span>
+<span class="sd">    top of the base compose. Its presence alone does not make a directory a stack --</span>
+<span class="sd">    :func:`discover` still needs a base file to find one at all.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">DEV_OVERRIDE_FILENAMES</span><span class="p">:</span>
+        <span class="n">candidate</span> <span class="o">=</span> <span class="n">directory</span> <span class="o">/</span> <span class="n">name</span>
+        <span class="k">if</span> <span class="n">candidate</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">candidate</span>
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="discover">
+<a class="viewcode-back" href="../../api.html#spiriconfig_docker.stacks.discover">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">discover</span><span class="p">(</span><span class="n">settings</span><span class="p">:</span> <span class="n">DockerSettings</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Stack</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Find every compose project in the configured directory, sorted by name.</span>
+
+<span class="sd">    A missing compose directory is not an error: it just means there is nothing</span>
+<span class="sd">    to manage yet, which is the state of a fresh machine.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">compose_dir</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">root</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;compose directory does not exist yet: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">root</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[]</span>
+
+    <span class="n">stacks</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">iterdir</span><span class="p">()):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">child</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+            <span class="k">continue</span>
+        <span class="n">compose_file</span> <span class="o">=</span> <span class="n">find_compose_file</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">compose_file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;skipping </span><span class="si">{}</span><span class="s2">: no compose file&quot;</span><span class="p">,</span> <span class="n">child</span><span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="n">stacks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">Stack</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">child</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="n">path</span><span class="o">=</span><span class="n">child</span><span class="p">,</span>
+                <span class="n">compose_file</span><span class="o">=</span><span class="n">compose_file</span><span class="p">,</span>
+                <span class="n">settings</span><span class="o">=</span><span class="n">settings</span><span class="p">,</span>
+                <span class="n">dev_override</span><span class="o">=</span><span class="n">find_dev_override</span><span class="p">(</span><span class="n">child</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">stacks</span></div>
+
+
+
+<div class="viewcode-block" id="get">
+<a class="viewcode-back" href="../../api.html#spiriconfig_docker.stacks.get">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">settings</span><span class="p">:</span> <span class="n">DockerSettings</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Stack</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the named stack, or raise :class:`StackError` if it is unknown.</span>
+
+<span class="sd">    Names are matched against what is actually on disk, so a caller cannot reach</span>
+<span class="sd">    outside the compose directory by passing something like ``../../etc``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">stacks</span> <span class="o">=</span> <span class="n">discover</span><span class="p">(</span><span class="n">settings</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">stack</span> <span class="ow">in</span> <span class="n">stacks</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">stack</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">stack</span>
+    <span class="n">known</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">stacks</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;none&quot;</span>
+    <span class="k">raise</span> <span class="n">StackError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;no such stack: </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> (known stacks: </span><span class="si">{</span><span class="n">known</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_valid_name</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Whether ``name`` is a single, safe directory name.</span>
+
+<span class="sd">    One path component, no separators, no ``..``, not hidden. Same guard</span>
+<span class="sd">    :meth:`get` leans on -- a name is only ever a directory *inside* the compose</span>
+<span class="sd">    directory, so anything that could climb out of it is not a name.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="s2">&quot;..&quot;</span><span class="p">}</span> <span class="ow">and</span> <span class="s2">&quot;/&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">name</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="create">
+<a class="viewcode-back" href="../../api.html#spiriconfig_docker.stacks.create">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">create</span><span class="p">(</span><span class="n">settings</span><span class="p">:</span> <span class="n">DockerSettings</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">NEW_COMPOSE_TEMPLATE</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Stack</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a new compose project: a directory with a ``compose.yaml`` in it.</span>
+
+<span class="sd">    The one place SpiriConfig makes a project directory rather than discovering</span>
+<span class="sd">    one -- see :attr:`~spiriconfig_docker.config.DockerSettings.compose_dir`, which</span>
+<span class="sd">    is otherwise a tree we only ever read. It is a deliberate, opt-in exception, and</span>
+<span class="sd">    it earns its keep the same way :meth:`Stack.write` does: the file is validated</span>
+<span class="sd">    with ``docker compose config`` before we call the project made, so a new stack</span>
+<span class="sd">    cannot land unstartable.</span>
+
+<span class="sd">    The asymmetry with the rest of the module is the point. We *created* this</span>
+<span class="sd">    directory, so if compose rejects the file we delete the directory again and the</span>
+<span class="sd">    machine is exactly as it was -- unlike a hand-made project, cleaning up after</span>
+<span class="sd">    ourselves here is ours to do. That is the same bargain the app store&#39;s ``adopt``</span>
+<span class="sd">    strikes in reverse: touch only what you made.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_valid_name</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">StackError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> is not a usable project name: it must be a single directory &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;name, with no &#39;/&#39; and no leading dot.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">yaml</span><span class="o">.</span><span class="n">YAMLError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">StackError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;not valid YAML: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+
+    <span class="n">path</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">compose_dir</span> <span class="o">/</span> <span class="n">name</span>
+    <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="n">StackError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2"> already exists, so it is not ours to create. Pick another name, &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;or edit the existing project.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="c1"># From here on we have made something, so every failure path has to undo it.</span>
+    <span class="n">path</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">compose_file</span> <span class="o">=</span> <span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;compose.yaml&quot;</span>
+    <span class="n">stack</span> <span class="o">=</span> <span class="n">Stack</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">compose_file</span><span class="o">=</span><span class="n">compose_file</span><span class="p">,</span> <span class="n">settings</span><span class="o">=</span><span class="n">settings</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">compose_file</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">run</span><span class="p">(</span><span class="n">stack</span><span class="o">.</span><span class="n">validate</span><span class="p">(),</span> <span class="n">timeout</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">command_timeout</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">CommandError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">StackError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;could not run docker compose to check the file: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+    <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">ignore_errors</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">raise</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="o">.</span><span class="n">ok</span><span class="p">:</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">StackError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;docker compose rejected the file, so nothing was created:</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;created </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">compose_file</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">stack</span></div>
+
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;COMPOSE_FILENAMES&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;DEFAULT_EXEC_COMMAND&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;DEV_OVERRIDE_FILENAMES&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;NEW_COMPOSE_TEMPLATE&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Stack&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;StackError&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Usage&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;create&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;discover&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;find_compose_file&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;find_dev_override&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+</pre></div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2026, Alex Davies
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script src="../../_static/documentation_options.js?v=1b390748"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

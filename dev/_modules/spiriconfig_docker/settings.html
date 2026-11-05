@@ -1,0 +1,1012 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html">
+        <link rel="canonical" href="https://spiri-robotics.github.io/SpiriConfig/latest/_modules/spiriconfig_docker/settings.html">
+        <link rel="prefetch" href="../../_static/spiri-logo-light.svg" as="image">
+        <link rel="prefetch" href="../../_static/spiri-logo-dark.svg" as="image">
+
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
+        <title>spiriconfig_docker.settings - SpiriConfig</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=bde8c6b5" />
+    <link rel="stylesheet" type="text/css" href="../../_static/spiri-safety-icon.css?v=01762096" />
+    <link rel="stylesheet" type="text/css" href="../../_static/spiri-safety.css?v=84605d0a" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../index.html"><div class="brand">SpiriConfig</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo only-light" src="../../_static/spiri-logo-light.svg" alt="Light Logo"/>
+    <img class="sidebar-logo only-dark" src="../../_static/spiri-logo-dark.svg" alt="Dark Logo"/>
+  </div>
+  
+  <span class="sidebar-brand-text">SpiriConfig</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div>
+<div class="spiri-versions" hidden>
+  <label class="spiri-versions__label" for="spiri-version">Version</label>
+  <select class="spiri-versions__select" id="spiri-version"></select>
+  <a class="spiri-versions__pdf" hidden>Download PDF</a>
+</div>
+<script>
+  (() => {
+    const box = document.currentScript.previousElementSibling;
+    // This version's root, and the site's root above it.
+    const root = new URL(document.documentElement.dataset.content_root || "./", location.href);
+    const site = new URL("../", root);
+    const current = root.href.slice(site.href.length).replace(/\/$/, "");
+    const page = location.pathname.slice(root.pathname.length);
+
+    fetch(new URL("versions.json", site))
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        const name = current === "latest" ? data?.latest : current;
+        const here = data?.versions.find((v) => v.name === name);
+        if (!here) return;
+
+        const select = box.querySelector("select");
+        for (const v of data.versions) {
+          const label =
+            v.name === "dev" ? "dev (main)" : v.name === data.latest ? `${v.name} (latest)` : v.name;
+          select.add(new Option(label, v.name, false, v === here));
+        }
+        // The same page in the chosen version, or its front page if it has no such page.
+        select.addEventListener("change", async () => {
+          const chosen = data.versions.find((v) => v.name === select.value);
+          const front = new URL(chosen.path, site);
+          const same = new URL(page, front);
+          const exists = await fetch(same, { method: "HEAD" }).then((r) => r.ok, () => false);
+          location.href = (exists ? same : front).href;
+        });
+
+        if (here.pdf) {
+          const pdf = box.querySelector("a");
+          pdf.href = new URL(here.pdf, site).href;
+          pdf.hidden = false;
+        }
+        box.hidden = false;
+      })
+      .catch(() => {});
+  })();
+</script><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">1. Installing SpiriConfig</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../configuration.html">2. Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../advanced.html">3. Advanced mode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../docker.html">4. The docker plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../appstore.html">5. App store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plugins.html">6. Writing a plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../container-plugins.html">7. Container plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../design.html">8. Design notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">9. API reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Document control</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../revisions.html">Revision history</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <h1>Source code for spiriconfig_docker.settings</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;``x-spiri-settings``: the settings form an app declares for itself.</span>
+
+<span class="sd">Not to be confused with :class:`spiriconfig_docker.config.DockerSettings`, which</span>
+<span class="sd">is how *SpiriConfig* is configured. This is how an *app* says which of its knobs a</span>
+<span class="sd">human is allowed to turn.</span>
+
+<span class="sd">A compose file declares a list of fields under a top-level ``x-spiri-settings``</span>
+<span class="sd">key, and each field names a ``.env`` variable and the NiceGUI widget that should</span>
+<span class="sd">edit it::</span>
+
+<span class="sd">    x-spiri-settings:</span>
+<span class="sd">      - env: GRAFANA_PORT</span>
+<span class="sd">        widget: number</span>
+<span class="sd">        label: HTTP port</span>
+<span class="sd">        help: The port the dashboard is served on.</span>
+<span class="sd">        default: &quot;3000&quot;</span>
+<span class="sd">        min: 1</span>
+<span class="sd">        max: 65535</span>
+
+<span class="sd">      - env: GRAFANA_ADMIN_PASSWORD</span>
+<span class="sd">        widget: password</span>
+<span class="sd">        label: Admin password</span>
+<span class="sd">        required: true</span>
+
+<span class="sd">      - env: GRAFANA_LOG_LEVEL</span>
+<span class="sd">        widget: select</span>
+<span class="sd">        label: Log level</span>
+<span class="sd">        options: [debug, info, warn, error]</span>
+<span class="sd">        default: info</span>
+<span class="sd">        advanced: true</span>
+
+<span class="sd">    services:</span>
+<span class="sd">      grafana:</span>
+<span class="sd">        image: grafana/grafana:11.1.0</span>
+<span class="sd">        ports:</span>
+<span class="sd">          - &quot;${GRAFANA_PORT:-3000}:3000&quot;</span>
+<span class="sd">        environment:</span>
+<span class="sd">          GF_SECURITY_ADMIN_PASSWORD: &quot;${GRAFANA_ADMIN_PASSWORD:-admin}&quot;</span>
+
+<span class="sd">Three things about that are load-bearing.</span>
+
+<span class="sd">**``x-`` means compose ignores it.** Extension fields are part of the compose</span>
+<span class="sd">spec, so a compose file carrying a form is still an ordinary compose file. It</span>
+<span class="sd">runs, unchanged, on a machine that has never heard of SpiriConfig -- which is the</span>
+<span class="sd">rule the whole project is built on.</span>
+
+<span class="sd">**The form writes a ``.env``, and nothing else.** Not a database of ours, not a</span>
+<span class="sd">sidecar. ``.env`` is a file compose already reads (see</span>
+<span class="sd">:mod:`spiriconfig_docker.env`), so the settings page is a *nicer way to edit a</span>
+<span class="sd">file the user could have edited in vim*, and every value it sets is one they can</span>
+<span class="sd">read back with ``cat``. There is no state here that outlives the file.</span>
+
+<span class="sd">**The widget is named, not inferred.** ``widget: select`` means ``ui.select``.</span>
+<span class="sd">The alternative -- declaring an abstract type and having us guess a widget from it</span>
+<span class="sd">-- means an app author who wants a dropdown instead of a text box has to discover</span>
+<span class="sd">which incantation of ``type:`` and ``enum:`` we happen to map to one. Naming the</span>
+<span class="sd">widget is shorter, and it is honest about what it will do.</span>
+
+<span class="sd">``advanced: true`` is the app author&#39;s way of saying *this knob is for a developer*</span>
+<span class="sd">-- a log level, a debug flag, a tuning parameter nobody should have to read past on</span>
+<span class="sd">their way to the port number. The field is then only rendered in advanced mode (see</span>
+<span class="sd">:mod:`spiriconfig.advanced`), which makes a long form short for the person who did</span>
+<span class="sd">not want it long. It hides the *widget*, and nothing else: the variable is still</span>
+<span class="sd">read from the ``.env``, still written back on save, and the CLI still lists and sets</span>
+<span class="sd">it. An app author choosing to declutter a form is not choosing who may configure</span>
+<span class="sd">their app, and if this ever grew teeth it would be a permission system built out of</span>
+<span class="sd">somebody&#39;s UI preference.</span>
+
+<span class="sd">The form does not have to live in the compose file. It can sit in a sidecar --</span>
+<span class="sd">``spiri-settings.yaml``, beside it -- and then the compose file needs no</span>
+<span class="sd">``x-spiri-settings`` key, or indeed any edit at all::</span>
+
+<span class="sd">    grafana/</span>
+<span class="sd">    ├── compose.yaml            &lt;- exactly as its author published it</span>
+<span class="sd">    ├── spiri-settings.yaml     &lt;- the form</span>
+<span class="sd">    └── .env                    &lt;- the answers</span>
+
+<span class="sd">That is for the app store&#39;s benefit. An app is very often somebody else&#39;s compose</span>
+<span class="sd">file, copied in as it was published, and every line a maintainer changes in it is a</span>
+<span class="sd">line they get to re-merge by hand every time upstream moves. A sidecar adds a</span>
+<span class="sd">settings form while touching nothing, so the app stays a clean copy of the thing it</span>
+<span class="sd">came from. See :func:`_source` for the three forms and how they are chosen between.</span>
+
+<span class="sd">The fallback in the compose file (``${GRAFANA_PORT:-3000}``) is not redundant with</span>
+<span class="sd">``default:``. ``default:`` is what the *form* offers; the compose fallback is what</span>
+<span class="sd">the *app* does when nobody has filled the form in. An app that only had the former</span>
+<span class="sd">would not start until someone had visited a web page, which would be a poor thing</span>
+<span class="sd">to require of a compose file.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">loguru</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">spiriconfig.commands</span><span class="w"> </span><span class="kn">import</span> <span class="n">CommandError</span><span class="p">,</span> <span class="n">run</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">spiriconfig_docker</span><span class="w"> </span><span class="kn">import</span> <span class="n">env</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">spiriconfig_docker.stacks</span><span class="w"> </span><span class="kn">import</span> <span class="n">Stack</span>
+
+<span class="c1">#: The compose key an app declares its settings form under.</span>
+<span class="n">SETTINGS_KEY</span> <span class="o">=</span> <span class="s2">&quot;x-spiri-settings&quot;</span>
+
+<span class="c1">#: The file the form writes, in the stack&#39;s own directory. Compose&#39;s own default,</span>
+<span class="c1">#: not a name of ours -- which is why an app configured through the UI behaves</span>
+<span class="c1">#: identically under a bare ``docker compose up``.</span>
+<span class="n">ENV_FILENAME</span> <span class="o">=</span> <span class="s2">&quot;.env&quot;</span>
+
+<span class="c1">#: Sidecar names, checked in order, for an app that keeps its settings in their own</span>
+<span class="c1">#: file rather than in the compose file. See :func:`_source` for why it can.</span>
+<span class="n">SIDECAR_FILENAMES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;spiri-settings.yaml&quot;</span><span class="p">,</span> <span class="s2">&quot;spiri-settings.yml&quot;</span><span class="p">)</span>
+
+<span class="c1">#: Every widget an app may ask for, and the NiceGUI element each one becomes.</span>
+<span class="c1">#:</span>
+<span class="c1">#: Kept here rather than in :mod:`spiriconfig_docker.widgets` so that the CLI and</span>
+<span class="c1">#: the schema can be checked without importing NiceGUI. The two are held together</span>
+<span class="c1">#: by a test that fails if a name here has no builder there.</span>
+<span class="n">WIDGETS</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">(</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;input&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;password&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;textarea&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;number&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;slider&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;switch&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;checkbox&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;select&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;radio&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;toggle&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;color&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;video_device&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+
+<span class="c1">#: Widgets that are a choice between fixed options, and so require ``options:``.</span>
+<span class="n">CHOICE_WIDGETS</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="s2">&quot;select&quot;</span><span class="p">,</span> <span class="s2">&quot;radio&quot;</span><span class="p">,</span> <span class="s2">&quot;toggle&quot;</span><span class="p">})</span>
+
+<span class="c1">#: Widgets whose options are never only what is declared. ``video_device`` fills</span>
+<span class="c1">#: its dropdown with whatever ``/dev/video*`` exists at render time, adds any</span>
+<span class="c1">#: URLs an author declares in ``options:`` on top, and accepts a value typed in</span>
+<span class="c1">#: by hand besides -- so unlike :data:`CHOICE_WIDGETS`, ``options:`` is optional</span>
+<span class="c1">#: here, and there is no fixed list to validate a saved value against: a camera</span>
+<span class="c1">#: present on save may be gone by the time the ``.env`` is read again, and a</span>
+<span class="c1">#: typed-in URL was never on any list to begin with.</span>
+<span class="n">DISCOVERED_WIDGETS</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="s2">&quot;video_device&quot;</span><span class="p">})</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logger</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">plugin</span><span class="o">=</span><span class="s2">&quot;docker&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="SettingsError">
+<a class="viewcode-back" href="../../api.html#spiriconfig_docker.settings.SettingsError">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">SettingsError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;An app&#39;s ``x-spiri-settings`` is malformed, or a value for it is.&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="Field">
+<a class="viewcode-back" href="../../api.html#spiriconfig_docker.settings.Field">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Field</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;One setting: a ``.env`` variable, and how to ask a human for it.&quot;&quot;&quot;</span>
+
+    <span class="n">env</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The ``.env`` variable this field reads and writes.&quot;&quot;&quot;</span>
+
+    <span class="n">widget</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;input&quot;</span>
+    <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Shown beside the widget. Defaults to a readable form of :attr:`env`.&quot;&quot;&quot;</span>
+
+    <span class="n">help</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Shown under the widget. This is where an app author explains themselves.&quot;&quot;&quot;</span>
+
+    <span class="n">default</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;What the form offers when the ``.env`` does not set this variable.&quot;&quot;&quot;</span>
+
+    <span class="n">options</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The choices, for :data:`CHOICE_WIDGETS`.&quot;&quot;&quot;</span>
+
+    <span class="nb">min</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="nb">max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">step</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">required</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">pattern</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A regular expression the value must match. Checked in the form, and on save.&quot;&quot;&quot;</span>
+
+    <span class="n">advanced</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Show this field only in advanced mode. Clutter, not secrecy.</span>
+
+<span class="sd">    A hidden field is still filled in from the ``.env``, still written back when the</span>
+<span class="sd">    form is saved, and still ``spiriconfig docker settings``&#39;s business. See the</span>
+<span class="sd">    module docstring, and :mod:`spiriconfig.advanced`, which says the same thing</span>
+<span class="sd">    about every other advanced-only element on the page.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">title</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The label to render: what the author wrote, or a readable fallback.</span>
+
+<span class="sd">        ``GRAFANA_ADMIN_PASSWORD`` becomes ``Grafana admin password``, so an author</span>
+<span class="sd">        who cannot be bothered to write a label still gets something better than a</span>
+<span class="sd">        shouting environment variable.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">label</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_field_from</span><span class="p">(</span><span class="n">raw</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">source</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">SETTINGS_KEY</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Field</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build one :class:`Field`, or say precisely what is wrong with it.</span>
+
+<span class="sd">    The error messages are aimed at whoever wrote the declaration, which is usually</span>
+<span class="sd">    a store author and is occasionally the user. They name the offending field by</span>
+<span class="sd">    position, because a field with no ``env`` has no other name to give, and they</span>
+<span class="sd">    name ``source`` -- the compose key or the sidecar&#39;s filename -- because with</span>
+<span class="sd">    three places a form can come from, &quot;which file is this in?&quot; has become a real</span>
+<span class="sd">    question.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">where</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">source</span><span class="si">}</span><span class="s2">[</span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2">]&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">SettingsError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">where</span><span class="si">}</span><span class="s2"> must be a mapping, not </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">unknown</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span> <span class="o">-</span> <span class="p">{</span><span class="n">f</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">Field</span><span class="o">.</span><span class="n">__dataclass_fields__</span><span class="o">.</span><span class="n">values</span><span class="p">()}</span>
+    <span class="k">if</span> <span class="n">unknown</span><span class="p">:</span>
+        <span class="n">known</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">Field</span><span class="o">.</span><span class="n">__dataclass_fields__</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+        <span class="k">raise</span> <span class="n">SettingsError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">where</span><span class="si">}</span><span class="s2"> has unknown keys: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">unknown</span><span class="p">))</span><span class="si">}</span><span class="s2">. Known keys: </span><span class="si">{</span><span class="n">known</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="n">raw</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;env&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">SettingsError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">where</span><span class="si">}</span><span class="s2"> needs an `env:` naming the variable it sets&quot;</span><span class="p">)</span>
+
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">raw</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;widget&quot;</span><span class="p">,</span> <span class="s2">&quot;input&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">widget</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">WIDGETS</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">SettingsError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">where</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">) asks for widget </span><span class="si">{</span><span class="n">widget</span><span class="si">!r}</span><span class="s2">, which does not exist. &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Available: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">WIDGETS</span><span class="p">))</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">options</span> <span class="o">=</span> <span class="n">raw</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;options&quot;</span><span class="p">,</span> <span class="p">[])</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">SettingsError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">where</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">) has `options:` that is not a list&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">widget</span> <span class="ow">in</span> <span class="n">CHOICE_WIDGETS</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">options</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">SettingsError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">where</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">) is a </span><span class="si">{</span><span class="n">widget</span><span class="si">}</span><span class="s2">, so it needs `options:` to choose between&quot;</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Everything reaching a .env is a string, so the schema&#39;s scalars are coerced</span>
+    <span class="c1"># here rather than at every use. YAML turning `default: 3000` into an int, or</span>
+    <span class="c1"># `default: true` into a bool, is the author writing what they meant -- it</span>
+    <span class="c1"># should not become a type error three modules away.</span>
+    <span class="k">return</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">env</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">widget</span><span class="p">,</span>
+        <span class="n">label</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;label&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)),</span>
+        <span class="n">help</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;help&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)),</span>
+        <span class="n">default</span><span class="o">=</span><span class="n">_scalar</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;default&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)),</span>
+        <span class="n">options</span><span class="o">=</span><span class="p">[</span><span class="n">_scalar</span><span class="p">(</span><span class="n">o</span><span class="p">)</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">options</span><span class="p">],</span>
+        <span class="nb">min</span><span class="o">=</span><span class="n">raw</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;min&quot;</span><span class="p">),</span>
+        <span class="nb">max</span><span class="o">=</span><span class="n">raw</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;max&quot;</span><span class="p">),</span>
+        <span class="n">step</span><span class="o">=</span><span class="n">raw</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;step&quot;</span><span class="p">),</span>
+        <span class="n">required</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;required&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)),</span>
+        <span class="n">pattern</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;pattern&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)),</span>
+        <span class="n">advanced</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;advanced&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)),</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_scalar</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A YAML scalar as the string a ``.env`` will hold.</span>
+
+<span class="sd">    ``True`` becomes ``&quot;true&quot;``, not ``&quot;True&quot;``: the value is going into a file</span>
+<span class="sd">    that shell scripts and containers read, and every other tool in that world</span>
+<span class="sd">    spells a boolean in lower case.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;true&quot;</span> <span class="k">if</span> <span class="n">value</span> <span class="k">else</span> <span class="s2">&quot;false&quot;</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="declared">
+<a class="viewcode-back" href="../../api.html#spiriconfig_docker.settings.declared">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">declared</span><span class="p">(</span><span class="n">compose_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Field</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The fields an app declares, or ``[]`` if it declares none.</span>
+
+<span class="sd">    Reading the compose file as YAML is fine, and is what</span>
+<span class="sd">    :meth:`spiriconfig_appstore.stores.App.version` already does. We never write it</span>
+<span class="sd">    back -- the file the form edits is the ``.env`` beside it, precisely so that a</span>
+<span class="sd">    settings page can never reformat somebody&#39;s compose file or eat its comments.</span>
+
+<span class="sd">    Raises :class:`SettingsError` if the declaration is there but wrong, because a</span>
+<span class="sd">    store author who typoed ``widgit:`` needs to hear about it. An app with no</span>
+<span class="sd">    settings at all is not an error; it is simply an app with no settings, which is</span>
+<span class="sd">    most of them.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">raw</span><span class="p">,</span> <span class="n">source</span> <span class="o">=</span> <span class="n">_source</span><span class="p">(</span><span class="n">compose_file</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">raw</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">SettingsError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">source</span><span class="si">}</span><span class="s2"> must be a list of fields&quot;</span><span class="p">)</span>
+
+    <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="n">_field_from</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">raw</span><span class="p">)]</span>
+
+    <span class="n">seen</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">fields</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">env</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">SettingsError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">source</span><span class="si">}</span><span class="s2"> sets </span><span class="si">{</span><span class="n">item</span><span class="o">.</span><span class="n">env</span><span class="si">}</span><span class="s2"> twice, at [</span><span class="si">{</span><span class="n">seen</span><span class="p">[</span><span class="n">item</span><span class="o">.</span><span class="n">env</span><span class="p">]</span><span class="si">}</span><span class="s2">] and &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2">]. Two widgets writing one variable cannot both be right.&quot;</span>
+            <span class="p">)</span>
+        <span class="n">seen</span><span class="p">[</span><span class="n">item</span><span class="o">.</span><span class="n">env</span><span class="p">]</span> <span class="o">=</span> <span class="n">index</span>
+
+    <span class="k">return</span> <span class="n">fields</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_source</span><span class="p">(</span><span class="n">compose_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Find an app&#39;s settings, wherever it keeps them. Returns (raw fields, label).</span>
+
+<span class="sd">    Three ways to declare them, and the reason there is more than one is the app</span>
+<span class="sd">    store. An app is often somebody else&#39;s compose file, copied in as it was</span>
+<span class="sd">    published: the more of it you have to edit, the more of every future ``git</span>
+<span class="sd">    merge`` is your own doing. So the sidecar exists to let a maintainer add a</span>
+<span class="sd">    settings form *without touching the compose file at all*.</span>
+
+<span class="sd">    In precedence order:</span>
+
+<span class="sd">    1. ``x-spiri-settings:`` in the compose file, holding the list itself.</span>
+<span class="sd">    2. ``x-spiri-settings: my-settings.yaml``, naming a file to read it from.</span>
+<span class="sd">    3. No key at all, and a :data:`SIDECAR_FILENAMES` file sitting beside the</span>
+<span class="sd">       compose file. Nothing in the compose file, which is the point.</span>
+
+<span class="sd">    Declaring settings *twice* is an error rather than a precedence rule. Two</span>
+<span class="sd">    sources of truth that can disagree is the thing this project exists not to do,</span>
+<span class="sd">    and a store author who has left an old sidecar next to a new inline block would</span>
+<span class="sd">    much rather be told than have us silently pick one.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">inline</span> <span class="o">=</span> <span class="n">_from_compose</span><span class="p">(</span><span class="n">compose_file</span><span class="p">)</span>
+    <span class="n">sidecar</span> <span class="o">=</span> <span class="n">find_sidecar</span><span class="p">(</span><span class="n">compose_file</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">inline</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">sidecar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">SettingsError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">compose_file</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> declares </span><span class="si">{</span><span class="n">SETTINGS_KEY</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">sidecar</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> exists &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;beside it. Settings must come from one place or the other -- delete &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;whichever is stale.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inline</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">_load_sidecar</span><span class="p">(</span><span class="n">_referenced</span><span class="p">(</span><span class="n">compose_file</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">inline</span><span class="p">)),</span> <span class="n">inline</span>
+    <span class="k">if</span> <span class="n">inline</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">inline</span><span class="p">,</span> <span class="n">SETTINGS_KEY</span>
+    <span class="k">if</span> <span class="n">sidecar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_load_sidecar</span><span class="p">(</span><span class="n">sidecar</span><span class="p">),</span> <span class="n">sidecar</span><span class="o">.</span><span class="n">name</span>
+    <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_from_compose</span><span class="p">(</span><span class="n">compose_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The raw ``x-spiri-settings`` value from the compose file, or None if absent.</span>
+
+<span class="sd">    Reading the compose file as YAML is fine, and is what</span>
+<span class="sd">    :meth:`spiriconfig_appstore.stores.App.version` already does. We never write it</span>
+<span class="sd">    back -- the file the form edits is the ``.env`` beside it, precisely so that a</span>
+<span class="sd">    settings page can never reformat somebody&#39;s compose file or eat its comments.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">document</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">compose_file</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="n">yaml</span><span class="o">.</span><span class="n">YAMLError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">SettingsError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;could not read </span><span class="si">{</span><span class="n">compose_file</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">document</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">document</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">SETTINGS_KEY</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_referenced</span><span class="p">(</span><span class="n">directory</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Resolve a sidecar named in the compose file, refusing to leave the app.</span>
+
+<span class="sd">    A compose file is not always something the user wrote -- it can arrive from a</span>
+<span class="sd">    store, over the network -- so ``x-spiri-settings: ../../../etc/shadow`` is a</span>
+<span class="sd">    line somebody could write, and it must not be a line that makes us read it and</span>
+<span class="sd">    put it on a web page. Checked the way :func:`spiriconfig_docker.stacks.get`</span>
+<span class="sd">    checks a stack name: resolve it, and insist the answer is still inside.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="p">(</span><span class="n">directory</span> <span class="o">/</span> <span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">target</span><span class="o">.</span><span class="n">is_relative_to</span><span class="p">(</span><span class="n">directory</span><span class="o">.</span><span class="n">resolve</span><span class="p">()):</span>
+        <span class="k">raise</span> <span class="n">SettingsError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">SETTINGS_KEY</span><span class="si">}</span><span class="s2"> points at </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2">, which is outside the app&#39;s &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;directory. It must name a file beside the compose file.&quot;</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">target</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="n">SettingsError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">SETTINGS_KEY</span><span class="si">}</span><span class="s2"> points at </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2">, which does not exist&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">target</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_load_sidecar</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read a sidecar&#39;s fields.</span>
+
+<span class="sd">    Accepts either a bare list of fields, or a mapping with ``x-spiri-settings:`` in</span>
+<span class="sd">    it -- so a maintainer whose compose file has outgrown its settings block can cut</span>
+<span class="sd">    the block out and paste it into a file, unchanged, and have it work.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">document</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="n">yaml</span><span class="o">.</span><span class="n">YAMLError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">SettingsError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;could not read </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">document</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">SETTINGS_KEY</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">document</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">SettingsError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> has no </span><span class="si">{</span><span class="n">SETTINGS_KEY</span><span class="si">}</span><span class="s2"> in it. A sidecar is either a &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;list of fields, or a mapping with </span><span class="si">{</span><span class="n">SETTINGS_KEY</span><span class="si">}</span><span class="s2"> holding one.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">document</span><span class="p">[</span><span class="n">SETTINGS_KEY</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">document</span>
+
+
+<div class="viewcode-block" id="find_sidecar">
+<a class="viewcode-back" href="../../api.html#spiriconfig_docker.settings.find_sidecar">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">find_sidecar</span><span class="p">(</span><span class="n">directory</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The settings sidecar in ``directory``, or None if there is not one.</span>
+
+<span class="sd">    The same shape as :func:`spiriconfig_docker.stacks.find_compose_file`, and for</span>
+<span class="sd">    the same reason: a fixed list of names, checked in order, so that finding one is</span>
+<span class="sd">    a question about the filesystem and not about configuration.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">SIDECAR_FILENAMES</span><span class="p">:</span>
+        <span class="n">candidate</span> <span class="o">=</span> <span class="n">directory</span> <span class="o">/</span> <span class="n">name</span>
+        <span class="k">if</span> <span class="n">candidate</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">candidate</span>
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="StackSettings">
+<a class="viewcode-back" href="../../api.html#spiriconfig_docker.settings.StackSettings">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">StackSettings</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A stack&#39;s declared form, bound to the ``.env`` it reads and writes.&quot;&quot;&quot;</span>
+
+    <span class="n">stack</span><span class="p">:</span> <span class="n">Stack</span>
+    <span class="n">fields</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Field</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">env_file</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="n">ENV_FILENAME</span>
+
+<div class="viewcode-block" id="StackSettings.values">
+<a class="viewcode-back" href="../../api.html#spiriconfig_docker.settings.StackSettings.values">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">values</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;What the form should show: the ``.env``&#39;s value, or the field&#39;s default.</span>
+
+<span class="sd">        Only declared fields. Whatever else the user keeps in their ``.env`` is</span>
+<span class="sd">        theirs, and none of the form&#39;s business -- it is not shown, and</span>
+<span class="sd">        :meth:`save` will not touch it.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">current</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env_file</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">f</span><span class="o">.</span><span class="n">env</span><span class="p">:</span> <span class="n">current</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">env</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">default</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="StackSettings.read">
+<a class="viewcode-back" href="../../api.html#spiriconfig_docker.settings.StackSettings.read">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The ``.env``&#39;s text, or ``&quot;&quot;`` if the app has not got one yet.</span>
+
+<span class="sd">        A missing ``.env`` is the ordinary state of an app nobody has configured,</span>
+<span class="sd">        not an error -- and an empty buffer is the honest thing to show for one.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_original</span><span class="p">()</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="StackSettings.preview">
+<a class="viewcode-back" href="../../api.html#spiriconfig_docker.settings.StackSettings.preview">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">preview</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The exact text :meth:`save` would write. Shown in the UI before it does.</span>
+
+<span class="sd">        The same instinct as showing the command line before running it: a settings</span>
+<span class="sd">        page that edits a file should be willing to say which bytes it is about to</span>
+<span class="sd">        put in it. *Exact* is meant literally -- the advanced editor is filled with</span>
+<span class="sd">        this text and will write back whatever it then holds, so a preview that</span>
+<span class="sd">        differed from the write by so much as a header would be a preview that lied</span>
+<span class="sd">        the moment somebody edited it.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rendered</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_checked</span><span class="p">(</span><span class="n">values</span><span class="p">))</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_original</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The ``.env`` as it stands, or None if there is not one.</span>
+
+<span class="sd">        None and ``&quot;&quot;`` are kept apart on purpose: they are different files to put</span>
+<span class="sd">        back if a save is rejected, and only one of them wants a header.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">env_file</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_rendered</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">checked</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The file, with ``checked`` patched into it. What a form save writes.&quot;&quot;&quot;</span>
+        <span class="n">original</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_original</span><span class="p">()</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">original</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">checked</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">original</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">text</span><span class="p">:</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="n">_HEADER</span> <span class="o">+</span> <span class="n">text</span>
+        <span class="k">return</span> <span class="n">text</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_checked</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate ``values`` against the schema, and drop anything undeclared.</span>
+
+<span class="sd">        Undeclared keys are dropped rather than rejected: the caller is a form we</span>
+<span class="sd">        built from the schema, so a key that is not in it is our bug, not the</span>
+<span class="sd">        user&#39;s -- and writing it into their ``.env`` would be the worst way to find</span>
+<span class="sd">        out. Values are checked here, on the way to the file, rather than only in</span>
+<span class="sd">        the widgets, so that the CLI gets the same guarantees the web UI does.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">checked</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">env</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="n">item</span><span class="o">.</span><span class="n">env</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">required</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">value</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">SettingsError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">item</span><span class="o">.</span><span class="n">title</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">item</span><span class="o">.</span><span class="n">env</span><span class="si">}</span><span class="s2">) is required&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">and</span> <span class="n">item</span><span class="o">.</span><span class="n">pattern</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">pattern</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">SettingsError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">item</span><span class="o">.</span><span class="n">title</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">item</span><span class="o">.</span><span class="n">env</span><span class="si">}</span><span class="s2">) must match </span><span class="si">{</span><span class="n">item</span><span class="o">.</span><span class="n">pattern</span><span class="si">!r}</span><span class="s2">, &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;and </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s2"> does not&quot;</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">and</span> <span class="n">item</span><span class="o">.</span><span class="n">widget</span> <span class="ow">in</span> <span class="n">CHOICE_WIDGETS</span> <span class="ow">and</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">item</span><span class="o">.</span><span class="n">options</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">SettingsError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">item</span><span class="o">.</span><span class="n">title</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">item</span><span class="o">.</span><span class="n">env</span><span class="si">}</span><span class="s2">) must be one of &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">options</span><span class="p">)</span><span class="si">}</span><span class="s2">, not </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+            <span class="n">checked</span><span class="p">[</span><span class="n">item</span><span class="o">.</span><span class="n">env</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">return</span> <span class="n">checked</span>
+
+<div class="viewcode-block" id="StackSettings.save">
+<a class="viewcode-back" href="../../api.html#spiriconfig_docker.settings.StackSettings.save">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Write the values to the ``.env``, refusing to leave a broken one behind.</span>
+
+<span class="sd">        The keys the form declares are patched into the file; everything else in it</span>
+<span class="sd">        -- the user&#39;s comments, their own variables, the order they chose -- comes</span>
+<span class="sd">        through untouched. See :func:`spiriconfig_docker.env.patch`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_rendered</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_checked</span><span class="p">(</span><span class="n">values</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="StackSettings.write">
+<a class="viewcode-back" href="../../api.html#spiriconfig_docker.settings.StackSettings.write">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Write ``text`` to the ``.env`` as given, refusing to leave a broken one.</span>
+
+<span class="sd">        The other door into the same file, for the advanced editor: bytes in, bytes</span>
+<span class="sd">        on disk. No patching, no header, no schema -- a file somebody edited by hand</span>
+<span class="sd">        is a file they own, and the form&#39;s opinion about which keys exist is not one</span>
+<span class="sd">        it gets to impose on a text editor. What they typed is what compose will</span>
+<span class="sd">        read, which is the entire reason to offer a text editor at all.</span>
+
+<span class="sd">        The check is the same bargain :meth:`spiriconfig_docker.stacks.Stack.write`</span>
+<span class="sd">        makes for the compose file, and for the same reason: compose has to be able</span>
+<span class="sd">        to read this file, and a ``.env`` it rejects makes the stack unstartable --</span>
+<span class="sd">        including by hand, from a shell, which is the escape hatch that must never</span>
+<span class="sd">        close. So the new file goes down, ``docker compose config`` is asked whether</span>
+<span class="sd">        it can still read the project, and the original is put back if it says no.</span>
+<span class="sd">        A rejected save leaves the previous, working file exactly as it was.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">original</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_original</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">env_file</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">run</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="o">.</span><span class="n">validate</span><span class="p">(),</span>
+                <span class="n">timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">command_timeout</span><span class="p">,</span>
+                <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="n">CommandError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_restore</span><span class="p">(</span><span class="n">original</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">SettingsError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;could not run docker compose to check the file: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="o">.</span><span class="n">ok</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_restore</span><span class="p">(</span><span class="n">original</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">SettingsError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;docker compose rejected the settings, so they were not saved:</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;wrote </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">env_file</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_restore</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">original</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Put the ``.env`` back exactly as it was, including not existing at all.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">original</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">env_file</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">missing_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">env_file</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">original</span><span class="p">)</span></div>
+
+
+
+<span class="c1">#: Written at the top of a ``.env`` we create, and never touched again after that.</span>
+<span class="c1">#:</span>
+<span class="c1">#: A file appearing in a user&#39;s project directory should say where it came from,</span>
+<span class="c1">#: and -- more usefully -- that they are allowed to edit it. It goes in only on</span>
+<span class="c1">#: creation: rewriting a header into a file the user already owns would be exactly</span>
+<span class="c1">#: the sort of helpful vandalism this project is against.</span>
+<span class="n">_HEADER</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">&quot;# Settings for this app, read by `docker compose` and editable by hand.</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="s2">&quot;# SpiriConfig&#39;s settings page edits this file; it keeps your comments and</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="s2">&quot;# any other variables you put here.</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="for_stack">
+<a class="viewcode-back" href="../../api.html#spiriconfig_docker.settings.for_stack">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">for_stack</span><span class="p">(</span><span class="n">stack</span><span class="p">:</span> <span class="n">Stack</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StackSettings</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The settings form for ``stack``, empty if it declares none.</span>
+
+<span class="sd">    Raises :class:`SettingsError` if it declares a malformed one.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">StackSettings</span><span class="p">(</span><span class="n">stack</span><span class="o">=</span><span class="n">stack</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="n">declared</span><span class="p">(</span><span class="n">stack</span><span class="o">.</span><span class="n">compose_file</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="has_settings">
+<a class="viewcode-back" href="../../api.html#spiriconfig_docker.settings.has_settings">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">has_settings</span><span class="p">(</span><span class="n">stack</span><span class="p">:</span> <span class="n">Stack</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Whether ``stack`` declares a settings form that we could render.</span>
+
+<span class="sd">    Swallows a malformed declaration, deliberately: this is called while drawing a</span>
+<span class="sd">    list of every stack, and one app with a typo in it must not take the page down</span>
+<span class="sd">    with it. The error is logged, and it is raised properly by :func:`for_stack`</span>
+<span class="sd">    when someone actually opens that app&#39;s settings -- which is the moment they can</span>
+<span class="sd">    do something about it.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">declared</span><span class="p">(</span><span class="n">stack</span><span class="o">.</span><span class="n">compose_file</span><span class="p">))</span>
+    <span class="k">except</span> <span class="n">SettingsError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> has a broken </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">stack</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">SETTINGS_KEY</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+
+
+<div class="viewcode-block" id="get">
+<a class="viewcode-back" href="../../api.html#spiriconfig_docker.settings.get">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">stack_settings</span><span class="p">:</span> <span class="n">StackSettings</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Field</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Look up a declared field by its variable name.&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">stack_settings</span><span class="o">.</span><span class="n">fields</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">env</span> <span class="o">==</span> <span class="n">key</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">item</span>
+    <span class="n">known</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">env</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">stack_settings</span><span class="o">.</span><span class="n">fields</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;none&quot;</span>
+    <span class="k">raise</span> <span class="n">SettingsError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">stack_settings</span><span class="o">.</span><span class="n">stack</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> has no setting </span><span class="si">{</span><span class="n">key</span><span class="si">!r}</span><span class="s2"> (has: </span><span class="si">{</span><span class="n">known</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span></div>
+
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;CHOICE_WIDGETS&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;DISCOVERED_WIDGETS&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ENV_FILENAME&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;SETTINGS_KEY&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;SIDECAR_FILENAMES&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;WIDGETS&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Field&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;SettingsError&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;StackSettings&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;declared&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;find_sidecar&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;for_stack&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;has_settings&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+</pre></div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2026, Alex Davies
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script src="../../_static/documentation_options.js?v=1b390748"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

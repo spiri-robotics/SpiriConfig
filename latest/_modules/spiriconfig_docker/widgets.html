@@ -1,0 +1,812 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html">
+        <link rel="canonical" href="https://spiri-robotics.github.io/SpiriConfig/latest/_modules/spiriconfig_docker/widgets.html">
+        <link rel="prefetch" href="../../_static/spiri-logo-light.svg" as="image">
+        <link rel="prefetch" href="../../_static/spiri-logo-dark.svg" as="image">
+
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
+        <title>spiriconfig_docker.widgets - SpiriConfig</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=bde8c6b5" />
+    <link rel="stylesheet" type="text/css" href="../../_static/spiri-safety-icon.css?v=01762096" />
+    <link rel="stylesheet" type="text/css" href="../../_static/spiri-safety.css?v=84605d0a" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../index.html"><div class="brand">SpiriConfig</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo only-light" src="../../_static/spiri-logo-light.svg" alt="Light Logo"/>
+    <img class="sidebar-logo only-dark" src="../../_static/spiri-logo-dark.svg" alt="Dark Logo"/>
+  </div>
+  
+  <span class="sidebar-brand-text">SpiriConfig</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div>
+<div class="spiri-versions" hidden>
+  <label class="spiri-versions__label" for="spiri-version">Version</label>
+  <select class="spiri-versions__select" id="spiri-version"></select>
+  <a class="spiri-versions__pdf" hidden>Download PDF</a>
+</div>
+<script>
+  (() => {
+    const box = document.currentScript.previousElementSibling;
+    // This version's root, and the site's root above it.
+    const root = new URL(document.documentElement.dataset.content_root || "./", location.href);
+    const site = new URL("../", root);
+    const current = root.href.slice(site.href.length).replace(/\/$/, "");
+    const page = location.pathname.slice(root.pathname.length);
+
+    fetch(new URL("versions.json", site))
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        const name = current === "latest" ? data?.latest : current;
+        const here = data?.versions.find((v) => v.name === name);
+        if (!here) return;
+
+        const select = box.querySelector("select");
+        for (const v of data.versions) {
+          const label =
+            v.name === "dev" ? "dev (main)" : v.name === data.latest ? `${v.name} (latest)` : v.name;
+          select.add(new Option(label, v.name, false, v === here));
+        }
+        // The same page in the chosen version, or its front page if it has no such page.
+        select.addEventListener("change", async () => {
+          const chosen = data.versions.find((v) => v.name === select.value);
+          const front = new URL(chosen.path, site);
+          const same = new URL(page, front);
+          const exists = await fetch(same, { method: "HEAD" }).then((r) => r.ok, () => false);
+          location.href = (exists ? same : front).href;
+        });
+
+        if (here.pdf) {
+          const pdf = box.querySelector("a");
+          pdf.href = new URL(here.pdf, site).href;
+          pdf.hidden = false;
+        }
+        box.hidden = false;
+      })
+      .catch(() => {});
+  })();
+</script><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">1. Installing SpiriConfig</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../configuration.html">2. Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../advanced.html">3. Advanced mode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../docker.html">4. The docker plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../appstore.html">5. App store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plugins.html">6. Writing a plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../container-plugins.html">7. Container plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../design.html">8. Design notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">9. API reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Document control</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../revisions.html">Revision history</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <h1>Source code for spiriconfig_docker.widgets</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;The widgets a settings form is made of, one per NiceGUI element.</span>
+
+<span class="sd">``widget: select`` in a compose file means ``ui.select`` on the page. That is the</span>
+<span class="sd">whole mapping, and keeping it that direct is a deliberate refusal of the usual</span>
+<span class="sd">design, in which a schema declares an abstract *type* and the renderer guesses a</span>
+<span class="sd">widget from it. Guessing is what forces an app author to work out that</span>
+<span class="sd">``type: string`` plus ``enum:`` is the incantation for a dropdown, and it is what</span>
+<span class="sd">leaves them stuck when they want a slider instead of a number box for the same</span>
+<span class="sd">integer. Naming the element is shorter to write, obvious to read, and puts the</span>
+<span class="sd">author in charge of their own form.</span>
+
+<span class="sd">Every widget has to do three things, and they are separate because a ``.env``</span>
+<span class="sd">holds text and a widget does not:</span>
+
+<span class="sd">* **build** the NiceGUI element</span>
+<span class="sd">* **parse** the text out of the ``.env`` into whatever the element&#39;s ``value`` is</span>
+<span class="sd">* **format** that value back into text for the ``.env``</span>
+
+<span class="sd">The round trip is where the bodies are buried. ``ui.number`` hands back a float,</span>
+<span class="sd">so a port typed as ``3000`` would go into the file as ``3000.0`` and into the</span>
+<span class="sd">container as a string docker cannot bind. ``ui.switch`` hands back a bool, and</span>
+<span class="sd">``str(True)`` is ``&quot;True&quot;``, which is not how anything else in a container spells</span>
+<span class="sd">it. So each widget owns its own conversions, and :func:`values` is the only thing</span>
+<span class="sd">that reads them back.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">nicegui</span><span class="w"> </span><span class="kn">import</span> <span class="n">ui</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">spiriconfig</span><span class="w"> </span><span class="kn">import</span> <span class="n">advanced</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">spiriconfig_docker.settings</span><span class="w"> </span><span class="kn">import</span> <span class="n">Field</span>
+
+<span class="c1">#: Where video capture nodes show up. A module-level constant, rather than the</span>
+<span class="c1">#: literal inline, so a test can point it at a fake ``/dev`` instead of needing</span>
+<span class="c1">#: an actual camera.</span>
+<span class="n">_DEV_DIR</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;/dev&quot;</span><span class="p">)</span>
+
+<span class="c1">#: Where the kernel names a ``/dev/videoN`` node, if it names it at all.</span>
+<span class="c1">#:</span>
+<span class="c1">#: Read rather than run: this is a file the v4l2 driver already writes, so there</span>
+<span class="c1">#: is no tool to shell out to and nothing to parse out of a command&#39;s prose.</span>
+<span class="n">_V4L_SYSFS</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;/sys/class/video4linux&quot;</span><span class="p">)</span>
+
+<span class="c1">#: Text a ``.env`` might hold for a boolean widget. Anything else is false.</span>
+<span class="c1">#:</span>
+<span class="c1">#: Generous on the way in and strict on the way out: we write ``true``/``false``,</span>
+<span class="c1">#: but a user who hand-edited their ``.env`` to say ``yes`` meant yes, and a</span>
+<span class="c1">#: switch that silently showed their ``yes`` as off would be lying to them.</span>
+<span class="n">TRUTHY</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="s2">&quot;true&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;yes&quot;</span><span class="p">,</span> <span class="s2">&quot;on&quot;</span><span class="p">})</span>
+
+<span class="c1">#: NiceGUI marker put on each rendered widget, followed by the variable it sets:</span>
+<span class="c1">#: ``setting-GRAFANA_PORT``. See :func:`render`.</span>
+<span class="n">MARKER_PREFIX</span> <span class="o">=</span> <span class="s2">&quot;setting-&quot;</span>
+
+<span class="c1">#: NiceGUI marker put on each field&#39;s reset button, followed by the variable it</span>
+<span class="c1">#: resets: ``reset-GRAFANA_PORT``. See :func:`render`.</span>
+<span class="n">RESET_PREFIX</span> <span class="o">=</span> <span class="s2">&quot;reset-&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_to_bool</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">_</span><span class="p">:</span> <span class="n">Field</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">TRUTHY</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_from_bool</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">return</span> <span class="s2">&quot;true&quot;</span> <span class="k">if</span> <span class="n">value</span> <span class="k">else</span> <span class="s2">&quot;false&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_to_number</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">_</span><span class="p">:</span> <span class="n">Field</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Text to a number, or None for an empty box.</span>
+
+<span class="sd">    Unparseable text becomes None rather than raising: it means somebody typed</span>
+<span class="sd">    prose into a ``.env``, and the useful response is an empty box they can fix,</span>
+<span class="sd">    not a page that will not render.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_from_number</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A number back to text, without the ``.0`` that would break a port binding.</span>
+
+<span class="sd">    ``ui.number`` always yields a float, so ``3000`` comes back as ``3000.0``.</span>
+<span class="sd">    Written out verbatim that gives ``ports: &quot;3000.0:3000&quot;``, which docker rejects</span>
+<span class="sd">    -- so an integral float is written as an integer.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">value</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="ow">and</span> <span class="n">value</span><span class="o">.</span><span class="n">is_integer</span><span class="p">():</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_to_text</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">_</span><span class="p">:</span> <span class="n">Field</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">text</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_from_text</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">return</span> <span class="s2">&quot;&quot;</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_common</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="n">Field</span><span class="p">,</span> <span class="n">element</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Label and validation that any element can carry.</span>
+
+<span class="sd">    The validation is the same rule :meth:`StackSettings._checked` enforces on the</span>
+<span class="sd">    way to the file, said twice on purpose: here it is a red message under the box</span>
+<span class="sd">    as you type, and there it is a refusal to write. The form is the courtesy; the</span>
+<span class="sd">    check before the write is the guarantee, and it is the one that also covers the</span>
+<span class="sd">    CLI.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">checks</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="nb">bool</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
+        <span class="n">checks</span><span class="p">[</span><span class="s2">&quot;Required&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">value</span><span class="p">:</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">pattern</span><span class="p">:</span>
+        <span class="n">pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">pattern</span><span class="p">)</span>
+        <span class="n">checks</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;Must match </span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">pattern</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">value</span><span class="p">:</span> <span class="ow">not</span> <span class="n">value</span> <span class="ow">or</span> <span class="nb">bool</span><span class="p">(</span><span class="n">pattern</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">checks</span><span class="p">:</span>
+        <span class="n">element</span><span class="o">.</span><span class="n">validation</span> <span class="o">=</span> <span class="n">checks</span>
+    <span class="k">return</span> <span class="n">element</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_input</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="n">Field</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A single-line text box.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_common</span><span class="p">(</span>
+        <span class="n">field</span><span class="p">,</span>
+        <span class="n">ui</span><span class="o">.</span><span class="n">input</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">title</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">),</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_password</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="n">Field</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A text box with the value masked, and a toggle to reveal it.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_common</span><span class="p">(</span>
+        <span class="n">field</span><span class="p">,</span>
+        <span class="n">ui</span><span class="o">.</span><span class="n">input</span><span class="p">(</span>
+            <span class="n">label</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">title</span><span class="p">,</span>
+            <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">,</span>
+            <span class="n">password</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">password_toggle_button</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">placeholder</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_textarea</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="n">Field</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A multi-line text box.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_common</span><span class="p">(</span>
+        <span class="n">field</span><span class="p">,</span>
+        <span class="n">ui</span><span class="o">.</span><span class="n">textarea</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">title</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">),</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_number</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="n">Field</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A number box. Respects `min`, `max`, `step`.&quot;&quot;&quot;</span>
+    <span class="n">element</span> <span class="o">=</span> <span class="n">ui</span><span class="o">.</span><span class="n">number</span><span class="p">(</span>
+        <span class="n">label</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">title</span><span class="p">,</span>
+        <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">,</span>
+        <span class="nb">min</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">min</span><span class="p">,</span>
+        <span class="nb">max</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">max</span><span class="p">,</span>
+        <span class="n">step</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">step</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">_common</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">element</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_slider</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="n">Field</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A slider, plus the label and the readout it does not come with.</span>
+
+<span class="sd">    ``ui.slider`` has no label of its own and shows no number, which is fine in a</span>
+<span class="sd">    dashboard and useless in a settings form -- a bare rail that says neither what</span>
+<span class="sd">    it sets nor what it is currently set to. Both are added here, and the readout is</span>
+<span class="sd">    *bound* to the slider rather than refreshed by a handler, so it tracks the thumb</span>
+<span class="sd">    as it is dragged.</span>
+
+<span class="sd">    A slider with no bounds is a rail with no ends, so a field that forgot to say</span>
+<span class="sd">    gets 0-100.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="n">ui</span><span class="o">.</span><span class="n">column</span><span class="p">()</span><span class="o">.</span><span class="n">classes</span><span class="p">(</span><span class="s2">&quot;w-full gap-0&quot;</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">ui</span><span class="o">.</span><span class="n">row</span><span class="p">()</span><span class="o">.</span><span class="n">classes</span><span class="p">(</span><span class="s2">&quot;w-full items-baseline justify-between&quot;</span><span class="p">):</span>
+            <span class="n">ui</span><span class="o">.</span><span class="n">label</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">title</span><span class="p">)</span><span class="o">.</span><span class="n">classes</span><span class="p">(</span><span class="s2">&quot;text-sm&quot;</span><span class="p">)</span>
+            <span class="n">readout</span> <span class="o">=</span> <span class="n">ui</span><span class="o">.</span><span class="n">label</span><span class="p">()</span><span class="o">.</span><span class="n">classes</span><span class="p">(</span><span class="s2">&quot;text-sm font-mono text-gray-500&quot;</span><span class="p">)</span>
+        <span class="n">element</span> <span class="o">=</span> <span class="n">ui</span><span class="o">.</span><span class="n">slider</span><span class="p">(</span>
+            <span class="nb">min</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">min</span> <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">min</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="nb">max</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">max</span> <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">max</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">100</span><span class="p">,</span>
+            <span class="n">step</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">step</span> <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">step</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">,</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">classes</span><span class="p">(</span><span class="s2">&quot;w-full&quot;</span><span class="p">)</span>
+        <span class="n">readout</span><span class="o">.</span><span class="n">bind_text_from</span><span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="n">backward</span><span class="o">=</span><span class="n">_from_number</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">element</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_switch</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="n">Field</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;An on/off switch.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">ui</span><span class="o">.</span><span class="n">switch</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">title</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_checkbox</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="n">Field</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A checkbox.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">ui</span><span class="o">.</span><span class="n">checkbox</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">title</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_select</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="n">Field</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A dropdown, fixed to `options`.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_common</span><span class="p">(</span>
+        <span class="n">field</span><span class="p">,</span> <span class="n">ui</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">options</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">title</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_video_devices</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Every ``/dev/videoN`` on this machine, mapped to a label naming it.</span>
+
+<span class="sd">    The label comes from ``/sys/class/video4linux/videoN/name``, which the kernel</span>
+<span class="sd">    writes for every capture device -- a webcam shows up as something like ``HD</span>
+<span class="sd">    Pro Webcam C920`` rather than the bare node a human cannot tell apart from a</span>
+<span class="sd">    second one. A node without that file, or with one that fails to read, still</span>
+<span class="sd">    gets listed under its own name rather than being dropped -- a form that hides</span>
+<span class="sd">    a camera because of a sysfs hiccup is worse than one that shows it unnamed.</span>
+
+<span class="sd">    Sorted numerically (``video2`` before ``video10``) rather than as text, which</span>
+<span class="sd">    would put ``video10`` first.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">devices</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span>
+        <span class="n">_DEV_DIR</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;video*&quot;</span><span class="p">),</span>
+        <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\D&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">),</span>
+    <span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="p">(</span><span class="n">_V4L_SYSFS</span> <span class="o">/</span> <span class="n">path</span><span class="o">.</span><span class="n">name</span> <span class="o">/</span> <span class="s2">&quot;name&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">devices</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">)&quot;</span>
+    <span class="k">return</span> <span class="n">devices</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_video_device_options</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="n">Field</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Every option the video device dropdown offers, in the order it offers them.</span>
+
+<span class="sd">    Three sources, layered: the cameras :func:`_video_devices` finds plugged in</span>
+<span class="sd">    right now; then ``field.options``, an app author&#39;s declared list of URLs</span>
+<span class="sd">    (an RTSP stream, an IP camera) that no filesystem scan would ever find; then</span>
+<span class="sd">    the ``.env``&#39;s current value, if it is neither, so a save is never seen to</span>
+<span class="sd">    have silently forgotten it -- a device unplugged, or a URL an author has</span>
+<span class="sd">    since dropped from ``options:``, still shows up rather than vanishing.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">devices</span> <span class="o">=</span> <span class="n">_video_devices</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">field</span><span class="o">.</span><span class="n">options</span><span class="p">:</span>
+        <span class="n">devices</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="ow">and</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
+        <span class="n">devices</span> <span class="o">=</span> <span class="p">{</span><span class="n">value</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> (not currently present)&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">devices</span><span class="p">}</span>
+    <span class="k">return</span> <span class="n">devices</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_video_device</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="n">Field</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A dropdown of video sources: cameras found on this machine, URLs an app</span>
+<span class="sd">    author declared in ``options:``, or one typed in by hand.</span>
+
+<span class="sd">    ``with_input`` and ``new_value_mode=&quot;add-unique&quot;`` are what let the third</span>
+<span class="sd">    kind exist -- neither a camera nor a declared URL is something every app can</span>
+<span class="sd">    anticipate, so the box also accepts whatever text is typed into it, the same</span>
+<span class="sd">    way :func:`_input` would.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_common</span><span class="p">(</span>
+        <span class="n">field</span><span class="p">,</span>
+        <span class="n">ui</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+            <span class="n">options</span><span class="o">=</span><span class="n">_video_device_options</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">value</span><span class="p">),</span>
+            <span class="n">label</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">title</span><span class="p">,</span>
+            <span class="n">value</span><span class="o">=</span><span class="n">value</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">with_input</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">new_value_mode</span><span class="o">=</span><span class="s2">&quot;add-unique&quot;</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_radio</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="n">Field</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Radio buttons, fixed to `options`.&quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="n">ui</span><span class="o">.</span><span class="n">column</span><span class="p">()</span><span class="o">.</span><span class="n">classes</span><span class="p">(</span><span class="s2">&quot;gap-0&quot;</span><span class="p">):</span>
+        <span class="n">ui</span><span class="o">.</span><span class="n">label</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">title</span><span class="p">)</span><span class="o">.</span><span class="n">classes</span><span class="p">(</span><span class="s2">&quot;text-sm&quot;</span><span class="p">)</span>
+        <span class="n">element</span> <span class="o">=</span> <span class="n">ui</span><span class="o">.</span><span class="n">radio</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">options</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">props</span><span class="p">(</span><span class="s2">&quot;inline&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">element</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_toggle</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="n">Field</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A button group, fixed to `options`.&quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="n">ui</span><span class="o">.</span><span class="n">column</span><span class="p">()</span><span class="o">.</span><span class="n">classes</span><span class="p">(</span><span class="s2">&quot;gap-0&quot;</span><span class="p">):</span>
+        <span class="n">ui</span><span class="o">.</span><span class="n">label</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">title</span><span class="p">)</span><span class="o">.</span><span class="n">classes</span><span class="p">(</span><span class="s2">&quot;text-sm&quot;</span><span class="p">)</span>
+        <span class="n">element</span> <span class="o">=</span> <span class="n">ui</span><span class="o">.</span><span class="n">toggle</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">options</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">element</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_color</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="n">Field</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A color picker.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_common</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">ui</span><span class="o">.</span><span class="n">color_input</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">title</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">))</span>
+
+
+<div class="viewcode-block" id="Widget">
+<a class="viewcode-back" href="../../api.html#spiriconfig_docker.widgets.Widget">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Widget</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;How one ``widget:`` name is built, and how its value crosses the ``.env``.&quot;&quot;&quot;</span>
+
+    <span class="n">build</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Field</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">Any</span><span class="p">]</span>
+    <span class="n">parse</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Field</span><span class="p">],</span> <span class="n">Any</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Text from the ``.env`` -&gt; the element&#39;s ``value``.&quot;&quot;&quot;</span>
+
+    <span class="nb">format</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="nb">str</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The element&#39;s ``value`` -&gt; text for the ``.env``.&quot;&quot;&quot;</span></div>
+
+
+
+<span class="c1">#: Every widget name an app may ask for. The keys are exactly</span>
+<span class="c1">#: :data:`spiriconfig_docker.settings.WIDGETS` -- a test asserts it, so a widget</span>
+<span class="c1">#: added to one and forgotten in the other fails the suite rather than the page.</span>
+<span class="n">REGISTRY</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Widget</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;input&quot;</span><span class="p">:</span> <span class="n">Widget</span><span class="p">(</span><span class="n">_input</span><span class="p">,</span> <span class="n">_to_text</span><span class="p">,</span> <span class="n">_from_text</span><span class="p">),</span>
+    <span class="s2">&quot;password&quot;</span><span class="p">:</span> <span class="n">Widget</span><span class="p">(</span><span class="n">_password</span><span class="p">,</span> <span class="n">_to_text</span><span class="p">,</span> <span class="n">_from_text</span><span class="p">),</span>
+    <span class="s2">&quot;textarea&quot;</span><span class="p">:</span> <span class="n">Widget</span><span class="p">(</span><span class="n">_textarea</span><span class="p">,</span> <span class="n">_to_text</span><span class="p">,</span> <span class="n">_from_text</span><span class="p">),</span>
+    <span class="s2">&quot;number&quot;</span><span class="p">:</span> <span class="n">Widget</span><span class="p">(</span><span class="n">_number</span><span class="p">,</span> <span class="n">_to_number</span><span class="p">,</span> <span class="n">_from_number</span><span class="p">),</span>
+    <span class="s2">&quot;slider&quot;</span><span class="p">:</span> <span class="n">Widget</span><span class="p">(</span><span class="n">_slider</span><span class="p">,</span> <span class="n">_to_number</span><span class="p">,</span> <span class="n">_from_number</span><span class="p">),</span>
+    <span class="s2">&quot;switch&quot;</span><span class="p">:</span> <span class="n">Widget</span><span class="p">(</span><span class="n">_switch</span><span class="p">,</span> <span class="n">_to_bool</span><span class="p">,</span> <span class="n">_from_bool</span><span class="p">),</span>
+    <span class="s2">&quot;checkbox&quot;</span><span class="p">:</span> <span class="n">Widget</span><span class="p">(</span><span class="n">_checkbox</span><span class="p">,</span> <span class="n">_to_bool</span><span class="p">,</span> <span class="n">_from_bool</span><span class="p">),</span>
+    <span class="s2">&quot;select&quot;</span><span class="p">:</span> <span class="n">Widget</span><span class="p">(</span><span class="n">_select</span><span class="p">,</span> <span class="n">_to_text</span><span class="p">,</span> <span class="n">_from_text</span><span class="p">),</span>
+    <span class="s2">&quot;radio&quot;</span><span class="p">:</span> <span class="n">Widget</span><span class="p">(</span><span class="n">_radio</span><span class="p">,</span> <span class="n">_to_text</span><span class="p">,</span> <span class="n">_from_text</span><span class="p">),</span>
+    <span class="s2">&quot;toggle&quot;</span><span class="p">:</span> <span class="n">Widget</span><span class="p">(</span><span class="n">_toggle</span><span class="p">,</span> <span class="n">_to_text</span><span class="p">,</span> <span class="n">_from_text</span><span class="p">),</span>
+    <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">Widget</span><span class="p">(</span><span class="n">_color</span><span class="p">,</span> <span class="n">_to_text</span><span class="p">,</span> <span class="n">_from_text</span><span class="p">),</span>
+    <span class="s2">&quot;video_device&quot;</span><span class="p">:</span> <span class="n">Widget</span><span class="p">(</span><span class="n">_video_device</span><span class="p">,</span> <span class="n">_to_text</span><span class="p">,</span> <span class="n">_from_text</span><span class="p">),</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="Bound">
+<a class="viewcode-back" href="../../api.html#spiriconfig_docker.widgets.Bound">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Bound</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A rendered field, and the element holding its answer.&quot;&quot;&quot;</span>
+
+    <span class="n">field</span><span class="p">:</span> <span class="n">Field</span>
+    <span class="n">element</span><span class="p">:</span> <span class="n">Any</span>
+    <span class="n">widget</span><span class="p">:</span> <span class="n">Widget</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;What the user has put in, as the ``.env`` will hold it.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">default</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The field&#39;s declared default, parsed into the element&#39;s ``value`` type.</span>
+
+<span class="sd">        The same trip the ``.env``&#39;s text takes on the way into the widget, so that</span>
+<span class="sd">        comparing it against ``element.value`` is comparing like with like -- a</span>
+<span class="sd">        number widget holds ``8080.0``, and ``field.default`` is the string</span>
+<span class="sd">        ``&quot;8080&quot;``, and only one of those is what the widget will read back.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Bound.reset">
+<a class="viewcode-back" href="../../api.html#spiriconfig_docker.widgets.Bound.reset">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Put the widget back to the field&#39;s declared default.</span>
+
+<span class="sd">        Only the widget -- nothing is written. The reset is undone by a Cancel and</span>
+<span class="sd">        made real by a Save, exactly like typing into the box by hand, because that</span>
+<span class="sd">        is all it is: :meth:`value` reads the element back whatever put the value</span>
+<span class="sd">        there.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">default</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="render">
+<a class="viewcode-back" href="../../api.html#spiriconfig_docker.widgets.render">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">render</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="n">Field</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Bound</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Render one field, showing ``value``, and return a handle on it.</span>
+
+<span class="sd">    An ``advanced:`` field is rendered like any other and then marked, so that the</span>
+<span class="sd">    switch shows and hides it live -- and, crucially, so that it is *built* either</span>
+<span class="sd">    way. The element exists whatever the switch says; :func:`values` reads it back</span>
+<span class="sd">    whatever the switch says. Hiding a widget must not drop the variable out of the</span>
+<span class="sd">    ``.env``, which is what skipping the build would quietly do to anyone who saved</span>
+<span class="sd">    a form with advanced mode off.</span>
+
+<span class="sd">    The whole column is marked rather than the widget alone. A field is a widget</span>
+<span class="sd">    *and* its help text, and half a field left on the page would be worse than none.</span>
+
+<span class="sd">    The widget stays a *direct* child of the column, with the help text and the</span>
+<span class="sd">    reset button on a row of their own beneath it. That is not just tidy: the mark</span>
+<span class="sd">    lands one level above the widget, and :func:`spiriconfig.advanced.mark` is on the</span>
+<span class="sd">    column, so &quot;the field&quot; the switch reveals and &quot;the field&quot; a test reaches for from</span>
+<span class="sd">    the widget are the same element either way.</span>
+
+<span class="sd">    The reset button appears only when the value has drifted from the default (see</span>
+<span class="sd">    :meth:`Bound.default`), and puts the widget back to it. A reset button on a field</span>
+<span class="sd">    already at its default is a button that does nothing, and one on every field is</span>
+<span class="sd">    clutter, so it shows itself when there is something to undo and hides again the</span>
+<span class="sd">    moment the value is back.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">REGISTRY</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">widget</span><span class="p">]</span>
+    <span class="k">with</span> <span class="n">ui</span><span class="o">.</span><span class="n">column</span><span class="p">()</span><span class="o">.</span><span class="n">classes</span><span class="p">(</span><span class="s2">&quot;w-full gap-1&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">column</span><span class="p">:</span>
+        <span class="n">element</span> <span class="o">=</span> <span class="n">widget</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">widget</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">field</span><span class="p">))</span>
+        <span class="n">element</span><span class="o">.</span><span class="n">classes</span><span class="p">(</span><span class="s2">&quot;w-full&quot;</span><span class="p">)</span>
+        <span class="c1"># Named after the variable it sets, which is the only name it is guaranteed</span>
+        <span class="c1"># to have -- `label:` is optional, and two apps may well both call something</span>
+        <span class="c1"># &quot;Port&quot;. Tests find widgets by it, and so can anything else driving the page.</span>
+        <span class="n">element</span><span class="o">.</span><span class="n">mark</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">MARKER_PREFIX</span><span class="si">}{</span><span class="n">field</span><span class="o">.</span><span class="n">env</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">bound</span> <span class="o">=</span> <span class="n">Bound</span><span class="p">(</span><span class="n">field</span><span class="o">=</span><span class="n">field</span><span class="p">,</span> <span class="n">element</span><span class="o">=</span><span class="n">element</span><span class="p">,</span> <span class="n">widget</span><span class="o">=</span><span class="n">widget</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">ui</span><span class="o">.</span><span class="n">row</span><span class="p">()</span><span class="o">.</span><span class="n">classes</span><span class="p">(</span><span class="s2">&quot;w-full items-center gap-2&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">help</span><span class="p">:</span>
+                <span class="n">ui</span><span class="o">.</span><span class="n">label</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">help</span><span class="p">)</span><span class="o">.</span><span class="n">classes</span><span class="p">(</span><span class="s2">&quot;text-xs text-gray-500&quot;</span><span class="p">)</span>
+            <span class="c1"># `ml-auto` pins the reset to the right whether or not there is help text</span>
+            <span class="c1"># to its left -- the alternative, an empty spacer when there is none, is a</span>
+            <span class="c1"># second way to say the same thing and a second thing to keep in step.</span>
+            <span class="n">reset</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">ui</span><span class="o">.</span><span class="n">button</span><span class="p">(</span><span class="n">icon</span><span class="o">=</span><span class="s2">&quot;restart_alt&quot;</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">bound</span><span class="o">.</span><span class="n">reset</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">props</span><span class="p">(</span><span class="s2">&quot;flat dense round size=sm&quot;</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">classes</span><span class="p">(</span><span class="s2">&quot;ml-auto&quot;</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">mark</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">RESET_PREFIX</span><span class="si">}{</span><span class="n">field</span><span class="o">.</span><span class="n">env</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">reset</span><span class="o">.</span><span class="n">tooltip</span><span class="p">(</span><span class="n">_reset_tooltip</span><span class="p">(</span><span class="n">field</span><span class="p">))</span>
+
+            <span class="k">def</span><span class="w"> </span><span class="nf">sync_reset</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">reset</span><span class="o">.</span><span class="n">set_visibility</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">value</span> <span class="o">!=</span> <span class="n">bound</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
+
+            <span class="c1"># Fires on a hand edit and on the reset&#39;s own `set_value` alike, so the</span>
+            <span class="c1"># button that undid the change is the same event that hides it again.</span>
+            <span class="n">element</span><span class="o">.</span><span class="n">on_value_change</span><span class="p">(</span><span class="n">sync_reset</span><span class="p">)</span>
+            <span class="n">sync_reset</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">advanced</span><span class="p">:</span>
+        <span class="n">advanced</span><span class="o">.</span><span class="n">mark</span><span class="p">(</span><span class="n">column</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">bound</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_reset_tooltip</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="n">Field</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The reset button&#39;s tooltip, naming the default unless it is a secret.</span>
+
+<span class="sd">    Showing which value it restores is the useful thing -- except for a password,</span>
+<span class="sd">    whose default is the one value not to print onto the page beside its own box.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">and</span> <span class="n">field</span><span class="o">.</span><span class="n">widget</span> <span class="o">!=</span> <span class="s2">&quot;password&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Reset to default (</span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="si">}</span><span class="s2">)&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;Reset to default&quot;</span>
+
+
+<div class="viewcode-block" id="form">
+<a class="viewcode-back" href="../../api.html#spiriconfig_docker.widgets.form">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">form</span><span class="p">(</span><span class="n">fields</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Field</span><span class="p">],</span> <span class="n">values</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Bound</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Render the whole form, in the order the app declared it.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">render</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">values</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">env</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">))</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="values">
+<a class="viewcode-back" href="../../api.html#spiriconfig_docker.widgets.values">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">values</span><span class="p">(</span><span class="n">bound</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Bound</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read every rendered field back, as the text a ``.env`` will hold.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">{</span><span class="n">item</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">env</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">bound</span><span class="p">}</span></div>
+
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;MARKER_PREFIX&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;REGISTRY&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;RESET_PREFIX&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;TRUTHY&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Bound&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Widget&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;form&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;render&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;values&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+</pre></div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2026, Alex Davies
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script src="../../_static/documentation_options.js?v=1b390748"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>
